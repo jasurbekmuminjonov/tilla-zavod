@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const publicPaths = ["/user/create", "/user/login"];
+  const publicPaths = ["/user/login", "/factory/create"];
 
   if (publicPaths.includes(req.path)) {
     return next();

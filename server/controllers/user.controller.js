@@ -8,18 +8,20 @@ const {
 
 exports.createUser = async (req, res) => {
   try {
-    const { factory_id, user_id } = req.user;
-    req.body.factory_id = factory_id;
-    req.body.password = await hashPassword(req.body.password);
-    const admin = await User.findById(user_id);
-    if (admin.role !== "admin") {
-      return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
+    if (!req.body.factory_id) {
+      const { factory_id, user_id } = req.user;
+      req.body.factory_id = factory_id;
+      const admin = await User.findById(user_id);
+      if (admin.role !== "admin") {
+        return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
+      }
     }
+    req.body.password = await hashPassword(req.body.password);
     await User.create(req.body);
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -71,7 +73,13 @@ exports.editUser = async (req, res) => {
   try {
     const { user_id } = req.user;
     const { id } = req.params;
-    const { allowed_process_types, name, phone, role } = req.body;
+    const {
+      allowed_process_types,
+      name,
+      phone,
+      attached_warehouses,
+      allow_production,
+    } = req.body;
     const admin = await User.findById(user_id);
     if (admin.role !== "admin") {
       return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
@@ -80,12 +88,14 @@ exports.editUser = async (req, res) => {
       allowed_process_types,
       name,
       phone,
+      attached_warehouses,
+      allow_production,
     });
 
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -103,7 +113,7 @@ exports.editUserPassword = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -120,7 +130,7 @@ exports.editAdminPassword = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -139,7 +149,7 @@ exports.loginUser = async (req, res) => {
     return res.status(200).json({ user, token });
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -155,7 +165,7 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -171,6 +181,6 @@ exports.getUserByUserId = async (req, res) => {
     return res.status(200).json(user);
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

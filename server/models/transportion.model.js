@@ -37,17 +37,17 @@ const TransportionSchema = new mongoose.Schema(
     },
     get_time: {
       type: Date,
-      default: Date.now,
+      default: null,
     },
     get_gramm: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       default: null,
     },
     lost_gramm: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       default: null,
     },

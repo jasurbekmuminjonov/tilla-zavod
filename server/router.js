@@ -44,6 +44,7 @@ const {
   startProcess,
   endProcess,
   cancelProcess,
+  getProcess,
 } = require("./controllers/process.controller");
 
 const {
@@ -80,6 +81,10 @@ const {
   completeTransportion,
   cancelTransportion,
 } = require("./controllers/transportion.controller");
+const {
+  createProvider,
+  getProviders,
+} = require("./controllers/provider.controller");
 
 // User routes
 rt.post("/user/create", createUser);
@@ -102,14 +107,14 @@ rt.post("/factory/create", createFactory);
 rt.get("/factory", getFactory);
 
 // Gold routes
-rt.post("/gold/:warehouse_id", createGold);
+rt.post("/gold/:warehouse_id/create", createGold);
 
 // Tool routes
-rt.post("/tool/:warehouse_id", createTool);
+rt.post("/tool/:warehouse_id/create", createTool);
 rt.get("/tool/types", getAllToolTypes);
 
 // Product Type routes
-rt.post("/product-type", createProductType);
+rt.post("/product-type/create", createProductType);
 rt.get("/product-type", getProductTypes);
 rt.put("/product-type/:id", editProductType);
 rt.delete("/product-type/:id", deleteProductType);
@@ -119,12 +124,13 @@ rt.post("/product/create", createProduct);
 
 // Process routes
 rt.post("/process/create", createProcess);
+rt.get("/process", getProcess);
 rt.put("/process/start/:process_id", startProcess);
 rt.put("/process/end/:process_id", endProcess);
 rt.put("/process/cancel/:process_id", cancelProcess);
 
 // Process Type routes
-rt.post("/process-type", createProcessType);
+rt.post("/process-type/create", createProcessType);
 rt.get("/process-type", getProcessTypes);
 rt.get("/process-type/user", getProcessTypesByUser);
 rt.put("/process-type/:id", editProcessTypeById);
@@ -153,5 +159,9 @@ rt.get("/transport/sent", getSentTransportions);
 rt.get("/transport/received", getGetTransportions);
 rt.put("/transport/complete/:transportion_id", completeTransportion);
 rt.put("/transport/cancel/:transportion_id", cancelTransportion);
+
+// Provider routes
+rt.post("/provider/create", createProvider);
+rt.get("/provider", getProviders);
 
 module.exports = rt;

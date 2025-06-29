@@ -18,7 +18,7 @@ exports.createProcess = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -32,13 +32,13 @@ exports.startProcess = async (req, res) => {
         .status(400)
         .json({ message: "Siz bundan huquqqa ega emassiz" });
     }
-    process.start_time = Date.now;
+    process.start_time = Date.now();
     process.status = "in_progress";
     await process.save();
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -65,22 +65,27 @@ exports.endProcess = async (req, res) => {
     }
     let endPurity;
     let endProductPurity;
-    if (purity_change) {
-      endPurity = (userGold.purity * process.start_gramm) / req.body.end_gramm;
+    if (processType.purity_change) {
+      endPurity =
+        (userGold.gold_purity * process.start_gramm) / req.body.end_gramm;
       endProductPurity =
         (userGold.product_purity * process.start_gramm) / req.body.end_gramm;
     }
+    console.log(userGold);
+    console.log(process);
+    console.log(req.body);
+
+    console.log(endPurity);
 
     const newGold = {
       gramm: req.body.end_gramm,
-      purity: endPurity,
+      gold_purity: endPurity,
       product_purity: endProductPurity,
       ratio: userGold.ratio,
       provider_id: userGold.provider_id,
       process_id,
     };
     user.gold.push(newGold);
-    await user.save();
     const updatedUser = await User.findById(user_id);
     const updatedGold = updatedUser.gold.slice(-1)[0];
     process.end_gold_id = updatedGold._id;
@@ -89,13 +94,14 @@ exports.endProcess = async (req, res) => {
     process.end_purity = endPurity;
     process.end_product_purity = endProductPurity;
     process.end_gramm = req.body.end_gramm;
-    process.end_time = Date.now;
+    process.end_time = Date.now();
     process.status = "completed";
     await process.save();
+    await user.save();
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -120,6 +126,16 @@ exports.cancelProcess = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.getProcess = async (req, res) => {
+  try {
+    const process = await Process.find({ factory_id: req.user.factory_id });
+    return res.status(200).json(process);
+  } catch (err) {
+    console.log(err.message);
+    return response.error(res, "Serverda xatolik", 500);
   }
 };

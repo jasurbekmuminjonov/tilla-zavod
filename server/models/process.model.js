@@ -13,7 +13,7 @@ const ProcessSchema = new mongoose.Schema(
     },
     end_gold_id: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: false,
       default: null,
     },
     start_gramm: {
@@ -23,33 +23,33 @@ const ProcessSchema = new mongoose.Schema(
     },
     end_purity: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       max: 1000,
       default: null,
     },
     end_product_purity: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       max: 1000,
       default: null,
     },
     end_gramm: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       default: null,
     },
     lost_gramm: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       default: null,
     },
     lost_per_gramm: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
       default: null,
     },

@@ -1,3 +1,4 @@
+const User = require("../models/user.model");
 const Warehouse = require("../models/warehouse.model");
 
 exports.createWarehouse = async (req, res) => {
