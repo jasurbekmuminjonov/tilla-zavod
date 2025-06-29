@@ -7,20 +7,11 @@ const ProcessTypeSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    process_suffix: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     weight_loss: {
       type: Boolean,
       default: false,
     },
     purity_change: {
-      type: Boolean,
-      default: false,
-    },
-    split_to_product: {
       type: Boolean,
       default: false,
     },

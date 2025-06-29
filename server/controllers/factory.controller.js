@@ -6,7 +6,7 @@ exports.createFactory = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -16,6 +16,6 @@ exports.getFactory = async (req, res) => {
     return res.status(200).json(factory);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };

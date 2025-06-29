@@ -46,14 +46,11 @@ const WarehouseSchema = new mongoose.Schema(
             ref: "Provider",
             required: true,
           },
-          carried_processes: {
-            type: [
-              {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Process",
-              },
-            ],
-            default: [],
+          process_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Process",
+            required: false,
+            default: null,
           },
           gold_purity: {
             type: Number,
@@ -73,6 +70,10 @@ const WarehouseSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
+          description: {
+            type: String,
+            default: "",
+          },
           gramm: {
             type: Number,
             required: true,
@@ -90,6 +91,51 @@ const WarehouseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Factory",
       required: true,
+    },
+    products: {
+      type: [
+        {
+          product_type_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "ProductType",
+            required: true,
+          },
+          quantity: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          total_gramm: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          gramm_per_quantity: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          total_lost_gramm: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          gold_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+          },
+          user_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+        },
+      ],
+      default: [],
     },
   },
   { timestamps: true }

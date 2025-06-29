@@ -67,14 +67,11 @@ const UserSchema = new mongoose.Schema(
             ref: "Provider",
             required: true,
           },
-          carried_processes: {
-            type: [
-              {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Process",
-              },
-            ],
-            default: [],
+          process_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Process",
+            required: false,
+            default: null,
           },
           gold_purity: {
             type: Number,
@@ -94,6 +91,10 @@ const UserSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
+          description: {
+            type: String,
+            default: "",
+          },
           gramm: {
             type: Number,
             required: true,
@@ -107,7 +108,7 @@ const UserSchema = new mongoose.Schema(
       ],
       default: [],
     },
-    permitted_process_types: {
+    allowed_process_types: {
       type: [
         {
           type: mongoose.Schema.Types.ObjectId,
@@ -124,6 +125,54 @@ const UserSchema = new mongoose.Schema(
         },
       ],
       default: [],
+    },
+    products: {
+      type: [
+        {
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          gold_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+          },
+          products: [
+            {
+              product_type_id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "ProductType",
+                required: true,
+              },
+              quantity: {
+                type: Number,
+                required: true,
+                min: 0,
+              },
+              total_gramm: {
+                type: Number,
+                required: true,
+                min: 0,
+              },
+              gramm_per_quantity: {
+                type: Number,
+                required: true,
+                min: 0,
+              },
+              total_lost_gramm: {
+                type: Number,
+                required: true,
+                min: 0,
+              },
+            },
+          ],
+        },
+      ],
+      default: [],
+    },
+    allow_production: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

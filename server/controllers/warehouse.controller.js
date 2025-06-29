@@ -12,7 +12,7 @@ exports.createWarehouse = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -30,7 +30,7 @@ exports.editWarehouse = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -46,7 +46,7 @@ exports.deleteWarehouse = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -55,10 +55,11 @@ exports.getWarehouses = async (req, res) => {
     const { factory_id } = req.user;
     const warehouses = await Warehouse.find({ factory_id })
       .populate({ path: "gold.provider_id" })
-      .populate({ path: "gold.carried_processes" });
+      .populate({ path: "gold.process_id" })
+      .populate({ path: "products.product_type_id" });
     return res.status(200).json(warehouses);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };

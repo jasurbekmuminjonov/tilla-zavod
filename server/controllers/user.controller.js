@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const ProductType = require("../models/ProductType");
 const {
   hashPassword,
   comparePassword,
@@ -18,22 +19,51 @@ exports.createUser = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
 exports.getUsers = async (req, res) => {
   try {
     const { factory_id } = req.user;
+
     const users = await User.find({ factory_id })
-      .populate("permitted_process_types")
+      .populate("allowed_process_types")
+      .populate("attached_warehouses")
       .populate({ path: "gold.provider_id" })
-      .populate({ path: "gold.carried_processes" });
+      .populate({ path: "gold.process_id" })
+      .lean();
+
+    const allTypeIds = users.flatMap((user) =>
+      user.products.flatMap((entry) =>
+        entry.products.map((p) => p.product_type_id?.toString())
+      )
+    );
+    const uniqueTypeIds = [...new Set(allTypeIds.filter(Boolean))];
+
+    const productTypes = await ProductType.find({
+      _id: { $in: uniqueTypeIds },
+    })
+      .select("_id product_name description")
+      .lean();
+
+    users.forEach((user) => {
+      user.products.forEach((entry) => {
+        entry.products.forEach((p) => {
+          const matched = productTypes.find(
+            (pt) => pt._id.toString() === p.product_type_id?.toString()
+          );
+          if (matched) {
+            p.product_type_id = matched;
+          }
+        });
+      });
+    });
 
     return res.status(200).json(users);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({ message: "Serverda xatolik" });
   }
 };
 
@@ -41,13 +71,13 @@ exports.editUser = async (req, res) => {
   try {
     const { user_id } = req.user;
     const { id } = req.params;
-    const { permitted_process_types, name, phone, role } = req.body;
+    const { allowed_process_types, name, phone, role } = req.body;
     const admin = await User.findById(user_id);
     if (admin.role !== "admin") {
       return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
     }
     await User.findByIdAndUpdate(id, {
-      permitted_process_types,
+      allowed_process_types,
       name,
       phone,
     });
@@ -55,7 +85,7 @@ exports.editUser = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -73,7 +103,7 @@ exports.editUserPassword = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -90,7 +120,7 @@ exports.editAdminPassword = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -109,7 +139,7 @@ exports.loginUser = async (req, res) => {
     return res.status(200).json({ user, token });
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -125,6 +155,22 @@ exports.deleteUser = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
+  }
+};
+
+exports.getUserByUserId = async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const user = await User.findById(user_id)
+      .populate("allowed_process_types")
+      .populate("attached_warehouses")
+      .populate({ path: "gold.provider_id" })
+      .populate({ path: "gold.process_id" });
+
+    return res.status(200).json(user);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };

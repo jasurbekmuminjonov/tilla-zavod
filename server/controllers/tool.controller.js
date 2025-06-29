@@ -5,7 +5,7 @@ exports.createTool = async (req, res) => {
   try {
     const { user_id } = req.user;
     const user = await User.findById(user_id);
-    const { warehouse_id } = req.body;
+    const { warehouse_id } = req.params;
     if (!user.attached_warehouses.includes(warehouse_id)) {
       return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
     }
@@ -15,7 +15,7 @@ exports.createTool = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };
 
@@ -40,6 +40,6 @@ exports.getAllToolTypes = async (req, res) => {
     return res.status(200).json(uniqueToolNames);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({message:"Serverda xatolik", err})
   }
 };

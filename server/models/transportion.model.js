@@ -31,15 +31,25 @@ const TransportionSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    sent_time: {
+      type: Date,
+      default: Date.now,
+    },
+    get_time: {
+      type: Date,
+      default: Date.now,
+    },
     get_gramm: {
       type: Number,
       required: true,
       min: 0,
+      default: null,
     },
-    difference_gramm: {
+    lost_gramm: {
       type: Number,
       required: true,
       min: 0,
+      default: null,
     },
     status: {
       type: String,

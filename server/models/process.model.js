@@ -21,38 +21,47 @@ const ProcessSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    start_purity: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 1000,
-    },
     end_purity: {
       type: Number,
       required: true,
       min: 0,
       max: 1000,
+      default: null,
+    },
+    end_product_purity: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 1000,
+      default: null,
     },
     end_gramm: {
       type: Number,
       required: true,
       min: 0,
+      default: null,
     },
-    difference_gramm: {
+    lost_gramm: {
       type: Number,
       required: true,
       min: 0,
+      default: null,
+    },
+    lost_per_gramm: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: null,
     },
     start_time: {
       type: Date,
-      required: true,
-      default: Date.now,
+      default: null,
     },
     end_time: {
       type: Date,
       default: null,
     },
-    process_type: {
+    process_type_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProcessType",
       required: true,

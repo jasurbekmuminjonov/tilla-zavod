@@ -7,6 +7,11 @@ const ProductTypeSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     factory_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Factory",
