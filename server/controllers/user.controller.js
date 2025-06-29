@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const ProductType = require("../models/ProductType");
+const ProductType = require("../models/productType.model");
 const {
   hashPassword,
   comparePassword,

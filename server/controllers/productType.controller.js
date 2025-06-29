@@ -1,9 +1,9 @@
-const ProductType = require("../models/productType.model");
+const productTypeModel = require("../models/productType.model");
 
 exports.createProductType = async (req, res) => {
   try {
     req.body.factory_id = req.user.factory_id;
-    await ProductType.create(req.body);
+    await productTypeModel.create(req.body);
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);

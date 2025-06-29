@@ -1,6 +1,6 @@
-const ToolTransportion = require("../models/ToolTransportion");
-const Warehouse = require("../models/Warehouse");
-const User = require("../models/User");
+const ToolTransportion = require("../models/toolTransportion.model");
+const Warehouse = require("../models/warehouse.model");
+const User = require("../models/user.model");
 
 exports.createToolTransportion = async (req, res) => {
   try {
