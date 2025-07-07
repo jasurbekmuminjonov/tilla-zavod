@@ -49,7 +49,7 @@ exports.editProcessTypeById = async (req, res) => {
       return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
     }
     const { id } = req.params;
-    await ProcessType.findOneAndUpdate(id, {
+    await ProcessType.findByIdAndUpdate(id, {
       process_name: req.body.process_name,
       weight_loss: req.body.weight_loss,
       purity_change: req.body.purity_change,

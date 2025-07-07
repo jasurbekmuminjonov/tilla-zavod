@@ -20,7 +20,7 @@ const TransportionSchema = new mongoose.Schema(
     to_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "from_type",
+      refPath: "to_type",
     },
     gold_id: {
       type: mongoose.Schema.Types.ObjectId,

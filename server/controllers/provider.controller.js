@@ -7,7 +7,7 @@ exports.createProvider = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+  return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -17,6 +17,6 @@ exports.getProviders = async (req, res) => {
     return res.status(200).json(providers);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+   return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

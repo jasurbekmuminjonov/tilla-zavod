@@ -136,6 +136,6 @@ exports.getProcess = async (req, res) => {
     return res.status(200).json(process);
   } catch (err) {
     console.log(err.message);
-    return response.error(res, "Serverda xatolik", 500);
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

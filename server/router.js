@@ -24,7 +24,7 @@ const {
   createFactory,
   getFactory,
 } = require("./controllers/factory.controller");
-const { createGold } = require("./controllers/gold.controller");
+const { createGold, getGold } = require("./controllers/gold.controller");
 const {
   createTool,
   getAllToolTypes,
@@ -108,19 +108,20 @@ rt.get("/factory", getFactory);
 
 // Gold routes
 rt.post("/gold/:warehouse_id/create", createGold);
+rt.get("/gold", getGold);
 
 // Tool routes
 rt.post("/tool/:warehouse_id/create", createTool);
 rt.get("/tool/types", getAllToolTypes);
+
+// Product routes
+rt.post("/product/create", createProduct);
 
 // Product Type routes
 rt.post("/product-type/create", createProductType);
 rt.get("/product-type", getProductTypes);
 rt.put("/product-type/:id", editProductType);
 rt.delete("/product-type/:id", deleteProductType);
-
-// Product routes
-rt.post("/product/create", createProduct);
 
 // Process routes
 rt.post("/process/create", createProcess);

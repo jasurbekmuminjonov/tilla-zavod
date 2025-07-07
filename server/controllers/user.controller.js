@@ -16,6 +16,12 @@ exports.createUser = async (req, res) => {
         return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
       }
     }
+    const existUser = await User.findOne({ phone: req.body.phone });
+    if (existUser) {
+      return res.status(400).json({
+        message: `Telefon raqam ${existUser.name} tomonidan band qilingan`,
+      });
+    }
     req.body.password = await hashPassword(req.body.password);
     await User.create(req.body);
     return res.status(201).end();
@@ -143,7 +149,7 @@ exports.loginUser = async (req, res) => {
     }
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Parol noto'g'ri" });
+      return res.status(400).json({ message: "Parol noto'g'ri" });
     }
     const token = generateToken(user);
     return res.status(200).json({ user, token });

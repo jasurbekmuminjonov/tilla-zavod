@@ -12,3 +12,4 @@ const FactorySchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Factory", FactorySchema);
+  

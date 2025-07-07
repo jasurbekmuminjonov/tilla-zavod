@@ -1,0 +1,87 @@
+import { AiFillGold } from "react-icons/ai";
+import { BiTransfer } from "react-icons/bi";
+import { BsTools } from "react-icons/bs";
+import {
+  FaClipboardList,
+  FaHome,
+  FaUser,
+  FaUserTie,
+  FaWarehouse,
+} from "react-icons/fa";
+import { FiPackage } from "react-icons/fi";
+import { GiBigDiamondRing } from "react-icons/gi";
+import { IoMdSettings } from "react-icons/io";
+import { IoCutSharp } from "react-icons/io5";
+
+export const sidebarLinks = [
+  {
+    path: "/",
+    label: "Bosh sahifa",
+    icon: <FaHome size={20} />,
+  },
+  {
+    path: "/users",
+    label: "Ishchilar",
+    icon: <FaUser size={20} />,
+  },
+  {
+    path: "/warehouses",
+    label: "Omborlar",
+    icon: <FaWarehouse size={20} />,
+  },
+  {
+    path: "/process",
+    label: "Jarayonlar",
+    icon: <IoCutSharp size={20} />,
+  },
+  {
+    path: "/process-types",
+    label: "Jarayon turlari",
+    icon: <FaClipboardList size={20} />,
+  },
+  {
+    path: "/products",
+    label: "Tovarlar",
+    icon: <GiBigDiamondRing  size={20} />,
+  },
+  {
+    path: "/product-types",
+    label: "Tovar turlari",
+    icon: <FaClipboardList size={20} />,
+  },
+  {
+    path: "/gold",
+    label: "Oltin",
+    icon: <AiFillGold size={20} />,
+  },
+  {
+    path: "/tools",
+    label: "Ehtiyot qismlar",
+    icon: <BsTools size={20} />,
+  },
+  {
+    path: "/transfer-gold",
+    label: "Oltin o'tkazmalari",
+    icon: <AiFillGold size={20} />,
+  },
+  {
+    path: "/transfer-product",
+    label: "Tovar o'tkazmalari",
+    icon: <BiTransfer size={20} />,
+  },
+  {
+    path: "/transfer-tool",
+    label: "Eht. qism o'tkazmalari",
+    icon: <FiPackage size={20} />,
+  },
+  {
+    path: "/providers",
+    label: "Yetkazib beruvchilar",
+    icon: <FaUserTie size={20} />,
+  },
+  {
+    path: "/settings",
+    label: "Sozlamalar",
+    icon: <IoMdSettings size={20} />,
+  },
+];
