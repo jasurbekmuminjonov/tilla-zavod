@@ -10,9 +10,11 @@ import {
   Button,
   Form,
   Input,
+  InputNumber,
   notification,
   Popconfirm,
   Popover,
+  Select,
   Space,
   Table,
   Tabs,
@@ -20,6 +22,9 @@ import {
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { FaList } from "react-icons/fa";
+import { useCreateGoldMutation } from "../context/services/inventory.service";
+import { useGetProvidersQuery } from "../context/services/provider.service";
+import TextArea from "antd/es/input/TextArea";
 
 const { TabPane } = Tabs;
 
@@ -29,6 +34,11 @@ const Warehouses = () => {
   const [createWarehouse] = useCreateWarehouseMutation();
   const [editWarehouse] = useEditWarehouseMutation();
   const [deleteWarehouse] = useDeleteWarehouseMutation();
+  const { data: providers = [] } = useGetProvidersQuery();
+  const [goldForm] = Form.useForm();
+
+  const [createGold, { isLoading: goldCreateLoading }] =
+    useCreateGoldMutation();
 
   const [activeTab, setActiveTab] = useState("1");
   const [form] = Form.useForm();
@@ -62,6 +72,39 @@ const Warehouses = () => {
       });
     }
   };
+
+  async function handleCreateGold(values) {
+    try {
+      if (
+        window.confirm(
+          `Chindan ham ${values.gramm} gr, ${values.gold_purity}/${
+            values.product_purity
+          } bo'lgan oltinni, ${(
+            values.gold_purity / values.product_purity
+          )?.toFixed(
+            3
+          )} tayyorlash bilan kiritmoqchimisiz? Kiritgach, shunchaki o'chirib tashlashni iloji yo'q`
+        )
+      ) {
+        await createGold({
+          body: values,
+          warehouse_id: values.warehouse_id,
+        }).unwrap();
+        notification.success({
+          message: "Muvaffaqiyatli",
+          description: "Oltin kirim qilindi",
+        });
+        goldForm.resetFields();
+        setActiveTab("1");
+      }
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err?.data?.message,
+      });
+    }
+  }
 
   const columns = [
     {
@@ -306,6 +349,82 @@ const Warehouses = () => {
                 style={{ width: "100%" }}
               >
                 Saqlash
+              </Button>
+            </Form.Item>
+          </Form>
+        </TabPane>
+        <TabPane tab="Oltin kirim" key="3">
+          <Form
+            onFinish={handleCreateGold}
+            layout="vertical"
+            form={goldForm}
+            style={{ width: "50%" }}
+          >
+            <Form.Item
+              label="Jami gramm"
+              name="gramm"
+              rules={[{ required: true, message: "Grammni kiriting" }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              label="Oltin probasi"
+              name="gold_purity"
+              rules={[
+                { required: true, message: "Probani kiriting" },
+                // { min: 1, message: "Minimal miqdordan kam kiritdingiz" },
+                // { max: 1000, message: "Maximal miqdordan ko'p kiritdingiz" },
+              ]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              label="Tovar probasi"
+              name="product_purity"
+              rules={[
+                { required: true, message: "Probani kiriting" },
+                // { min: 1, message: "Minimal miqdordan kam kiritdingiz" },
+                // { max: 1000, message: "Maximal miqdordan ko'p kiritdingiz" },
+              ]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item name="description" label="Tavsif">
+              <TextArea cols={8} />
+            </Form.Item>
+            <Form.Item
+              rules={[{ required: true, message: "Omborni tanlang" }]}
+              name="warehouse_id"
+              label="Ombor"
+            >
+              <Select
+                options={warehouses.map((item) => ({
+                  value: item._id,
+                  label: item.warehouse_name,
+                }))}
+              />
+            </Form.Item>
+            <Form.Item
+              rules={[
+                { required: true, message: "Yetkazib beruvchini tanlang" },
+              ]}
+              name="provider_id"
+              label="Kimdan kelgan"
+            >
+              <Select
+                options={providers.map((item) => ({
+                  value: item._id,
+                  label: item.provider_name,
+                }))}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                style={{ width: "100%" }}
+                htmlType="submit"
+                type="primary"
+              >
+                Kiritish
               </Button>
             </Form.Item>
           </Form>
