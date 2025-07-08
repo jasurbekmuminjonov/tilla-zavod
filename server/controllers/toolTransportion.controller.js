@@ -2,38 +2,72 @@ const ToolTransportion = require("../models/toolTransportion.model");
 const Warehouse = require("../models/warehouse.model");
 const User = require("../models/user.model");
 
+
 exports.createToolTransportion = async (req, res) => {
   try {
-    const { tools, warehouse_id } = req.body;
+    const { tool_id, warehouse_id, user_id, quantity } = req.body;
     req.body.factory_id = req.user.factory_id;
 
     const warehouse = await Warehouse.findById(warehouse_id);
     if (!warehouse) return res.status(404).json({ message: "Ombor topilmadi" });
 
-    tools.forEach((tool) => {
-      const existingTool = warehouse.tools.find(
-        (t) => t._id.toString() === tool.tool_id
-      );
+    const user = await User.findById(user_id);
+    if (!user)
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
 
-      if (!existingTool || existingTool.quantity < tool.quantity) {
-        throw new Error(
-          `Omborda yetarli miqdorda ${tool.tool_name} mavjud emas`
-        );
-      }
+    const toolInWarehouse = warehouse.tools.find(
+      (t) => t._id.toString() === tool_id
+    );
 
-      existingTool.quantity -= tool.quantity;
-    });
+    if (!toolInWarehouse || toolInWarehouse.quantity < quantity) {
+      return res.status(400).json({
+        message: `Omborda yetarli miqdorda asbob mavjud emas`,
+      });
+    }
 
+    toolInWarehouse.quantity -= quantity;
     await warehouse.save();
 
-    const newTransportion = await ToolTransportion.create(req.body);
+    const existingTool = user.tools.find(
+      (t) =>
+        t.tool_name === toolInWarehouse.tool_name &&
+        t.unit === toolInWarehouse.unit &&
+        t.buy_price === toolInWarehouse.buy_price
+    );
 
-    res.status(201).json(newTransportion);
+    if (existingTool) {
+      existingTool.quantity += quantity;
+    } else {
+      user.tools.push({
+        tool_name: toolInWarehouse.tool_name,
+        unit: toolInWarehouse.unit,
+        quantity,
+        buy_price: toolInWarehouse.buy_price,
+        date: new Date(),
+      });
+    }
+
+    await user.save();
+
+    const newTransportion = await ToolTransportion.create({
+      tool_id,
+      quantity,
+      warehouse_id,
+      user_id,
+      factory_id: req.body.factory_id,
+      status: "completed",
+    });
+
+    res.status(201).json({
+      message: "Asbob foydalanuvchiga muvaffaqiyatli o'tkazildi",
+      transport: newTransportion,
+    });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "Yaratishda xatolik", error: error.message });
+    res.status(500).json({
+      message: "Yaratishda xatolik",
+      error: error.message,
+    });
   }
 };
 

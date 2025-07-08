@@ -22,6 +22,17 @@ exports.createTransportion = async (req, res) => {
     const transportingGold = from.gold.find(
       (item) => item._id.toString() === gold_id
     );
+    if (sent_gramm <= 0) {
+      return res.status(400).json({
+        message: "Yuborilayotgan gramm manfiy yoki 0 bo'lmasligi kerak",
+      });
+    }
+    if (transportingGold.gramm < sent_gramm) {
+      return res.status(400).json({
+        message:
+          "Tanlangan oltin grammi yuborish uchun yetmaydi. Agar ko'proq oltin yubormoqchi bo'lsangiz 2 marta o'tkazma yarating",
+      });
+    }
     transportingGold.gramm -= sent_gramm;
     await from.save();
     await Transportion.create(req.body);
@@ -48,11 +59,14 @@ exports.getSentTransportions = async (req, res) => {
   try {
     const { user_id, factory_id } = req.user;
     const user = await User.findById(user_id);
-    const allTransportions = await Transportion.find({ factory_id });
+    const allTransportions = await Transportion.find({ factory_id })
+      .populate("from_id")
+      .populate("to_id");
+
     const userSentTransportions = allTransportions.filter(
       (t) =>
-        user.attached_warehouses.includes(t.from_id) ||
-        t.from_id.toString() === user._id.toString()
+        user.attached_warehouses.includes(t.from_id._id) ||
+        t.from_id._id.toString() === user._id.toString()
     );
     return res.status(200).json(userSentTransportions);
   } catch (err) {
@@ -65,11 +79,13 @@ exports.getGetTransportions = async (req, res) => {
   try {
     const { user_id, factory_id } = req.user;
     const user = await User.findById(user_id);
-    const allTransportions = await Transportion.find({ factory_id });
+    const allTransportions = await Transportion.find({ factory_id })
+      .populate("from_id")
+      .populate("to_id");
     const userGetTransportions = allTransportions.filter(
       (t) =>
-        user.attached_warehouses.includes(t.to_id) ||
-        t.to_id.toString() === user._id.toString()
+        user.attached_warehouses.includes(t.to_id._id) ||
+        t.to_id._id.toString() === user._id.toString()
     );
     return res.status(200).json(userGetTransportions);
   } catch (err) {
@@ -94,6 +110,7 @@ exports.completeTransportion = async (req, res) => {
     } else {
       to = await User.findById(transportion.to_id);
     }
+
     if (transportion.from_type === "Warehouse") {
       from = await Warehouse.findById(transportion.from_id);
     } else {
@@ -149,20 +166,28 @@ exports.cancelTransportion = async (req, res) => {
     const user = await User.findById(user_id);
     const transportion = await Transportion.findById(transportion_id);
     if (
-      !user.attached_warehouses.includes(transportion.to_id) ||
-      user._id !== transportion.to_id
+      !user.attached_warehouses.includes(transportion.to_id) &&
+      user._id !== transportion.to_id &&
+      !user.attached_warehouses.includes(transportion.from_id.toString()) &&
+      user._id.toString() !== transportion.from_id.toString()
     ) {
       return res
         .status(400)
         .json({ message: "O'tkazma boshqa foydalanuvchi yoki ombor uchun" });
     }
-    const sentUser = await User.findById(transportion.from_id);
-    const sentGold = sentUser.gold.find(
+    let from;
+    if (transportion.from_type === "Warehouse") {
+      from = await Warehouse.findById(transportion.from_id);
+    } else {
+      from = await User.findById(transportion.from_id);
+    }
+    // const sentUser = await User.findById(transportion.from_id);
+    const sentGold = from.gold.find(
       (item) => item._id.toString() === transportion.gold_id.toString()
     );
     sentGold.gramm += transportion.sent_gramm;
-    await sentUser.save();
-    transportion.status = "cancelled";
+    await from.save();
+    transportion.status = "canceled";
     transportion.get_time = Date.now();
     await transportion.save();
     return res.status(200).end();

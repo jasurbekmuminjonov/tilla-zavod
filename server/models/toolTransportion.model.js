@@ -2,40 +2,19 @@ const mongoose = require("mongoose");
 
 const ToolTransportionSchema = new mongoose.Schema(
   {
-    tools: {
-      type: [
-        {
-          tool_id: { //warehouse.tools[n]._id
-            type: mongoose.Types.ObjectId,
-            required: true,
-          },
-          tool_name: {
-            type: String,
-            trim: true,
-            required: true,
-          },
-          unit: {
-            type: String,
-            required: true,
-            enum: ["piece", "package", "box", "gr", "ml", "sm"],
-          },
-          quantity: {
-            type: Number,
-            required: true,
-            min: 0,
-          },
-          buy_price: {
-            type: Number,
-            required: true,
-            min: 0,
-          },
-          date: {
-            type: Date,
-            default: Date.now,
-          },
-        },
-      ],
-      default: [],
+    tool_id: {
+      //warehouse.tools[n]._id
+      type: mongoose.Types.ObjectId,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    date: {
+      type: Date,
+      default: Date.now,
     },
     warehouse_id: {
       type: mongoose.Types.ObjectId,

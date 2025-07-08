@@ -54,7 +54,7 @@ const TransportionSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["pending", "completed", "cancelled"],
+      enum: ["pending", "completed", "canceled"],
       default: "pending",
     },
     factory_id: {
