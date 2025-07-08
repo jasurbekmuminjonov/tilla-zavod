@@ -26,6 +26,7 @@ import { GrUserAdmin } from "react-icons/gr";
 import { Form } from "antd";
 import { useGetWarehousesQuery } from "../context/services/warehouse.service";
 import { useGetProcessTypesQuery } from "../context/services/processType.service";
+import { unitOptions } from "../assets/unitOptions";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -217,7 +218,7 @@ const Users = () => {
     {
       title: "",
       dataIndex: "tools",
-      render: (text, record) => (
+      render: (text) => (
         <Popover
           trigger="click"
           title="Ehtiyot qismlar"
@@ -227,7 +228,11 @@ const Users = () => {
               style={{ minWidth: "300px" }}
               columns={[
                 { title: "Eht. qism", dataIndex: "tool_name" },
-                { title: "O'lch. birlik", dataIndex: "unit" },
+                {
+                  title: "O'lch. birlik",
+                  dataIndex: "unit",
+                  render: (text) => unitOptions[text],
+                },
                 { title: "Miqdor", dataIndex: "quantity" },
               ]}
               dataSource={text}
@@ -498,7 +503,7 @@ const Users = () => {
             </Form.Item>
             <Form.Item>
               <Button
-                style={{ width: "100%" }}
+                // style={{ width: "100%" }}
                 type="primary"
                 htmlType="submit"
                 loading={editLoading || createLoading}

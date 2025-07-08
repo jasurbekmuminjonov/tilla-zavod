@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { Layout as AntLayout, Modal } from "antd";
+import { Layout as AntLayout, Modal, Space } from "antd";
 import { FaRegBell } from "react-icons/fa";
 import { useState } from "react";
 import { useGetNotificationQuery } from "../context/services/notification.service";
@@ -24,26 +24,30 @@ const Layout = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "end",
+            justifyContent: "space-between",
             background: "#f5f5f5",
             borderBottom: "1px solid #ccc",
             gap: "15px",
+            paddingInline: "10px",
           }}
         >
-          <FaRegBell
-            onClick={() => setNotificationModal(true)}
-            style={{ cursor: "pointer", margin: "5px" }}
-            size={20}
-          />
-          <ImExit
-            color="red"
-            onClick={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/";
-            }}
-            style={{ cursor: "pointer", margin: "5px" }}
-            size={20}
-          />
+          <h2>{JSON.parse(localStorage.getItem("user")).name}</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <FaRegBell
+              onClick={() => setNotificationModal(true)}
+              style={{ cursor: "pointer", margin: "5px" }}
+              size={20}
+            />
+            <ImExit
+              color="red"
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/";
+              }}
+              style={{ cursor: "pointer", margin: "5px" }}
+              size={20}
+            />
+          </div>
         </Header>
         <Content style={{ paddingInline: "15px" }}>
           <Outlet />

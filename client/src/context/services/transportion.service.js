@@ -41,9 +41,10 @@ export const transportionApi = api.injectEndpoints({
 
     // Transportatsiyani yakunlash
     completeTransportion: builder.mutation({
-      query: (transportion_id) => ({
+      query: ({ transportion_id, body }) => ({
         url: `/transport/complete/${transportion_id}`,
         method: "PUT",
+        body,
       }),
       invalidatesTags: ["Transportion"],
     }),

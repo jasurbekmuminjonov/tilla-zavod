@@ -70,11 +70,6 @@ export const sidebarLinks = [
     icon: <BiTransfer size={20} />,
   },
   {
-    path: "/transfer-tool",
-    label: "Eht. qism o'tkazmalari",
-    icon: <FiPackage size={20} />,
-  },
-  {
     path: "/providers",
     label: "Yetkazib beruvchilar",
     icon: <FaUserTie size={20} />,

@@ -147,7 +147,7 @@ const ProductTypes = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                style={{ width: "100%" }}
+                // style={{ width: "100%" }}
               >
                 Saqlash
               </Button>

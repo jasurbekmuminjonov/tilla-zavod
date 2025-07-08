@@ -8,6 +8,8 @@ import ProcessTypes from "./pages/ProcessTypes";
 import ProductTypes from "./pages/ProductTypes";
 import Providers from "./pages/Providers";
 import Gold from "./pages/Gold";
+import GoldTransportion from "./pages/GoldTransportion";
+import Tools from "./pages/Tools";
 
 const App = () => {
   const token = localStorage.getItem("token");
@@ -20,6 +22,8 @@ const App = () => {
         <Route path="product-types" element={<ProductTypes />} />
         <Route path="providers" element={<Providers />} />
         <Route path="gold" element={<Gold />} />
+        <Route path="tools" element={<Tools  />} />
+        <Route path="transfer-gold" element={<GoldTransportion />} />
       </Route>
     </Routes>
   ) : (

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useGetGoldQuery } from "../context/services/inventory.service";
-import { Table, Modal, Button, Space, Select } from "antd";
+import { Table, Modal, Button, Space, Select, Tag } from "antd";
 import moment from "moment";
 import { FaList } from "react-icons/fa";
 import { useGetUsersQuery } from "../context/services/user.service";
@@ -63,23 +63,23 @@ const Gold = () => {
     {
       title: "Gramm",
       dataIndex: "gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     { title: "Tavsif", dataIndex: "description" },
     {
       title: "Proba",
       dataIndex: "gold_purity",
-      render: (text) => text.toFixed(2),
+      render: (text) => text?.toFixed(2),
     },
     {
       title: "Tovar probasi",
       dataIndex: "product_purity",
-      render: (text) => text.toFixed(2),
+      render: (text) => text?.toFixed(2),
     },
     {
       title: "Tayyorlash",
       dataIndex: "ratio",
-      render: (text) => text.toFixed(2),
+      render: (text) => text?.toFixed(2),
     },
     {
       title: "Sana",
@@ -112,22 +112,22 @@ const Gold = () => {
     {
       title: "Boshlang'ich gramm",
       dataIndex: "start_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yakuniy gramm",
       dataIndex: "end_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yakuniy proba",
       dataIndex: "end_purity",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yakuniy tovar proba",
       dataIndex: "end_product_purity",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Jarayon nomi",
@@ -140,12 +140,12 @@ const Gold = () => {
     {
       title: "Yo'qotish (g)",
       dataIndex: "lost_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yo'qotish 1gr da",
       dataIndex: "lost_per_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Boshlanish vaqti",
@@ -173,17 +173,17 @@ const Gold = () => {
     {
       title: "Yuborilgan gramm",
       dataIndex: "sent_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Olingan gramm",
       dataIndex: "get_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yo'qotilgan gramm",
       dataIndex: "lost_gramm",
-      render: (text) => text.toFixed(3),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Yuborilgan vaqti",
@@ -196,8 +196,28 @@ const Gold = () => {
       render: (text) => (text ? moment(text).format("DD.MM.YYYY HH:mm") : "-"),
     },
     {
-      title: "Status",
-      dataIndex: "status",
+      title: "Holati",
+      render: (_, record) => (
+        <Tag
+          color={
+            record.status === "pending"
+              ? "orange"
+              : record.status === "completed"
+              ? "green"
+              : record.status === "canceled"
+              ? "red"
+              : "red"
+          }
+        >
+          {record.status === "pending"
+            ? "Kutilmoqda"
+            : record.status === "completed"
+            ? "Qabul qilindi"
+            : record.status === "canceled"
+            ? "Rad etildi"
+            : "Xato"}
+        </Tag>
+      ),
     },
   ];
 

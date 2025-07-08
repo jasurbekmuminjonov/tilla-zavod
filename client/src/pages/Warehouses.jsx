@@ -22,9 +22,13 @@ import {
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { FaList } from "react-icons/fa";
-import { useCreateGoldMutation } from "../context/services/inventory.service";
+import {
+  useCreateGoldMutation,
+  useCreateToolMutation,
+} from "../context/services/inventory.service";
 import { useGetProvidersQuery } from "../context/services/provider.service";
 import TextArea from "antd/es/input/TextArea";
+import { unitOptions } from "../assets/unitOptions";
 
 const { TabPane } = Tabs;
 
@@ -36,9 +40,12 @@ const Warehouses = () => {
   const [deleteWarehouse] = useDeleteWarehouseMutation();
   const { data: providers = [] } = useGetProvidersQuery();
   const [goldForm] = Form.useForm();
+  const [toolForm] = Form.useForm();
 
   const [createGold, { isLoading: goldCreateLoading }] =
     useCreateGoldMutation();
+  const [createTool, { isLoading: toolCreateLoading }] =
+    useCreateToolMutation();
 
   const [activeTab, setActiveTab] = useState("1");
   const [form] = Form.useForm();
@@ -97,6 +104,26 @@ const Warehouses = () => {
         goldForm.resetFields();
         setActiveTab("1");
       }
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err?.data?.message,
+      });
+    }
+  }
+  async function handleCreateTool(values) {
+    try {
+      await createTool({
+        body: values,
+        warehouse_id: values.warehouse_id,
+      }).unwrap();
+      notification.success({
+        message: "Muvaffaqiyatli",
+        description: "Запчасть kirim qilindi",
+      });
+      toolForm.resetFields();
+      setActiveTab("1");
     } catch (err) {
       console.log(err);
       notification.error({
@@ -217,9 +244,21 @@ const Warehouses = () => {
             <Table
               columns={[
                 { title: "Nom", dataIndex: "tool_name" },
-                { title: "Birlik", dataIndex: "unit" },
-                { title: "Miqdor", dataIndex: "quantity" },
-                { title: "Narxi", dataIndex: "buy_price" },
+                {
+                  title: "Birlik",
+                  dataIndex: "unit",
+                  render: (text) => unitOptions[text],
+                },
+                {
+                  title: "Miqdor",
+                  dataIndex: "quantity",
+                  render: (text) => text.toLocaleString(),
+                },
+                {
+                  title: "Narxi",
+                  dataIndex: "buy_price",
+                  render: (text) => text.toLocaleString(),
+                },
               ]}
               dataSource={tools}
               rowKey={(r, i) => i}
@@ -346,7 +385,7 @@ const Warehouses = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                style={{ width: "100%" }}
+                // style={{ width: "100%" }}
               >
                 Saqlash
               </Button>
@@ -420,7 +459,73 @@ const Warehouses = () => {
             </Form.Item>
             <Form.Item>
               <Button
-                style={{ width: "100%" }}
+                loading={goldCreateLoading}
+                // style={{ width: "100%" }}
+                htmlType="submit"
+                type="primary"
+              >
+                Kiritish
+              </Button>
+            </Form.Item>
+          </Form>
+        </TabPane>
+        <TabPane tab="Запчасть kirim" key="4">
+          <Form
+            onFinish={handleCreateTool}
+            layout="vertical"
+            form={toolForm}
+            style={{ width: "50%" }}
+          >
+            <Form.Item
+              label="Запчасть nomi"
+              name="tool_name"
+              rules={[{ required: true, message: "Запчасть nomini kiriting" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="unit"
+              label="Birlik"
+              rules={[{ required: true, message: "Birlikni tanlang" }]}
+            >
+              <Select>
+                {Object.entries(unitOptions).map(([value, label]) => (
+                  <Select.Option key={value} value={value}>
+                    {label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Miqdor"
+              name="quantity"
+              rules={[{ required: true, message: "Miqdorni kiriting" }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              label="Tan narxi 1 dona uchun"
+              name="buy_price"
+              rules={[{ required: true, message: "Tan narxni kiriting" }]}
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              rules={[{ required: true, message: "Omborni tanlang" }]}
+              name="warehouse_id"
+              label="Ombor"
+            >
+              <Select
+                options={warehouses.map((item) => ({
+                  value: item._id,
+                  label: item.warehouse_name,
+                }))}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                loading={toolCreateLoading}
+                // style={{ width: "100%" }}
                 htmlType="submit"
                 type="primary"
               >
