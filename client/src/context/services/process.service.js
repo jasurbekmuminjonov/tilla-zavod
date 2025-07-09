@@ -10,6 +10,13 @@ export const processApi = api.injectEndpoints({
       }),
       providesTags: ["Process"],
     }),
+    getProcessesByUser: builder.query({
+      query: () => ({
+        url: "/process/user",
+        method: "GET",
+      }),
+      providesTags: ["Process"],
+    }),
 
     // Yangi jarayon yaratish
     createProcess: builder.mutation({
@@ -56,4 +63,5 @@ export const {
   useStartProcessMutation,
   useEndProcessMutation,
   useCancelProcessMutation,
+  useGetProcessesByUserQuery,
 } = processApi;

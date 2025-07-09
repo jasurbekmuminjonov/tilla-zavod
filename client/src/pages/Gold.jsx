@@ -233,6 +233,7 @@ const Gold = () => {
       >
         <h1>Umumiy oltin</h1>
         <Space>
+          <b>Umumiy: {filteredData.reduce((acc, g) => acc + g.gramm, 0)} gr</b>
           <Select
             allowClear
             showSearch

@@ -16,6 +16,7 @@ import {
   Space,
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
+import { FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -148,6 +149,7 @@ const ProductTypes = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
+                 icon={<FaSave />}
               >
                 Saqlash
               </Button>

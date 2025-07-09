@@ -1,5 +1,4 @@
 import { AiFillGold } from "react-icons/ai";
-import { BiTransfer } from "react-icons/bi";
 import { BsTools } from "react-icons/bs";
 import {
   FaClipboardList,
@@ -8,9 +7,8 @@ import {
   FaUserTie,
   FaWarehouse,
 } from "react-icons/fa";
-import { FiPackage } from "react-icons/fi";
 import { GiBigDiamondRing } from "react-icons/gi";
-import { IoMdSettings } from "react-icons/io";
+import { IoIosWarning, IoMdSettings } from "react-icons/io";
 import { IoCutSharp } from "react-icons/io5";
 
 export const sidebarLinks = [
@@ -42,7 +40,7 @@ export const sidebarLinks = [
   {
     path: "/products",
     label: "Tovarlar",
-    icon: <GiBigDiamondRing  size={20} />,
+    icon: <GiBigDiamondRing size={20} />,
   },
   {
     path: "/product-types",
@@ -55,6 +53,11 @@ export const sidebarLinks = [
     icon: <AiFillGold size={20} />,
   },
   {
+    path: "/losses",
+    label: "Потери",
+    icon: <IoIosWarning size={20} />,
+  },
+  {
     path: "/tools",
     label: "Ehtiyot qismlar",
     icon: <BsTools size={20} />,
@@ -63,11 +66,6 @@ export const sidebarLinks = [
     path: "/transfer-gold",
     label: "Oltin o'tkazmalari",
     icon: <AiFillGold size={20} />,
-  },
-  {
-    path: "/transfer-product",
-    label: "Tovar o'tkazmalari",
-    icon: <BiTransfer size={20} />,
   },
   {
     path: "/providers",

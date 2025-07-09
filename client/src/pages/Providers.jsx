@@ -15,6 +15,7 @@ import {
   //   Popconfirm,
   //   Space,
 } from "antd";
+import { FaSave } from "react-icons/fa";
 // import { MdEdit, MdDelete } from "react-icons/md";
 
 const { TabPane } = Tabs;
@@ -143,6 +144,7 @@ const Providers = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
+                 icon={<FaSave />}
               >
                 Saqlash
               </Button>

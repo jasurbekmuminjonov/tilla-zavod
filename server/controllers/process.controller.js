@@ -10,6 +10,9 @@ exports.createProcess = async (req, res) => {
     const userGold = user.gold.find(
       (item) => item._id.toString() === start_gold_id
     );
+    console.log(userGold);
+    console.log(start_gold_id);
+
     userGold.gramm -= start_gramm;
     req.body.user_id = user_id;
     req.body.factory_id = factory_id;
@@ -132,7 +135,19 @@ exports.cancelProcess = async (req, res) => {
 
 exports.getProcess = async (req, res) => {
   try {
-    const process = await Process.find({ factory_id: req.user.factory_id });
+    const process = await Process.find({ factory_id: req.user.factory_id }).populate("process_type_id");
+    return res.status(200).json(process);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+exports.getProcessByUserId = async (req, res) => {
+  try {
+    const process = await Process.find({
+      factory_id: req.user.factory_id,
+      user_id: req.user.user_id,
+    }).populate("process_type_id");
     return res.status(200).json(process);
   } catch (err) {
     console.log(err.message);

@@ -45,6 +45,7 @@ const {
   endProcess,
   cancelProcess,
   getProcess,
+  getProcessByUserId,
 } = require("./controllers/process.controller");
 
 const {
@@ -126,6 +127,7 @@ rt.delete("/product-type/:id", deleteProductType);
 // Process routes
 rt.post("/process/create", createProcess);
 rt.get("/process", getProcess);
+rt.get("/process/user", getProcessByUserId);
 rt.put("/process/start/:process_id", startProcess);
 rt.put("/process/end/:process_id", endProcess);
 rt.put("/process/cancel/:process_id", cancelProcess);

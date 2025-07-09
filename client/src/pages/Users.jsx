@@ -20,7 +20,7 @@ import {
   Tabs,
   Tag,
 } from "antd";
-import { FaList } from "react-icons/fa";
+import { FaList, FaSave } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { GrUserAdmin } from "react-icons/gr";
 import { Form } from "antd";
@@ -507,6 +507,7 @@ const Users = () => {
                 type="primary"
                 htmlType="submit"
                 loading={editLoading || createLoading}
+                 icon={<FaSave />}
               >
                 Saqlash
               </Button>

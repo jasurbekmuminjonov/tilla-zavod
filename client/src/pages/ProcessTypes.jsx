@@ -18,6 +18,7 @@ import {
   Space,
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
+import { FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 
@@ -180,6 +181,7 @@ const ProcessTypes = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
+                 icon={<FaSave />}
               >
                 Saqlash
               </Button>

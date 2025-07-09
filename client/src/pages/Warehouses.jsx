@@ -21,7 +21,7 @@ import {
   Tag,
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { FaList } from "react-icons/fa";
+import { FaList, FaSave } from "react-icons/fa";
 import {
   useCreateGoldMutation,
   useCreateToolMutation,
@@ -386,6 +386,7 @@ const Warehouses = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
+                 icon={<FaSave />}
               >
                 Saqlash
               </Button>
