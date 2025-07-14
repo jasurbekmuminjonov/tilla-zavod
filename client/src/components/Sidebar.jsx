@@ -6,11 +6,13 @@ const { Title } = Typography;
 
 import { Typography } from "antd";
 import { useState } from "react";
+import { useGetUserByUserIdQuery } from "../context/services/user.service";
 
 const { Sider } = Layout;
 
 const Sidebar = () => {
   const location = useLocation();
+  const { data: self = {} } = useGetUserByUserIdQuery();
   const [collapsed, setCollapsed] = useState(false);
   const { data: factory = {} } = useGetFactoryQuery();
   const baseStyle = {
@@ -25,13 +27,13 @@ const Sidebar = () => {
     : baseStyle;
   return (
     <Sider
-      collapsible
-      collapsed={collapsed}
+      collapsible={window.innerWidth >= 1100}
+      collapsed={window.innerWidth >= 1100 ? collapsed : true}
       onCollapse={setCollapsed}
       width={220}
       style={style}
     >
-      {!collapsed && (
+      {!collapsed && window.innerWidth >= 1100 && (
         <Title
           level={3}
           onClick={() => (window.location.href = "/")}

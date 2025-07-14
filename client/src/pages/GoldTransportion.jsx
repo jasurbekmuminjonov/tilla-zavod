@@ -110,6 +110,7 @@ const GoldTransportion = () => {
     {
       title: "Yo'qotilgan gramm",
       dataIndex: "lost_gramm",
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Qayerdan yuborildi",
@@ -212,6 +213,7 @@ const GoldTransportion = () => {
     {
       title: "Yo'qotilgan gramm",
       dataIndex: "lost_gramm",
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Qayerdan yuborildi",
@@ -323,6 +325,7 @@ const GoldTransportion = () => {
         onCancel={() => setCompleteModal(false)}
       >
         <Form
+          autoComplete="off"
           onFinish={handleCompleteTransportion}
           form={completeForm}
           layout="vertical"
@@ -365,7 +368,7 @@ const GoldTransportion = () => {
         </Form>
       </Modal>
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <Tabs.TabPane tab="Siz uchun" key="1">
+        <Tabs.TabPane style={{ overflowX: "auto" }} tab="Siz uchun" key="1">
           <Table
             size="small"
             loading={receivedLoading}
@@ -375,7 +378,7 @@ const GoldTransportion = () => {
             columns={receivedColumns}
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Siz yuborgan" key="2">
+        <Tabs.TabPane style={{ overflowX: "auto" }} tab="Siz yuborgan" key="2">
           <Table
             size="small"
             loading={sentLoading}

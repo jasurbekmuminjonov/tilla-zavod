@@ -4,11 +4,20 @@ import {
   useGetUsersQuery,
 } from "../context/services/user.service";
 import { useGetWarehousesQuery } from "../context/services/warehouse.service";
-import { Button, Form, Modal, Table } from "antd";
+import {
+  Button,
+  Form,
+  InputNumber,
+  Modal,
+  notification,
+  Select,
+  Table,
+} from "antd";
 import { unitOptions } from "../assets/unitOptions";
 import moment from "moment";
 import { useCreateToolTransportionMutation } from "../context/services/toolTransportion.service";
 import { GiHandTruck } from "react-icons/gi";
+import { MdSend } from "react-icons/md";
 
 const Tools = () => {
   const { data: self = {}, isLoading: selfLoading } = useGetUserByUserIdQuery();
@@ -20,6 +29,31 @@ const Tools = () => {
   const [transportingTool, setTransportingTool] = useState({});
   const [transportingModal, setTransportingModal] = useState(false);
   const [transportingForm] = Form.useForm();
+
+  async function handleTransportion(values) {
+    try {
+      const payload = {
+        tool_id: transportingTool._id,
+        warehouse_id: transportingTool.warehouseId,
+        user_id: values.user_id,
+        quantity: values.quantity,
+      };
+      await createToolTransportion(payload).unwrap();
+      notification.success({
+        message: "Muvaffaqiyatli",
+        description: "Запчасть o'tkazildi",
+      });
+      transportingForm.resetFields();
+      setTransportingModal(false);
+      setTransportingTool({});
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err.data.message,
+      });
+    }
+  }
 
   const userTools = useMemo(() => {
     if (!warehouses || !self) return [];
@@ -34,6 +68,7 @@ const Tools = () => {
       w.tools?.map((tool) => ({
         ...tool,
         locationName: w.warehouse_name,
+        warehouseId: w._id,
       }))
     );
 
@@ -41,14 +76,13 @@ const Tools = () => {
       self.tools?.map((tool) => ({
         ...tool,
         locationName: self.name || "Foydalanuvchi",
+        warehouseId: null,
       })) || [];
 
     return [...warehouseTools, ...selfTools].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
   }, [warehouses, self]);
-
-  console.log(userTools);
 
   const columns = [
     { title: "Запчасть", dataIndex: "tool_name" },
@@ -72,6 +106,7 @@ const Tools = () => {
       title: "Operatsiyalar",
       render: (_, record) => (
         <Button
+          disabled={!record.warehouseId}
           onClick={() => {
             setTransportingTool(record);
             setTransportingModal(true);
@@ -92,8 +127,35 @@ const Tools = () => {
         onCancel={() => setTransportingModal(false)}
         footer={null}
       >
-        <Form form={transportingForm} layout="vertical">
-          <Form.Item></Form.Item>
+        <Form
+          onFinish={handleTransportion}
+          form={transportingForm}
+          layout="vertical"
+          autoComplete="off"
+        >
+          <Form.Item name="user_id" label="Yuboriladigan ishchi">
+            <Select>
+              {users.map((item) => (
+                <Select.Option
+                  disabled={
+                    item.role === "admin" ||
+                    JSON.parse(localStorage.getItem("user"))._id === item._id
+                  }
+                  key={item._id}
+                >
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="quantity" label="Запчасть miqdori">
+            <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" icon={<MdSend />}>
+              Yuborish
+            </Button>
+          </Form.Item>
         </Form>
       </Modal>
       <Table

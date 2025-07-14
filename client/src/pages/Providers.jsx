@@ -15,7 +15,7 @@ import {
   //   Popconfirm,
   //   Space,
 } from "antd";
-import { FaSave } from "react-icons/fa";
+import { FaLock, FaSave } from "react-icons/fa";
 // import { MdEdit, MdDelete } from "react-icons/md";
 
 const { TabPane } = Tabs;
@@ -106,6 +106,23 @@ const Providers = () => {
     // },
   ];
 
+    if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+      return (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "15px",
+          }}
+        >
+          <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+        </div>
+      );
+    }
+
   return (
     <div className="providers">
       <Tabs
@@ -122,6 +139,7 @@ const Providers = () => {
             dataSource={providers}
             loading={isLoading}
             rowKey="_id"
+            size="small"
           />
         </TabPane>
 
@@ -131,6 +149,7 @@ const Providers = () => {
             style={{ width: "50%" }}
             form={form}
             onFinish={handleSubmit}
+            autoComplete="off"
           >
             <Form.Item
               name="provider_name"

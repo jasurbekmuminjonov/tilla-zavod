@@ -4,7 +4,9 @@ const User = require("../models/user.model");
 
 exports.createTransportion = async (req, res) => {
   try {
+    let io = req.app.get("socket");
     req.body.factory_id = req.user.factory_id;
+    const user = await User.findById(req.user.user_id);
     const { from_type, from_id, to_type, to_id, gold_id, sent_gramm } =
       req.body;
     let from;
@@ -36,6 +38,14 @@ exports.createTransportion = async (req, res) => {
     transportingGold.gramm -= sent_gramm;
     await from.save();
     await Transportion.create(req.body);
+    io.emit("goldTransportion", {
+      to,
+      to_type,
+      from,
+      from_type,
+      user,
+      type: "gold",
+    });
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
@@ -165,9 +175,10 @@ exports.cancelTransportion = async (req, res) => {
     const { user_id } = req.user;
     const user = await User.findById(user_id);
     const transportion = await Transportion.findById(transportion_id);
+
     if (
-      !user.attached_warehouses.includes(transportion.to_id) &&
-      user._id !== transportion.to_id &&
+      !user.attached_warehouses.includes(transportion.to_id.toString()) &&
+      user._id.toString() !== transportion.to_id.toString() &&
       !user.attached_warehouses.includes(transportion.from_id.toString()) &&
       user._id.toString() !== transportion.from_id.toString()
     ) {

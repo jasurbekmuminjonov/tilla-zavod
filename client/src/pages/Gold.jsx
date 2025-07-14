@@ -1,15 +1,19 @@
-import React, { useMemo, useState } from "react";
-import { useGetGoldQuery } from "../context/services/inventory.service";
-import { Table, Modal, Button, Space, Select, Tag } from "antd";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  useGetGoldQuery,
+  useLazySearchGoldQuery,
+} from "../context/services/inventory.service";
+import { Table, Modal, Button, Space, Select, Tag, Card } from "antd";
 import moment from "moment";
 import { FaList } from "react-icons/fa";
 import { useGetUsersQuery } from "../context/services/user.service";
 import { useGetWarehousesQuery } from "../context/services/warehouse.service";
 
 const Gold = () => {
-  const { data: gold = [] } = useGetGoldQuery();
+  const { data: gold = [], isLoading } = useGetGoldQuery();
   const { data: users = [] } = useGetUsersQuery();
   const { data: warehouses = [] } = useGetWarehousesQuery();
+  const [startGoldInfo, setStartGoldInfo] = useState({});
 
   const [selectedProcesses, setSelectedProcesses] = useState([]);
   const [selectedTransportions, setSelectedTransportions] = useState([]);
@@ -20,6 +24,18 @@ const Gold = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState("");
   const [dateRange, setDateRange] = useState({ from: null, to: null });
 
+  const [searchGold] = useLazySearchGoldQuery();
+
+  const getGoldObject = async (goldId) => {
+    try {
+      const result = await searchGold(goldId).unwrap();
+      return result;
+    } catch (err) {
+      console.error("Xatolik:", err);
+      return null;
+    }
+  };
+
   const showProcesses = (processes) => {
     setSelectedProcesses(processes || []);
     setIsProcessModalOpen(true);
@@ -29,6 +45,25 @@ const Gold = () => {
     setSelectedTransportions(transportions || []);
     setIsTransportModalOpen(true);
   };
+
+  useEffect(() => {
+    const fetchStartGoldInfo = async () => {
+      const newInfo = {};
+      for (const p of selectedProcesses) {
+        if (p.start_gold_id && !startGoldInfo[p.start_gold_id]) {
+          const res = await getGoldObject(p.start_gold_id);
+          if (res) {
+            newInfo[p.start_gold_id] = res.gold;
+          }
+        }
+      }
+      setStartGoldInfo((prev) => ({ ...prev, ...newInfo }));
+    };
+
+    if (isProcessModalOpen && selectedProcesses.length > 0) {
+      fetchStartGoldInfo();
+    }
+  }, [isProcessModalOpen, selectedProcesses]);
 
   const filteredData = useMemo(() => {
     return [...gold]
@@ -81,6 +116,7 @@ const Gold = () => {
       dataIndex: "ratio",
       render: (text) => text?.toFixed(2),
     },
+
     {
       title: "Sana",
       dataIndex: "date",
@@ -108,56 +144,77 @@ const Gold = () => {
     },
   ];
 
-  const processColumns = [
-    {
-      title: "Boshlang'ich gramm",
-      dataIndex: "start_gramm",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Yakuniy gramm",
-      dataIndex: "end_gramm",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Yakuniy proba",
-      dataIndex: "end_purity",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Yakuniy tovar proba",
-      dataIndex: "end_product_purity",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Jarayon nomi",
-      dataIndex: ["process_type_id", "process_name"],
-    },
-    {
-      title: "Yo'qotish limiti (g)",
-      dataIndex: ["process_type_id", "loss_limit_per_gramm"],
-    },
-    {
-      title: "Yo'qotish (g)",
-      dataIndex: "lost_gramm",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Yo'qotish 1gr da",
-      dataIndex: "lost_per_gramm",
-      render: (text) => text?.toFixed(3),
-    },
-    {
-      title: "Boshlanish vaqti",
-      dataIndex: "start_time",
-      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
-    },
-    {
-      title: "Tugash vaqti",
-      dataIndex: "end_time",
-      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
-    },
-  ];
+  // const processColumns = [
+  //   {
+  //     title: "Boshlang'ich gramm",
+  //     dataIndex: "start_gramm",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Boshlang'ich gramm",
+  //     dataIndex: "start_gramm",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Boshlang'ich proba",
+  //     dataIndex: "start_gold_id",
+  //     render: (id) =>
+  //       startGoldInfo[id]?.gold_purity
+  //         ? startGoldInfo[id].gold_purity.toFixed(3)
+  //         : "-",
+  //   },
+  //   {
+  //     title: "Boshlang'ich tovar proba",
+  //     dataIndex: "start_gold_id",
+  //     render: (id) =>
+  //       startGoldInfo[id]?.product_purity
+  //         ? startGoldInfo[id].product_purity.toFixed(3)
+  //         : "-",
+  //   },
+  //   {
+  //     title: "Yakuniy gramm",
+  //     dataIndex: "end_gramm",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Yakuniy proba",
+  //     dataIndex: "end_purity",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Yakuniy tovar proba",
+  //     dataIndex: "end_product_purity",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Jarayon nomi",
+  //     dataIndex: ["process_type_id", "process_name"],
+  //   },
+  //   {
+  //     title: "Yo'qotish limiti (g)",
+  //     dataIndex: ["process_type_id", "loss_limit_per_gramm"],
+  //   },
+  //   {
+  //     title: "Yo'qotish (g)",
+  //     dataIndex: "lost_gramm",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Yo'qotish 1gr da",
+  //     dataIndex: "lost_per_gramm",
+  //     render: (text) => text?.toFixed(3),
+  //   },
+  //   {
+  //     title: "Boshlanish vaqti",
+  //     dataIndex: "start_time",
+  //     render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+  //   },
+  //   {
+  //     title: "Tugash vaqti",
+  //     dataIndex: "end_time",
+  //     render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+  //   },
+  // ];
 
   const transportColumns = [
     {
@@ -225,81 +282,95 @@ const Gold = () => {
     <div className="gold">
       <header
         style={{
-          height: "50px",
+          // height: "50px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          paddingBlock: "5px",
         }}
       >
-        <h1>Umumiy oltin</h1>
+        <p>
+          Jami: {filteredData.reduce((acc, g) => acc + g.gramm, 0)?.toFixed(3)}{" "}
+          gr
+        </p>
         <Space>
-          <b>Umumiy: {filteredData.reduce((acc, g) => acc + g.gramm, 0)} gr</b>
-          <Select
-            allowClear
-            showSearch
-            style={{ width: 200 }}
-            placeholder="Ishchi bo'yicha filter"
-            optionFilterProp="children"
-            value={selectedUser}
-            onChange={(value) => {
-              setSelectedUser(value);
-              setSelectedWarehouse(null);
-            }}
-            options={[
-              { label: "Barchasi", value: "" },
-              ...users.map((u) => ({
-                label: u.name,
-                value: u._id,
-              })),
-            ]}
-          />
-          <Select
-            allowClear
-            showSearch
-            style={{ width: 200 }}
-            placeholder="Ombor bo'yicha filter"
-            optionFilterProp="children"
-            value={selectedWarehouse}
-            onChange={(value) => {
-              setSelectedWarehouse(value);
-              setSelectedUser(null);
-            }}
-            options={[
-              { label: "Barchasi", value: "" },
-              ...warehouses.map((w) => ({
-                label: w.warehouse_name,
-                value: w._id,
-              })),
-            ]}
-          />
-          <input
-            type="date"
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, from: e.target.value }))
-            }
-          />
-          dan
-          <input
-            type="date"
-            onChange={(e) =>
-              setDateRange((prev) => ({ ...prev, to: e.target.value }))
-            }
-          />
+          <Space direction="vertical">
+            <Select
+              allowClear
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Ishchi bo'yicha filter"
+              optionFilterProp="children"
+              value={selectedUser}
+              onChange={(value) => {
+                setSelectedUser(value);
+                setSelectedWarehouse(null);
+              }}
+              options={[
+                { label: "Barchasi", value: "" },
+                ...users.map((u) => ({
+                  label: u.name,
+                  value: u._id,
+                })),
+              ]}
+            />
+            <Select
+              allowClear
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Ombor bo'yicha filter"
+              optionFilterProp="children"
+              value={selectedWarehouse}
+              onChange={(value) => {
+                setSelectedWarehouse(value);
+                setSelectedUser(null);
+              }}
+              options={[
+                { label: "Barchasi", value: "" },
+                ...warehouses.map((w) => ({
+                  label: w.warehouse_name,
+                  value: w._id,
+                })),
+              ]}
+            />
+          </Space>
+          <Space direction="vertical">
+            <Space>
+              <input
+                type="date"
+                onChange={(e) =>
+                  setDateRange((prev) => ({ ...prev, from: e.target.value }))
+                }
+              />
+              dan
+            </Space>
+            <Space>
+              <input
+                type="date"
+                onChange={(e) =>
+                  setDateRange((prev) => ({ ...prev, to: e.target.value }))
+                }
+              />{" "}
+              gacha
+            </Space>
+          </Space>
         </Space>
       </header>
       <Table
         size="small"
         columns={columns}
-        dataSource={filteredData}
+        dataSource={filteredData.filter((item) => item.gramm > 0)}
         rowKey={(r) => r._id || Math.random()}
+        style={{ overflowX: "scroll" }}
+        loading={isLoading}
       />
 
-      <Modal
+      {/* <Modal
         open={isProcessModalOpen}
         title="Jarayonlar tarixi"
         onCancel={() => setIsProcessModalOpen(false)}
         footer={null}
-        width={1000}
+        width={1200}
       >
         <Table
           size="small"
@@ -308,6 +379,66 @@ const Gold = () => {
           rowKey={(r) => r._id}
           pagination={false}
         />
+      </Modal> */}
+      <Modal
+        open={isProcessModalOpen}
+        title="Jarayonlar tarixi"
+        onCancel={() => setIsProcessModalOpen(false)}
+        footer={null}
+        width={600} // kichikroq, mobilga mos
+      >
+        <Space direction="vertical" style={{ width: "100%" }}>
+          {selectedProcesses.map((process) => {
+            const gold = startGoldInfo[process.start_gold_id] || {};
+            return (
+              <Card
+                key={process._id}
+                size="small"
+                title={process.process_type_id?.process_name}
+              >
+                <p>
+                  <b>Boshlang‘ich gramm:</b> {process.start_gramm?.toFixed(3)}{" "}
+                  gr
+                </p>
+                <p>
+                  <b>Boshlang‘ich proba:</b>{" "}
+                  {gold.gold_purity?.toFixed(2) || "-"}
+                </p>
+                <p>
+                  <b>Boshlang‘ich tovar proba:</b>{" "}
+                  {gold.product_purity?.toFixed(2) || "-"}
+                </p>
+                <p>
+                  <b>Yakuniy gramm:</b> {process.end_gramm?.toFixed(3)} gr
+                </p>
+                <p>
+                  <b>Yakuniy proba:</b> {process.end_purity?.toFixed(2)}
+                </p>
+                <p>
+                  <b>Yakuniy tovar proba:</b>{" "}
+                  {process.end_product_purity?.toFixed(2)}
+                </p>
+                <p>
+                  <b>Yo‘qotish (g):</b> {process.lost_gramm?.toFixed(3)}
+                </p>
+                <p>
+                  <b>Yo‘qotish 1gr da:</b> {process.lost_per_gramm?.toFixed(3)}
+                </p>
+                <p>
+                  <b>Limit:</b> {process.process_type_id?.loss_limit_per_gramm}
+                </p>
+                <p>
+                  <b>Boshlanish:</b>{" "}
+                  {moment(process.start_time).format("DD.MM.YYYY HH:mm")}
+                </p>
+                <p>
+                  <b>Tugash:</b>{" "}
+                  {moment(process.end_time).format("DD.MM.YYYY HH:mm")}
+                </p>
+              </Card>
+            );
+          })}
+        </Space>
       </Modal>
 
       <Modal

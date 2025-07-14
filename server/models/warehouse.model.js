@@ -54,14 +54,12 @@ const WarehouseSchema = new mongoose.Schema(
           },
           gold_purity: {
             type: Number,
-            max: 1000,
             min: 1,
             required: true,
           },
           product_purity: {
             // gold purity / ratio = product purity
             type: Number,
-            max: 1000,
             min: 1,
             required: true,
           },
@@ -115,10 +113,10 @@ const WarehouseSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
-          total_lost_gramm: {
+          purity: {
             type: Number,
+            min: 1,
             required: true,
-            min: 0,
           },
           date: {
             type: Date,

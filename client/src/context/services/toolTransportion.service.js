@@ -36,7 +36,7 @@ export const toolTransportionApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["ToolTransportion"],
+      invalidatesTags: ["ToolTransportion", "User", "Warehouse"],
     }),
 
     // Transportatsiyani yakunlash
@@ -45,7 +45,7 @@ export const toolTransportionApi = api.injectEndpoints({
         url: `/tool-transport/complete/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ToolTransportion"],
+      invalidatesTags: ["ToolTransportion", "User", "Warehouse"],
     }),
 
     // Transportatsiyani bekor qilish

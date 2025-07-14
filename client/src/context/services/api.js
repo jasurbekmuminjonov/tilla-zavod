@@ -23,11 +23,11 @@ const baseQuery = async (args, api, extraOptions) => {
   return result;
 };
 
-const baseQueryWithRetry = retry(baseQuery, { maxRetries: 2 });
+const baseQueryWithRetry = retry(baseQuery, { maxRetries: 1 });
 
 export const api = createApi({
   reducerPath: "splitApi",
   baseQuery: baseQueryWithRetry,
-  tagTypes: [],
+  tagTypes: ["User", "Gold", "Warehouse", "Transportion", "Tool", "Losses"],
   endpoints: () => ({}),
 });

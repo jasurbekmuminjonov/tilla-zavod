@@ -20,7 +20,7 @@ import {
   Tabs,
   Tag,
 } from "antd";
-import { FaList, FaSave } from "react-icons/fa";
+import { FaList, FaLock, FaSave } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { GrUserAdmin } from "react-icons/gr";
 import { Form } from "antd";
@@ -367,6 +367,23 @@ const Users = () => {
     },
   ];
 
+    if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+      return (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "15px",
+          }}
+        >
+          <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+        </div>
+      );
+    }
+
   return (
     <div className="users">
       <Modal
@@ -375,7 +392,7 @@ const Users = () => {
         footer={null}
         onCancel={() => setPasswordModal(false)}
       >
-        <Form layout="vertical" onFinish={handleEditPassword}>
+        <Form autoComplete="off" layout="vertical" onFinish={handleEditPassword}>
           <Form.Item
             label="Yangi parol"
             rules={[{ required: true, message: "Yangi parolni kiriting" }]}
@@ -409,11 +426,13 @@ const Users = () => {
             loading={isLoading}
             columns={columns}
             dataSource={users}
+            size="small"
             rowKey="_id"
           />
         </TabPane>
         <TabPane tab="Yangi foydalanuvchi" key="2">
           <Form
+          autoComplete="off"
             layout="vertical"
             style={{ width: "50%" }}
             form={form}

@@ -10,6 +10,7 @@ import {
 import { GiBigDiamondRing } from "react-icons/gi";
 import { IoIosWarning, IoMdSettings } from "react-icons/io";
 import { IoCutSharp } from "react-icons/io5";
+import { TbCubeSend } from "react-icons/tb";
 
 export const sidebarLinks = [
   {
@@ -68,13 +69,18 @@ export const sidebarLinks = [
     icon: <AiFillGold size={20} />,
   },
   {
+    path: "/transfer-product",
+    label: "Tovar o'tkazmalari",
+    icon: <TbCubeSend size={20} />,
+  },
+  {
     path: "/providers",
     label: "Yetkazib beruvchilar",
     icon: <FaUserTie size={20} />,
   },
-  {
-    path: "/settings",
-    label: "Sozlamalar",
-    icon: <IoMdSettings size={20} />,
-  },
+  // {
+  //   path: "/settings",
+  //   label: "Sozlamalar",
+  //   icon: <IoMdSettings size={20} />,
+  // },
 ];

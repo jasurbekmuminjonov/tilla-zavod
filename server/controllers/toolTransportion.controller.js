@@ -2,7 +2,6 @@ const ToolTransportion = require("../models/toolTransportion.model");
 const Warehouse = require("../models/warehouse.model");
 const User = require("../models/user.model");
 
-
 exports.createToolTransportion = async (req, res) => {
   try {
     const { tool_id, warehouse_id, user_id, quantity } = req.body;

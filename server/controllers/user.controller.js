@@ -44,7 +44,7 @@ exports.getUsers = async (req, res) => {
 
     const allTypeIds = users.flatMap((user) =>
       user.products.flatMap((entry) =>
-        entry.products.map((p) => p.product_type_id?.toString())
+        entry?.products?.map((p) => p.product_type_id?.toString())
       )
     );
     const uniqueTypeIds = [...new Set(allTypeIds.filter(Boolean))];
@@ -55,9 +55,9 @@ exports.getUsers = async (req, res) => {
       .select("_id product_name description")
       .lean();
 
-    users.forEach((user) => {
-      user.products.forEach((entry) => {
-        entry.products.forEach((p) => {
+    users?.forEach((user) => {
+      user.products?.forEach((entry) => {
+        entry.products?.forEach((p) => {
           const matched = productTypes.find(
             (pt) => pt._id.toString() === p.product_type_id?.toString()
           );

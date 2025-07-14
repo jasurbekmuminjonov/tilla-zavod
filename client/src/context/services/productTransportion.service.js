@@ -36,7 +36,7 @@ export const productTransportionApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["ProductTransportion"],
+      invalidatesTags: ["ProductTransportion", "User", "Warehouse", "Gold"],
     }),
 
     // Transportatsiyani yakunlash
@@ -45,7 +45,7 @@ export const productTransportionApi = api.injectEndpoints({
         url: `/product-transport/complete/${id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["ProductTransportion"],
+      invalidatesTags: ["ProductTransportion", "User", "Warehouse", "Gold"],
     }),
 
     // Transportatsiyani bekor qilish

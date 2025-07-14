@@ -16,7 +16,7 @@ import {
   Space,
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { FaSave } from "react-icons/fa";
+import { FaLock, FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -105,7 +105,22 @@ const ProductTypes = () => {
       ),
     },
   ];
-
+  if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+        }}
+      >
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+      </div>
+    );
+  }
   return (
     <div className="product-types">
       <Tabs
@@ -122,6 +137,7 @@ const ProductTypes = () => {
             dataSource={productTypes}
             loading={isLoading}
             rowKey="_id"
+            size="small"
           />
         </TabPane>
 
@@ -131,6 +147,7 @@ const ProductTypes = () => {
             style={{ width: "50%" }}
             form={form}
             onFinish={handleSubmit}
+            autoComplete="off"
           >
             <Form.Item
               name="product_name"

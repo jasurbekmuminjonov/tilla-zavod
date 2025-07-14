@@ -2,7 +2,9 @@ const User = require("../models/user.model");
 const Warehouse = require("../models/warehouse.model");
 const Process = require("../models/process.model");
 const Transportion = require("../models/transportion.model");
+const ProductType = require("../models/productType.model");
 
+const mongoose = require("mongoose");
 exports.createGold = async (req, res) => {
   try {
     const { user_id } = req.user;
@@ -22,20 +24,21 @@ exports.createGold = async (req, res) => {
   }
 };
 
-const getProcessChain = async (startProcessId) => {
+const getProcessChain = async (endProcessId) => {
   const chain = [];
+  if (!endProcessId) return chain;
 
-  let current = startProcessId;
-
+  let current = await Process.findById(endProcessId).populate(
+    "process_type_id"
+  );
   while (current) {
-    const process = await Process.findById(current).populate("process_type_id");
-    if (!process) break;
-    chain.push(process);
-    current = process.process_id;
-    current = process?.process_id || null;
+    chain.unshift(current);
+    current = await Process.findOne({
+      end_gold_id: current.start_gold_id,
+    }).populate("process_type_id");
   }
 
-  return chain.reverse();
+  return chain;
 };
 
 exports.getGold = async (req, res) => {
@@ -71,6 +74,7 @@ exports.getGold = async (req, res) => {
           date: gold.date,
           processes,
           transportions,
+          _id: gold._id,
         });
       }
     }
@@ -107,5 +111,133 @@ exports.getGold = async (req, res) => {
   } catch (error) {
     console.error("getGold error:", error);
     res.status(500).json({ message: "Server xatosi" });
+  }
+};
+
+exports.searchGoldFromAnyWhere = async (req, res) => {
+  try {
+    const { gold_id } = req.params;
+    const factoryId = req.user.factory_id;
+
+    if (!mongoose.Types.ObjectId.isValid(gold_id)) {
+      return res.status(400).json({ message: "Noto‘g‘ri ID format" });
+    }
+
+    const users = await User.find({ factory_id: factoryId }).lean();
+
+    for (const user of users) {
+      const gold = user.gold.find((g) => g._id.toString() === gold_id);
+      if (gold) {
+        return res.status(200).json({
+          location: "user",
+          owner: { _id: user._id, name: user.name },
+          gold,
+        });
+      }
+    }
+
+    const warehouses = await Warehouse.find({ factory_id: factoryId }).lean();
+
+    for (const warehouse of warehouses) {
+      const gold = warehouse.gold.find((g) => g._id.toString() === gold_id);
+      if (gold) {
+        return res.status(200).json({
+          location: "warehouse",
+          owner: { _id: warehouse._id, name: warehouse.warehouse_name },
+          gold,
+        });
+      }
+    }
+
+    return res.status(404).json({ message: "Bunday gold topilmadi" });
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Server xatosi" });
+  }
+};
+
+exports.getAllLosses = async (req, res) => {
+  try {
+    const { factory_id } = req.user;
+    const allLosses = [];
+
+    // === 1. Transportion losses with owner name ===
+    const transportions = await Transportion.find({
+      factory_id,
+      status: "completed",
+    })
+      .populate("from_id", "name warehouse_name")
+      .populate("to_id", "name warehouse_name")
+      .lean();
+
+    transportions.forEach((t) => {
+      if (t.lost_gramm > 0) {
+        allLosses.push({
+          loss_type: "transportion",
+          lost_gramm: t.lost_gramm,
+          owner:
+            t.from_type === "User"
+              ? t.from_id?.name || "Nomaʼlum user"
+              : t.from_id?.warehouse_name || "Nomaʼlum ombor",
+          date: t.get_time,
+          data: t,
+        });
+      }
+    });
+
+    // === 2. Process losses with owner name ===
+    const processes = await Process.find({
+      factory_id,
+      status: "completed",
+    })
+      .populate("process_type_id", "process_name")
+      .populate("user_id", "name")
+      .lean();
+
+    processes.forEach((p) => {
+      if (p.lost_gramm > 0) {
+        allLosses.push({
+          loss_type: "process",
+          lost_gramm: p.lost_gramm,
+          owner: p.user_id?.name || "Nomaʼlum user",
+          date: p.end_time,
+          data: p,
+        });
+      }
+    });
+
+    // === 3. Product losses with owner name ===
+    const users = await User.find({ factory_id })
+      .populate("products.product_type_id", "product_name")
+      .lean();
+
+    users.forEach((user) => {
+      (user.products || []).forEach((product) => {
+        if (product.total_lost_gramm && product.total_lost_gramm > 0) {
+          allLosses.push({
+            loss_type: "product",
+            lost_gramm: product.total_lost_gramm,
+            owner: user.name || "Nomaʼlum user",
+            date: product.date,
+            data: {
+              ...product,
+              user_id: user._id,
+              user_name: user.name,
+              product_type: product.product_type_id,
+            },
+          });
+        }
+      });
+    });
+
+    // === Sort all by date descending ===
+    allLosses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return res.status(200).json(allLosses);
+  } catch (err) {
+    console.error("getAllLosses error:", err.message);
+    return res
+      .status(500)
+      .json({ message: "Serverda xatolik", error: err.message });
   }
 };

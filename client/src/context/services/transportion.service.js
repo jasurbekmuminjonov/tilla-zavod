@@ -36,7 +36,7 @@ export const transportionApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Transportion"],
+      invalidatesTags: ["Transportion", "Gold", "User", "Warehouse"],
     }),
 
     // Transportatsiyani yakunlash
@@ -46,7 +46,7 @@ export const transportionApi = api.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Transportion"],
+      invalidatesTags: ["Transportion", "Gold", "User", "Warehouse"],
     }),
 
     // Transportatsiyani bekor qilish
@@ -55,7 +55,7 @@ export const transportionApi = api.injectEndpoints({
         url: `/transport/cancel/${transportion_id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["Transportion"],
+      invalidatesTags: ["Transportion", "Gold", "User"],
     }),
   }),
 });

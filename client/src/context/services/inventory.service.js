@@ -30,11 +30,33 @@ export const inventoryApi = api.injectEndpoints({
       }),
       providesTags: ["Tool"],
     }),
+    searchGold: builder.query({
+      query: (goldId) => ({
+        url: `/gold/search/${goldId}`,
+        method: "GET",
+      }),
+      providesTags: ["Gold"],
+    }),
     getGold: builder.query({
       query: () => ({
         url: "/gold",
         method: "GET",
       }),
+      invalidatesTags: ["Gold"],
+    }),
+    getProduct: builder.query({
+      query: () => ({
+        url: "/product",
+        method: "GET",
+      }),
+      providesTags: ["Product"],
+    }),
+    getLosses: builder.query({
+      query: () => ({
+        url: "/losses",
+        method: "GET",
+      }),
+      providesTags: ["Losses"],
     }),
     // PRODUCT: Yangi mahsulot qo‘shish
     createProduct: builder.mutation({
@@ -43,7 +65,7 @@ export const inventoryApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Product", "User", "Warehouse", "Losses"],
     }),
   }),
 });
@@ -54,4 +76,7 @@ export const {
   useGetAllToolTypesQuery,
   useCreateProductMutation,
   useGetGoldQuery,
+  useGetProductQuery,
+  useLazySearchGoldQuery,
+  useGetLossesQuery,
 } = inventoryApi;

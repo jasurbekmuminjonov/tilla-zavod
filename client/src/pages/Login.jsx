@@ -9,7 +9,6 @@ const Login = () => {
   async function handleLogin(values) {
     try {
       const res = await loginUser(values).unwrap();
-      console.log(res);
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
       notification.success({

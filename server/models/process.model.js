@@ -25,14 +25,12 @@ const ProcessSchema = new mongoose.Schema(
       type: Number,
       required: false,
       min: 0,
-      max: 1000,
       default: null,
     },
     end_product_purity: {
       type: Number,
       required: false,
       min: 0,
-      max: 1000,
       default: null,
     },
     end_gramm: {

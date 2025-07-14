@@ -75,14 +75,12 @@ const UserSchema = new mongoose.Schema(
           },
           gold_purity: {
             type: Number,
-            max: 1000,
             min: 1,
             required: true,
           },
           product_purity: {
             // gold purity / ratio = product purity
             type: Number,
-            max: 1000,
             min: 1,
             required: true,
           },
@@ -129,6 +127,36 @@ const UserSchema = new mongoose.Schema(
     products: {
       type: [
         {
+          product_type_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "ProductType",
+            required: true,
+          },
+          quantity: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          total_gramm: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          gramm_per_quantity: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
+          purity: {
+            type: Number,
+            min: 1,
+            required: true,
+          },
+          total_lost_gramm: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
           date: {
             type: Date,
             default: Date.now,
@@ -137,39 +165,16 @@ const UserSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             required: true,
           },
-          products: [
-            {
-              product_type_id: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "ProductType",
-                required: true,
-              },
-              quantity: {
-                type: Number,
-                required: true,
-                min: 0,
-              },
-              total_gramm: {
-                type: Number,
-                required: true,
-                min: 0,
-              },
-              gramm_per_quantity: {
-                type: Number,
-                required: true,
-                min: 0,
-              },
-              total_lost_gramm: {
-                type: Number,
-                required: true,
-                min: 0,
-              },
-            },
-          ],
+          user_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
         },
       ],
       default: [],
     },
+
     allow_production: {
       type: Boolean,
       default: false,

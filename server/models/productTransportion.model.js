@@ -15,6 +15,11 @@ const ProductTransportionSchema = new mongoose.Schema(
             required: true,
             min: 0,
           },
+          purity: {
+            type: Number,
+            min: 1,
+            required: true,
+          },
           total_gramm: {
             type: Number,
             required: true,
@@ -56,6 +61,10 @@ const ProductTransportionSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    get_time: {
+      type: Date,
+      default: null,
     },
     status: {
       type: String,

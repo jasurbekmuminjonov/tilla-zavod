@@ -290,7 +290,11 @@ const Warehouses = () => {
                 { title: "Miqdor", dataIndex: "quantity" },
                 { title: "1 dona gramm", dataIndex: "gramm_per_quantity" },
                 { title: "Umumiy gramm", dataIndex: "total_gramm" },
-                { title: "Yo'qotilgan gramm", dataIndex: "total_lost_gramm" },
+                {
+                  title: "Yo'qotilgan gramm",
+                  dataIndex: "total_lost_gramm",
+                  render: (text) => text?.toFixed(3),
+                },
                 {
                   title: "Ishchi",
                   dataIndex: "user_id",
@@ -363,12 +367,14 @@ const Warehouses = () => {
           <Table
             loading={isLoading}
             columns={columns}
+            size="small"
             dataSource={warehouses}
             rowKey="_id"
           />
         </TabPane>
         <TabPane tab="Yangi ombor" key="2">
           <Form
+            autoComplete="off"
             layout="vertical"
             style={{ width: "50%" }}
             form={form}
@@ -386,7 +392,7 @@ const Warehouses = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
-                 icon={<FaSave />}
+                icon={<FaSave />}
               >
                 Saqlash
               </Button>
@@ -395,6 +401,7 @@ const Warehouses = () => {
         </TabPane>
         <TabPane tab="Oltin kirim" key="3">
           <Form
+            autoComplete="off"
             onFinish={handleCreateGold}
             layout="vertical"
             form={goldForm}
@@ -472,6 +479,7 @@ const Warehouses = () => {
         </TabPane>
         <TabPane tab="Запчасть kirim" key="4">
           <Form
+            autoComplete="off"
             onFinish={handleCreateTool}
             layout="vertical"
             form={toolForm}
