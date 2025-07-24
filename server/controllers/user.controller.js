@@ -85,6 +85,7 @@ exports.editUser = async (req, res) => {
       phone,
       attached_warehouses,
       allow_production,
+      create_gold,
     } = req.body;
     const admin = await User.findById(user_id);
     if (admin.role !== "admin") {
@@ -95,7 +96,7 @@ exports.editUser = async (req, res) => {
       name,
       phone,
       attached_warehouses,
-      allow_production,
+      create_gold,
     });
 
     return res.status(200).end();

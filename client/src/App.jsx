@@ -49,20 +49,15 @@ const App = () => {
     if (!token) return;
 
     const handleGoldTransportion = (data) => {
-      const { to, to_type } = data;
+      const { to } = data;
       const currentUser = selfRef.current;
 
-      const isForMe =
-        (to_type === "User" && currentUser?._id === to?._id) ||
-        (to_type === "Warehouse" &&
-          currentUser?.attached_warehouses?.some((w) => w._id === to?._id));
+      const isForMe = currentUser?._id === to?._id;
 
       if (isForMe) {
         notification.open({
           message: "Oltin o'tkazmasi",
-          description: `Yangi oltin ${
-            to_type === "User" ? "sizga" : "omborga"
-          } yuborildi`,
+          description: `Yangi oltin yuborildi, qabul qilib oling`,
           duration: 0,
         });
         refetch();

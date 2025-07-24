@@ -36,7 +36,7 @@ export const transportionApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Transportion", "Gold", "User", "Warehouse"],
+      invalidatesTags: ["Transportion"],
     }),
 
     // Transportatsiyani yakunlash
@@ -46,7 +46,17 @@ export const transportionApi = api.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Transportion", "Gold", "User", "Warehouse"],
+      invalidatesTags: ["Transportion"],
+    }),
+
+    // Transportatsiyani qaytarib olish
+    returnTransportion: builder.mutation({
+      query: ({ transportion_id, body }) => ({
+        url: `/transport/return/${transportion_id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Transportion"],
     }),
 
     // Transportatsiyani bekor qilish
@@ -55,7 +65,7 @@ export const transportionApi = api.injectEndpoints({
         url: `/transport/cancel/${transportion_id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["Transportion", "Gold", "User"],
+      invalidatesTags: ["Transportion"],
     }),
   }),
 });
@@ -67,4 +77,5 @@ export const {
   useCreateTransportionMutation,
   useCompleteTransportionMutation,
   useCancelTransportionMutation,
+  useReturnTransportionMutation,
 } = transportionApi;

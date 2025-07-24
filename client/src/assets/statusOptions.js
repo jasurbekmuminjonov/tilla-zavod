@@ -3,6 +3,14 @@ export const statusOptions = {
     text: "Kutilmoqda",
     color: "orange",
   },
+  active: {
+    text: "Faol",
+    color: "green",
+  },
+  inactive: {
+    text: "Nofaol",
+    color: "red",
+  },
   in_progress: {
     text: "Jarayonda",
     color: "lime",

@@ -2,30 +2,30 @@ const mongoose = require("mongoose");
 
 const TransportionSchema = new mongoose.Schema(
   {
-    from_type: {
-      type: String,
-      required: true,
-      enum: ["User", "Warehouse"],
-    },
-    to_type: {
-      type: String,
-      required: true,
-      enum: ["User", "Warehouse"],
-    },
+    // from_type: {
+    //   type: String,
+    //   required: true,
+    //   enum: ["User", "Warehouse"],
+    // },
+    // to_type: {
+    //   type: String,
+    //   required: true,
+    //   enum: ["User", "Warehouse"],
+    // },
     from_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "from_type",
+      ref: "User",
     },
     to_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "to_type",
+      ref: "User",
     },
-    gold_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-    },
+    // gold_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   required: true,
+    // },
     sent_gramm: {
       type: Number,
       required: true,
@@ -40,6 +40,12 @@ const TransportionSchema = new mongoose.Schema(
       default: null,
     },
     get_gramm: {
+      type: Number,
+      required: false,
+      min: 0,
+      default: null,
+    },
+    returned_gramm: {
       type: Number,
       required: false,
       min: 0,

@@ -35,7 +35,7 @@ const Home = () => {
 
     const startGrammTotal = processes
       .filter((p) => isInRange(p.start_time))
-      .reduce((sum, p) => sum + (p.start_gramm || 0), 0);
+      .reduce((sum, p) => sum + (p.end_gramm || 0), 0);
 
     const filteredProducts = products.filter((p) => isInRange(p.date));
     const totalProducts = filteredProducts.reduce(
@@ -123,7 +123,7 @@ const Home = () => {
         <Col span={8}>
           <Card>
             <Statistic
-              title="Jarayondagi oltin"
+              title="Jarayondan chiqqan gr"
               value={stats.startGrammTotal}
               precision={2}
               suffix="gr"

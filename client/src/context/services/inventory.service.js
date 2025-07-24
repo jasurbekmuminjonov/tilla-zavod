@@ -4,12 +4,12 @@ export const inventoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
     // GOLD: Omborga tilla qo'shish
     createGold: builder.mutation({
-      query: ({ warehouse_id, body }) => ({
-        url: `/gold/${warehouse_id}/create`,
+      query: (body) => ({
+        url: `/gold/create`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Gold", "Warehouse"],
+      invalidatesTags: ["Gold"],
     }),
 
     // TOOL: Omborga asbob qo'shish
@@ -42,7 +42,7 @@ export const inventoryApi = api.injectEndpoints({
         url: "/gold",
         method: "GET",
       }),
-      invalidatesTags: ["Gold"],
+      providesTags: ["Gold"],
     }),
     getProduct: builder.query({
       query: () => ({

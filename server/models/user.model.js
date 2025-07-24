@@ -174,8 +174,11 @@ const UserSchema = new mongoose.Schema(
       ],
       default: [],
     },
-
     allow_production: {
+      type: Boolean,
+      default: false,
+    },
+    create_gold: {
       type: Boolean,
       default: false,
     },

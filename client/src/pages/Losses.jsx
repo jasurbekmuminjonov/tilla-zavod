@@ -179,28 +179,33 @@ const Losses = () => {
                 <p>
                   <b>Yakuniy gramm:</b> {selectedLoss.data.end_gramm}
                 </p>
+                <p>
+                  <b>Astatka gramm:</b> {selectedLoss.data.astatka_gramm || "-"}
+                </p>
+                <p>
+                  <b>Proba:</b> {selectedLoss.data.end_purity}
+                </p>
               </>
             )}
 
             {selectedLoss.loss_type === "transportion" && (
               <>
                 <p>
-                  <b>Qayerdan:</b>{" "}
-                  {selectedLoss.data.from_type === "User"
-                    ? selectedLoss.data.from_id?.name
-                    : selectedLoss.data.from_id?.warehouse_name}
+                  <b>Qayerdan:</b> {selectedLoss.data.from_id?.name}
                 </p>
                 <p>
-                  <b>Qayerga:</b>{" "}
-                  {selectedLoss.data.to_type === "User"
-                    ? selectedLoss.data.to_id?.name
-                    : selectedLoss.data.to_id?.warehouse_name}
+                  <b>Qayerga:</b> {selectedLoss.data.to_id?.name}
                 </p>
                 <p>
                   <b>Yuborilgan gramm:</b> {selectedLoss.data.sent_gramm}
                 </p>
                 <p>
-                  <b>Qabul qilingan gramm:</b> {selectedLoss.data.get_gramm}
+                  <b>Qabul qilingan gramm:</b>{" "}
+                  {selectedLoss.data.get_gramm -
+                    (selectedLoss.data.returned_gramm || 0)}
+                </p>
+                <p>
+                  <b>Olingan gramm:</b> {selectedLoss.data.returned_gramm}
                 </p>
               </>
             )}

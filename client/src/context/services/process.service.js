@@ -25,7 +25,7 @@ export const processApi = api.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Process", "Gold", "User"],
+      invalidatesTags: ["Process"],
     }),
 
     // Jarayonni boshlash
@@ -44,7 +44,7 @@ export const processApi = api.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Process", "Gold", "User", "Losses"],
+      invalidatesTags: ["Process", "Losses"],
     }),
 
     // Jarayonni bekor qilish
@@ -53,7 +53,7 @@ export const processApi = api.injectEndpoints({
         url: `/process/cancel/${process_id}`,
         method: "PUT",
       }),
-      invalidatesTags: ["Process", "Gold", "User"],
+      invalidatesTags: ["Process"],
     }),
   }),
 });

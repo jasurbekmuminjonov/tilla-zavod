@@ -7,32 +7,44 @@ const ProcessSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    start_gold_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-    },
-    end_gold_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: false,
-      default: null,
-    },
+    // start_gold_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   required: true,
+    // },
+    // end_gold_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   required: false,
+    //   default: null,
+    // },
     start_gramm: {
       type: Number,
       required: true,
       min: 0,
     },
+    astatka_gramm: {
+      type: Number,
+      required: false,
+      default: null,
+      min: 0,
+    },
+    start_purity: {
+      type: Number,
+      required: false,
+      min: 0,
+      default: 585,
+    },
     end_purity: {
       type: Number,
       required: false,
       min: 0,
-      default: null,
+      default: 585,
     },
-    end_product_purity: {
-      type: Number,
-      required: false,
-      min: 0,
-      default: null,
-    },
+    // end_product_purity: {
+    //   type: Number,
+    //   required: false,
+    //   min: 0,
+    //   default: null,
+    // },
     end_gramm: {
       type: Number,
       required: false,
@@ -53,7 +65,7 @@ const ProcessSchema = new mongoose.Schema(
     },
     start_time: {
       type: Date,
-      default: null,
+      default: Date.now(),
     },
     end_time: {
       type: Date,
@@ -66,8 +78,8 @@ const ProcessSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "in_progress", "completed", "failed"],
-      default: "pending",
+      enum: ["active", "inactive"],
+      default: "active",
       required: true,
     },
     factory_id: {

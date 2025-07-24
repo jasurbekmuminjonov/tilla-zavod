@@ -108,144 +108,144 @@ const Users = () => {
       dataIndex: "role",
       render: (text) => (text === "admin" ? "Admin" : "Ishchi"),
     },
-    {
-      title: "Umumiy oltin gr",
-      dataIndex: "gold",
-      render: (text) => text.reduce((acc, g) => acc + g.gramm, 0).toFixed(3),
-    },
-    {
-      title: "",
-      dataIndex: "gold",
-      render: (gold) => (
-        <Popover
-          trigger="click"
-          title="Oltin"
-          placement="bottom"
-          content={
-            <Table
-              columns={[
-                {
-                  title: "Yetkazuvchi",
-                  dataIndex: "provider_id",
-                  render: (p) => p?.provider_name || "-",
-                },
-                {
-                  title: "Jarayon",
-                  dataIndex: "process_id",
-                  render: (p) => (
-                    <Tag color="green">
-                      {processTypes.find((pt) => pt._id === p?.process_type_id)
-                        ?.process_name || "-"}
-                    </Tag>
-                  ),
-                },
-                {
-                  title: "Gramm",
-                  dataIndex: "gramm",
-                  render: (text) => text.toFixed(3),
-                },
-                {
-                  title: "Oltin probasi",
-                  dataIndex: "gold_purity",
-                  render: (text) => text.toFixed(3),
-                },
-                {
-                  title: "Tovar probasi",
-                  dataIndex: "product_purity",
-                  render: (text) => text.toFixed(3),
-                },
-                {
-                  title: "Tayyorlash",
-                  dataIndex: "ratio",
-                  render: (text) => text.toFixed(3),
-                },
-                { title: "Izoh", dataIndex: "description" },
-              ]}
-              dataSource={gold}
-              rowKey={(r, i) => i}
-              pagination={false}
-              size="small"
-            />
-          }
-        >
-          <Button icon={<FaList />} />
-        </Popover>
-      ),
-    },
-    {
-      title: "",
-      dataIndex: "products",
-      render: (text, record) => (
-        <Popover
-          trigger="click"
-          title="Tayyor mahsulotlar"
-          placement="bottom"
-          content={
-            <Table
-              style={{ minWidth: "300px" }}
-              columns={[
-                {
-                  title: "Tovar",
-                  dataIndex: "product_type_id",
-                  render: (text) => text.product_name,
-                },
-                { title: "Miqdor", dataIndex: "quantity" },
-                { title: "Umumiy gramm", dataIndex: "total_gramm" },
-                {
-                  title: "1 dona da gramm",
-                  dataIndex: "gramm_per_quantity",
-                  render: (text) => text.toFixed(3),
-                },
-                {
-                  title: "Umumiy yo'qotilgan gramm",
-                  dataIndex: "total_lost_gramm",
+    // {
+    //   title: "Umumiy oltin gr",
+    //   dataIndex: "gold",
+    //   render: (text) => text.reduce((acc, g) => acc + g.gramm, 0).toFixed(3),
+    // },
+    // {
+    //   title: "",
+    //   dataIndex: "gold",
+    //   render: (gold) => (
+    //     <Popover
+    //       trigger="click"
+    //       title="Oltin"
+    //       placement="bottom"
+    //       content={
+    //         <Table
+    //           columns={[
+    //             {
+    //               title: "Yetkazuvchi",
+    //               dataIndex: "provider_id",
+    //               render: (p) => p?.provider_name || "-",
+    //             },
+    //             {
+    //               title: "Jarayon",
+    //               dataIndex: "process_id",
+    //               render: (p) => (
+    //                 <Tag color="green">
+    //                   {processTypes.find((pt) => pt._id === p?.process_type_id)
+    //                     ?.process_name || "-"}
+    //                 </Tag>
+    //               ),
+    //             },
+    //             {
+    //               title: "Gramm",
+    //               dataIndex: "gramm",
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //             {
+    //               title: "Oltin probasi",
+    //               dataIndex: "gold_purity",
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //             {
+    //               title: "Tovar probasi",
+    //               dataIndex: "product_purity",
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //             {
+    //               title: "Tayyorlash",
+    //               dataIndex: "ratio",
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //             { title: "Izoh", dataIndex: "description" },
+    //           ]}
+    //           dataSource={gold}
+    //           rowKey={(r, i) => i}
+    //           pagination={false}
+    //           size="small"
+    //         />
+    //       }
+    //     >
+    //       <Button icon={<FaList />} />
+    //     </Popover>
+    //   ),
+    // },
+    // {
+    //   title: "",
+    //   dataIndex: "products",
+    //   render: (text, record) => (
+    //     <Popover
+    //       trigger="click"
+    //       title="Tayyor mahsulotlar"
+    //       placement="bottom"
+    //       content={
+    //         <Table
+    //           style={{ minWidth: "300px" }}
+    //           columns={[
+    //             {
+    //               title: "Tovar",
+    //               dataIndex: "product_type_id",
+    //               render: (text) => text.product_name,
+    //             },
+    //             { title: "Miqdor", dataIndex: "quantity" },
+    //             { title: "Umumiy gramm", dataIndex: "total_gramm" },
+    //             {
+    //               title: "1 dona da gramm",
+    //               dataIndex: "gramm_per_quantity",
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //             {
+    //               title: "Umumiy yo'qotilgan gramm",
+    //               dataIndex: "total_lost_gramm",
 
-                  render: (text) => text.toFixed(3),
-                },
-              ]}
-              dataSource={text.products?.map((item, index) => ({
-                key: index,
-                ...item,
-              }))}
-              rowKey="_id"
-            />
-          }
-        >
-          <Button icon={<FaList />} />
-        </Popover>
-      ),
-    },
+    //               render: (text) => text.toFixed(3),
+    //             },
+    //           ]}
+    //           dataSource={text.products?.map((item, index) => ({
+    //             key: index,
+    //             ...item,
+    //           }))}
+    //           rowKey="_id"
+    //         />
+    //       }
+    //     >
+    //       <Button icon={<FaList />} />
+    //     </Popover>
+    //   ),
+    // },
+    // {
+    //   title: "",
+    //   dataIndex: "tools",
+    //   render: (text) => (
+    //     <Popover
+    //       trigger="click"
+    //       title="Ehtiyot qismlar"
+    //       placement="bottom"
+    //       content={
+    //         <Table
+    //           style={{ minWidth: "300px" }}
+    //           columns={[
+    //             { title: "Eht. qism", dataIndex: "tool_name" },
+    //             {
+    //               title: "O'lch. birlik",
+    //               dataIndex: "unit",
+    //               render: (text) => unitOptions[text],
+    //             },
+    //             { title: "Miqdor", dataIndex: "quantity" },
+    //           ]}
+    //           dataSource={text}
+    //           rowKey="_id"
+    //         />
+    //       }
+    //     >
+    //       <Button icon={<FaList />} />
+    //     </Popover>
+    //   ),
+    // },
     {
-      title: "",
-      dataIndex: "tools",
-      render: (text) => (
-        <Popover
-          trigger="click"
-          title="Ehtiyot qismlar"
-          placement="bottom"
-          content={
-            <Table
-              style={{ minWidth: "300px" }}
-              columns={[
-                { title: "Eht. qism", dataIndex: "tool_name" },
-                {
-                  title: "O'lch. birlik",
-                  dataIndex: "unit",
-                  render: (text) => unitOptions[text],
-                },
-                { title: "Miqdor", dataIndex: "quantity" },
-              ]}
-              dataSource={text}
-              rowKey="_id"
-            />
-          }
-        >
-          <Button icon={<FaList />} />
-        </Popover>
-      ),
-    },
-    {
-      title: "",
+      title: "Jarayonlar",
       dataIndex: "allowed_process_types",
       render: (text) => (
         <Popover
@@ -282,28 +282,33 @@ const Users = () => {
       ),
     },
     {
-      title: "",
-      dataIndex: "attached_warehouses",
-      render: (text) => (
-        <Popover
-          placement="bottom"
-          title="Bog'langan omborlar"
-          trigger="click"
-          content={
-            <Table
-              style={{ minWidth: "300px" }}
-              columns={[{ title: "Ombor", dataIndex: "warehouse_name" }]}
-              dataSource={text}
-              rowKey="_id"
-            />
-          }
-        >
-          <Button icon={<FaList />} />
-        </Popover>
-      ),
+      title: "Oltin kirim",
+      dataIndex: "create_gold",
+      render: (text) => (text ? "✅" : "❌"),
     },
+    // {
+    //   title: "",
+    //   dataIndex: "attached_warehouses",
+    //   render: (text) => (
+    //     <Popover
+    //       placement="bottom"
+    //       title="Bog'langan omborlar"
+    //       trigger="click"
+    //       content={
+    //         <Table
+    //           style={{ minWidth: "300px" }}
+    //           columns={[{ title: "Ombor", dataIndex: "warehouse_name" }]}
+    //           dataSource={text}
+    //           rowKey="_id"
+    //         />
+    //       }
+    //     >
+    //       <Button icon={<FaList />} />
+    //     </Popover>
+    //   ),
+    // },
     {
-      title: "",
+      title: "Operatsiyalar",
       render: (_, record) => (
         <Space>
           <Button
@@ -320,6 +325,7 @@ const Users = () => {
                   (w) => w._id
                 ),
                 allow_production: record.allow_production,
+                create_gold: record.create_gold,
               });
               setActiveTab("2");
             }}
@@ -367,22 +373,22 @@ const Users = () => {
     },
   ];
 
-    if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
-      return (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "15px",
-          }}
-        >
-          <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
-        </div>
-      );
-    }
+  if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+        }}
+      >
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="users">
@@ -392,7 +398,11 @@ const Users = () => {
         footer={null}
         onCancel={() => setPasswordModal(false)}
       >
-        <Form autoComplete="off" layout="vertical" onFinish={handleEditPassword}>
+        <Form
+          autoComplete="off"
+          layout="vertical"
+          onFinish={handleEditPassword}
+        >
           <Form.Item
             label="Yangi parol"
             rules={[{ required: true, message: "Yangi parolni kiriting" }]}
@@ -432,7 +442,7 @@ const Users = () => {
         </TabPane>
         <TabPane tab="Yangi foydalanuvchi" key="2">
           <Form
-          autoComplete="off"
+            autoComplete="off"
             layout="vertical"
             style={{ width: "50%" }}
             form={form}
@@ -520,13 +530,16 @@ const Users = () => {
             <Form.Item name="allow_production" label="Tayyor tovar">
               <Switch />
             </Form.Item>
+            <Form.Item name="create_gold" label="Oltin kirim">
+              <Switch />
+            </Form.Item>
             <Form.Item>
               <Button
                 // style={{ width: "100%" }}
                 type="primary"
                 htmlType="submit"
                 loading={editLoading || createLoading}
-                 icon={<FaSave />}
+                icon={<FaSave />}
               >
                 Saqlash
               </Button>
