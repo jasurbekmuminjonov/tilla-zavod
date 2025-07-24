@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Form,
+  Input,
   InputNumber,
   message,
   notification,
@@ -86,6 +87,56 @@ const Process = () => {
   }
 
   const columns = [
+    {
+      title: (
+        <div
+          style={{
+            fontSize: "12px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          Vaqti
+          <br />
+          {/* <div>Boshlanish | Tugash</div> */}
+        </div>
+      ),
+      render: (_, record) => {
+        const start = record.start_time
+          ? moment(record.start_time).format("HH:mm")
+          : "-";
+
+        const end = record.end_time
+          ? moment(record.end_time).format("HH:mm")
+          : "-";
+
+        return (
+          <Space direction="vertical">
+            {/* <div
+              style={{
+                fontSize: "12px",
+                display: "flex",
+                justifyContent: "center",
+                gap: "5px",
+              }}
+            > */}
+            <span>{start}</span>
+            {/* <span>|</span> */}
+            <span>{end}</span>
+            {/* </div> */}
+            {/* <ElapsedTimer
+              endDate={record.end_time}
+              startDate={record.start_time}
+            /> */}
+          </Space>
+        );
+      },
+    },
+    {
+      title: "Tavsif",
+      dataIndex: "description",
+    },
     {
       title: "Jarayon ID",
       dataIndex: "_id",
@@ -233,52 +284,7 @@ const Process = () => {
       dataIndex: "process_type_id",
       render: (text) => text.loss_limit_per_gramm || "-",
     },
-    {
-      title: (
-        <div
-          style={{
-            fontSize: "12px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          Vaqti
-          <br />
-          <div>Boshlanish | Tugash</div>
-        </div>
-      ),
-      render: (_, record) => {
-        const start = record.start_time
-          ? moment(record.start_time).format("HH:mm")
-          : "-";
 
-        const end = record.end_time
-          ? moment(record.end_time).format("HH:mm")
-          : "-";
-
-        return (
-          <Space direction="vertical">
-            <div
-              style={{
-                fontSize: "12px",
-                display: "flex",
-                justifyContent: "center",
-                gap: "5px",
-              }}
-            >
-              <span>{start}</span>
-              <span>|</span>
-              <span>{end}</span>
-            </div>
-            {/* <ElapsedTimer
-              endDate={record.end_time}
-              startDate={record.start_time}
-            /> */}
-          </Space>
-        );
-      },
-    },
     {
       title: "Operatsiyalar",
       render: (_, record) => (
@@ -731,6 +737,9 @@ const Process = () => {
             form={form}
             layout="vertical"
           >
+            <Form.Item name="description" label="Tavsif">
+              <Input />
+            </Form.Item>
             <Form.Item
               rules={[{ required: true, message: "Jarayon turini tanlang" }]}
               name="process_type_id"

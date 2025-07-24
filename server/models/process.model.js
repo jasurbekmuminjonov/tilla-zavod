@@ -21,6 +21,10 @@ const ProcessSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    description: {
+      type: String,
+      default: "",
+    },
     astatka_gramm: {
       type: Number,
       required: false,
