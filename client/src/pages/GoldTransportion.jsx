@@ -511,7 +511,7 @@ const GoldTransportion = () => {
         </Tabs.TabPane>
         <Tabs.TabPane style={{ overflowX: "auto" }} tab="Siz yuborgan" key="2">
           <Table
-          scroll={{ x: "max-content" }}
+            scroll={{ x: "max-content" }}
             size="small"
             loading={sentLoading}
             dataSource={sentTransportions
@@ -640,98 +640,94 @@ const GoldTransportion = () => {
             </Form.Item>
           </Form>
         </Tabs.TabPane>
-        {self?.role === "admin" && (
-          <Tabs.TabPane key="4" tab="Jadval">
-            <div
+        <Tabs.TabPane key="4" tab="Jadval">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginTop: 16,
+              flexWrap: "wrap",
+              gap: 20,
+            }}
+          >
+            <table
+              border={1}
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginTop: 16,
-                flexWrap: "wrap",
-                gap: 20,
+                borderCollapse: "collapse",
+                width: "70%",
+                textAlign: "center",
+                fontFamily: "sans-serif",
               }}
             >
-              <table
-                border={1}
-                style={{
-                  borderCollapse: "collapse",
-                  width: "70%",
-                  textAlign: "center",
-                  fontFamily: "sans-serif",
-                }}
-              >
-                <thead>
-                  <tr style={{ backgroundColor: "#f0f0f0" }}>
-                    <th style={{ padding: "10px" }}>Umumiy yuborilgan gr</th>
-                    <th style={{ padding: "10px" }}>
-                      Umumiy qabul qilingan gr
-                    </th>
-                    <th style={{ padding: "10px" }}>Umumiy olingan gr</th>
-                    <th style={{ padding: "10px" }}>Umumiy потери gr</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce((acc, item) => acc + item.sent_gramm, 0)
-                        ?.toFixed(2)}
-                    </td>
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce(
-                          (acc, item) =>
-                            acc + item.get_gramm - (item.returned_gramm || 0),
-                          0
-                        )
-                        ?.toFixed(2)}
-                    </td>
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce((acc, item) => acc + item.returned_gramm, 0)
-                        ?.toFixed(2)}
-                    </td>
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce((acc, item) => acc + item.lost_gramm, 0)
-                        ?.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <thead>
+                <tr style={{ backgroundColor: "#f0f0f0" }}>
+                  <th style={{ padding: "10px" }}>Umumiy yuborilgan gr</th>
+                  <th style={{ padding: "10px" }}>Umumiy qabul qilingan gr</th>
+                  <th style={{ padding: "10px" }}>Umumiy olingan gr</th>
+                  <th style={{ padding: "10px" }}>Umumiy потери gr</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce((acc, item) => acc + item.sent_gramm, 0)
+                      ?.toFixed(2)}
+                  </td>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce(
+                        (acc, item) =>
+                          acc + item.get_gramm - (item.returned_gramm || 0),
+                        0
+                      )
+                      ?.toFixed(2)}
+                  </td>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce((acc, item) => acc + item.returned_gramm, 0)
+                      ?.toFixed(2)}
+                  </td>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce((acc, item) => acc + item.lost_gramm, 0)
+                      ?.toFixed(2)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <label>
-                  <input
-                    type="date"
-                    value={startDate || ""}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />{" "}
-                  dan
-                </label>
-                <label>
-                  <input
-                    type="date"
-                    value={endDate || ""}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />{" "}
-                  gacha
-                </label>
-              </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label>
+                <input
+                  type="date"
+                  value={startDate || ""}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />{" "}
+                dan
+              </label>
+              <label>
+                <input
+                  type="date"
+                  value={endDate || ""}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />{" "}
+                gacha
+              </label>
             </div>
+          </div>
 
-            <Table
+          <Table
             scroll={{ x: "max-content" }}
-              size="small"
-              loading={sentLoading}
-              dataSource={filteredTransportions
-                ?.slice()
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
-              columns={columns.slice(0, 9)}
-            />
-          </Tabs.TabPane>
-        )}
+            size="small"
+            loading={sentLoading}
+            dataSource={filteredTransportions
+              ?.slice()
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+            columns={columns.slice(0, 9)}
+          />
+        </Tabs.TabPane>
       </Tabs>
     </div>
   );

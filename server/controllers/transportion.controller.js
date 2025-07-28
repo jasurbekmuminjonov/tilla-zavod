@@ -53,7 +53,9 @@ exports.getTransportions = async (req, res) => {
   try {
     const transportions = await Transportion.find({
       factory_id: req.user.factory_id,
-    }).populate("from_id").populate("to_id");
+    })
+      .populate("from_id")
+      .populate("to_id");
     return res.status(200).json(transportions);
   } catch (err) {
     console.log(err.message);
@@ -265,3 +267,17 @@ exports.returnTransportion = async (req, res) => {
 //     return res.status(500).json({ message: "Serverda xatolik", err });
 //   }
 // };
+
+exports.getReportsFromUserId = async (req, res) => {
+  try {
+    const gived = await Transportion.find({ from_id: req.user.user_id });
+    const get = await Transportion.find({ to_id: req.user.user_id });
+    res.status(200).json({
+      gived,
+      get,
+    });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
