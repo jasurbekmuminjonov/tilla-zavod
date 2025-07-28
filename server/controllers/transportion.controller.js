@@ -175,13 +175,15 @@ exports.getGetTransportions = async (req, res) => {
 //   }
 // };
 
+
+
 exports.completeTransportion = async (req, res) => {
   try {
     const { transportion_id } = req.params;
-    const { get_gramm } = req.body;
+    // const { get_gramm } = req.body;
     const transportion = await Transportion.findById(transportion_id);
-    transportion.get_gramm = get_gramm;
-    transportion.lost_gramm = transportion.sent_gramm - get_gramm;
+    // transportion.get_gramm = transportion.sent_gramm - get_gramm;
+    // transportion.returned_gramm = get_gramm;
     transportion.status = "completed";
     transportion.get_time = Date.now();
     await transportion.save();

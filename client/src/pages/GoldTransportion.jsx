@@ -57,6 +57,8 @@ const GoldTransportion = () => {
   const [completeForm] = Form.useForm();
   const [returningTransportion, setReturningTransportion] = useState("");
   const [returnModal, setReturnModal] = useState(false);
+  const [selectedFrom, setSelectedFrom] = useState("")
+  const [selectedTo, setSelectedTo] = useState("")
   const [returnForm] = Form.useForm();
 
   // const selectedGoldSource = useMemo(() => {
@@ -73,7 +75,7 @@ const GoldTransportion = () => {
         message: "Muvaffaqiyatli",
         description: "Oltin yuborildi, tomonning qabul qilishini kuting",
       });
-      form.resetFields();
+      // form.resetFields();
       // setSelectedGold({});
       // setFromType("User");
       // setToType("User");
@@ -87,11 +89,11 @@ const GoldTransportion = () => {
     }
   }
 
-  async function handleCompleteTransportion(values) {
+  async function handleCompleteTransportion(id) {
     try {
       await completeTransportion({
-        transportion_id: completingTransportion._id,
-        body: values,
+        transportion_id: id,
+        body: {},
       }).unwrap();
       notification.success({
         message: "Muvaffaqiyatli",
@@ -131,33 +133,33 @@ const GoldTransportion = () => {
   }
   const columns = [
     {
-      title: "Yuborilgan",
+      title: "Berdim",
       dataIndex: "sent_gramm",
     },
+    // {
+    //   title: "Qabul qilgan",
+    //   dataIndex: "get_gramm",
+    //    render: (text, record) => text - (record.returned_gramm || 0),
+    // },
     {
-      title: "Qabul qilgan",
-      dataIndex: "get_gramm",
-      render: (text, record) => text - (record.returned_gramm || 0),
-    },
-    {
-      title: "Qaytarilgan",
+      title: "Oldim",
       dataIndex: "returned_gramm",
     },
-    {
-      title: "Потери",
-      dataIndex: "lost_gramm",
-      render: (text) => text?.toFixed(3),
-    },
+    // {
+    //   title: "Потери",
+    //   dataIndex: "lost_gramm",
+    //   render: (text) => text?.toFixed(3),
+    // },
     // {
     //   title: "Qayerdan yuborildi",
     //   dataIndex: "from_type",
     //   render: (text) => (text === "User" ? "Foydalanuvchi" : "Ombor"),
     // },
-    {
-      title: "Kimdan yuborildi",
-      dataIndex: "from_id",
-      render: (text) => text.name,
-    },
+    // {
+    //   title: "Kimdan yuborildi",
+    //   dataIndex: "from_id",
+    //   render: (text) => text.name,
+    // },
     // {
     //   title: "Qayerga yuborildi",
     //   dataIndex: "to_type",
@@ -186,19 +188,19 @@ const GoldTransportion = () => {
             record.status === "pending"
               ? "orange"
               : record.status === "completed"
-              ? "green"
-              : record.status === "canceled"
-              ? "red"
-              : "red"
+                ? "green"
+                : record.status === "canceled"
+                  ? "red"
+                  : "red"
           }
         >
           {record.status === "pending"
             ? "Kutilmoqda"
             : record.status === "completed"
-            ? "Qabul qilindi"
-            : record.status === "canceled"
-            ? "Rad etildi"
-            : "Xato"}
+              ? "Qabul qilindi"
+              : record.status === "canceled"
+                ? "Rad etildi"
+                : "Xato"}
         </Tag>
       ),
     },
@@ -209,11 +211,11 @@ const GoldTransportion = () => {
           <Button
             variant="filled"
             color="green"
-            disabled={
-              record.status !== "completed" ||
-              self._id !== record.from_id._id ||
-              record.returned_gramm
-            }
+            // disabled={
+            //   record.status !== "completed" ||
+            //   self._id !== record.from_id._id ||
+            //   record.returned_gramm
+            // }
             icon={<IoMdReturnLeft />}
             onClick={() => {
               setReturningTransportion(record);
@@ -252,25 +254,26 @@ const GoldTransportion = () => {
       ),
     },
   ];
+
   const receivedColumns = [
     {
-      title: "Yuborilgan",
+      title: "Oldim",
       dataIndex: "sent_gramm",
     },
+    // {
+    //   title: "Qabul qilgan",
+    //   dataIndex: "get_gramm",
+    //   render: (text, record) => text - (record.returned_gramm || 0),
+    // },
     {
-      title: "Qabul qilgan",
-      dataIndex: "get_gramm",
-      render: (text, record) => text - (record.returned_gramm || 0),
-    },
-    {
-      title: "Qaytarilgan",
+      title: "Berdim",
       dataIndex: "returned_gramm",
     },
-    {
-      title: "Потери",
-      dataIndex: "lost_gramm",
-      render: (text) => text?.toFixed(3),
-    },
+    // {
+    //   title: "Потери",
+    //   dataIndex: "lost_gramm",
+    //   render: (text) => text?.toFixed(3),
+    // },
     {
       title: "Qayerdan yuborildi",
       dataIndex: "from_type",
@@ -281,16 +284,16 @@ const GoldTransportion = () => {
       dataIndex: "from_id",
       render: (text) => text.name || text.warehouse_name,
     },
-    {
-      title: "Qayerga yuborildi",
-      dataIndex: "to_type",
-      render: (text) => (text === "User" ? "Foydalanuvchi" : "Ombor"),
-    },
-    {
-      title: "Kimga yuborildi",
-      dataIndex: "to_id",
-      render: (text) => text.name || text.warehouse_name,
-    },
+    // {
+    //   title: "Qayerga yuborildi",
+    //   dataIndex: "to_type",
+    //   render: (text) => (text === "User" ? "Foydalanuvchi" : "Ombor"),
+    // },
+    // {
+    //   title: "Kimga yuborildi",
+    //   dataIndex: "to_id",
+    //   render: (text) => text.name || text.warehouse_name,
+    // },
     {
       title: "Yuborilgan vaqti",
       dataIndex: "sent_time",
@@ -309,19 +312,19 @@ const GoldTransportion = () => {
             record.status === "pending"
               ? "orange"
               : record.status === "completed"
-              ? "green"
-              : record.status === "canceled"
-              ? "red"
-              : "red"
+                ? "green"
+                : record.status === "canceled"
+                  ? "red"
+                  : "red"
           }
         >
           {record.status === "pending"
             ? "Kutilmoqda"
             : record.status === "completed"
-            ? "Qabul qilindi"
-            : record.status === "canceled"
-            ? "Rad etildi"
-            : "Xato"}
+              ? "Qabul qilindi"
+              : record.status === "canceled"
+                ? "Rad etildi"
+                : "Xato"}
         </Tag>
       ),
     },
@@ -334,13 +337,9 @@ const GoldTransportion = () => {
             color="green"
             disabled={record.status !== "pending"}
             icon={<FaCheck />}
-            onClick={() => {
-              setCompletingTransportion(record);
-              setCompleteModal(true);
-              completeForm.resetFields();
-            }}
+            onClick={() => handleCompleteTransportion(record._id)}
           />
-          <Button
+          {/* <Button
             variant="filled"
             color="green"
             disabled={
@@ -354,7 +353,7 @@ const GoldTransportion = () => {
               setReturnModal(true);
               returnForm.resetFields();
             }}
-          />
+          /> */}
           <Popconfirm
             placement="bottom"
             overlayStyle={{ width: "300px" }}
@@ -387,15 +386,34 @@ const GoldTransportion = () => {
     },
   ];
 
-  const filteredTransportions = useMemo(() => {
-    if (!startDate || !endDate) return transportions;
-    const start = moment(startDate).startOf("day");
-    const end = moment(endDate).endOf("day");
+  // const filteredTransportions = useMemo(() => {
+  //   const start = moment(startDate).startOf("day");
+  //   const end = moment(endDate).endOf("day");
 
-    return transportions.filter((item) =>
-      moment(item.sent_time).isBetween(start, end, undefined, "[]")
-    );
-  }, [transportions, startDate, endDate]);
+  //   return transportions.filter((item) =>
+  //     moment(item.sent_time).isBetween(start, end, undefined, "[]") && (selectedFrom && item.from_id._id === selectedFrom) && (selectedTo && item.to_id._id === selectedTo)
+  //   );
+  // }, [transportions, startDate, endDate, selectedFrom, selectedTo]);
+
+  const filteredTransportions = useMemo(() => {
+    const hasDateRange = startDate && endDate;
+    const start = hasDateRange ? moment(startDate).startOf("day") : null;
+    const end = hasDateRange ? moment(endDate).endOf("day") : null;
+
+    return transportions.filter((item) => {
+      const inDateRange = hasDateRange
+        ? item.sent_time &&
+        moment(item.sent_time).isSameOrAfter(start) &&
+        moment(item.sent_time).isSameOrBefore(end)
+        : true;
+
+      const matchesFrom = !selectedFrom || item.from_id._id === selectedFrom;
+      const matchesTo = !selectedTo || item.to_id._id === selectedTo;
+
+      return inDateRange && matchesFrom && matchesTo;
+    });
+  }, [transportions, startDate, endDate, selectedFrom, selectedTo]);
+
 
   return (
     <div className="gold-transportion">
@@ -417,24 +435,24 @@ const GoldTransportion = () => {
                 required: true,
                 message: "Kiritish majburiy",
               },
-              {
-                validator(_, value) {
-                  if (value === undefined || value === null || value === "") {
-                    return Promise.reject("Gram kiritish majburiy");
-                  }
-                  if (value <= 0) {
-                    return Promise.reject(
-                      "Miqdor 0 yoki manfiy bo'lishi mumkin emas"
-                    );
-                  }
-                  if (value > completingTransportion?.sent_gramm) {
-                    return Promise.reject(
-                      `Maksimal miqdor: ${completingTransportion?.sent_gramm} gramm`
-                    );
-                  }
-                  return Promise.resolve();
-                },
-              },
+              // {
+              //   validator(_, value) {
+              //     if (value === undefined || value === null || value === "") {
+              //       return Promise.reject("Gram kiritish majburiy");
+              //     }
+              //     if (value <= 0) {
+              //       return Promise.reject(
+              //         "Miqdor 0 yoki manfiy bo'lishi mumkin emas"
+              //       );
+              //     }
+              //     if (value > completingTransportion?.sent_gramm) {
+              //       return Promise.reject(
+              //         `Maksimal miqdor: ${completingTransportion?.sent_gramm} gramm`
+              //       );
+              //     }
+              //     return Promise.resolve();
+              //   },
+              // },
             ]}
             name="get_gramm"
             label="Qabul qilingan gramm"
@@ -466,24 +484,24 @@ const GoldTransportion = () => {
                 required: true,
                 message: "Kiritish majburiy",
               },
-              {
-                validator(_, value) {
-                  if (value === undefined || value === null || value === "") {
-                    return Promise.reject("Gram kiritish majburiy");
-                  }
-                  if (value <= 0) {
-                    return Promise.reject(
-                      "Miqdor 0 yoki manfiy bo'lishi mumkin emas"
-                    );
-                  }
-                  if (value > returningTransportion?.get_gramm) {
-                    return Promise.reject(
-                      `Maksimal miqdor: ${returningTransportion?.get_gramm} gramm`
-                    );
-                  }
-                  return Promise.resolve();
-                },
-              },
+              // {
+              //   validator(_, value) {
+              //     if (value === undefined || value === null || value === "") {
+              //       return Promise.reject("Gram kiritish majburiy");
+              //     }
+              //     if (value <= 0) {
+              //       return Promise.reject(
+              //         "Miqdor 0 yoki manfiy bo'lishi mumkin emas"
+              //       );
+              //     }
+              //     if (value > returningTransportion?.get_gramm) {
+              //       return Promise.reject(
+              //         `Maksimal miqdor: ${returningTransportion?.get_gramm} gramm`
+              //       );
+              //     }
+              //     return Promise.resolve();
+              //   },
+              // },
             ]}
             name="returned_gramm"
             label="Qaytarib olingan gramm"
@@ -499,13 +517,19 @@ const GoldTransportion = () => {
       </Modal>
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <Tabs.TabPane style={{ overflowX: "auto" }} tab="Siz uchun" key="1">
+          {/* <table>
+            <tr>
+              <td>{filteredTransportions.reduce((acc, item) => acc + item.sent_gramm, 0)}</td>
+              <td>{filteredTransportions.reduce((acc, item) => acc + item.returned_gramm, 0)}</td>
+            </tr>
+          </table> */}
           <Table
             size="small"
             scroll={{ x: "max-content" }}
             loading={receivedLoading}
             dataSource={receivedTransportions
               ?.slice()
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+             }
             columns={receivedColumns}
           />
         </Tabs.TabPane>
@@ -516,7 +540,7 @@ const GoldTransportion = () => {
             loading={sentLoading}
             dataSource={sentTransportions
               ?.slice()
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+              }
             columns={columns}
           />
         </Tabs.TabPane>
@@ -697,26 +721,109 @@ const GoldTransportion = () => {
                 </tr>
               </tbody>
             </table>
+        {self?.role === "admin" && (
+          <Tabs.TabPane key="4" tab="Jadval">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginTop: 16,
+                flexWrap: "wrap",
+                gap: 20,
+              }}
+            >
+              <table
+                border={1}
+                style={{
+                  borderCollapse: "collapse",
+                  width: "70%",
+                  textAlign: "center",
+                  fontFamily: "sans-serif",
+                }}
+              >
+                <thead>
+                  <tr style={{ backgroundColor: "#f0f0f0" }}>
+                    <th style={{ padding: "10px" }}>Umumiy yuborilgan gr</th>
+                    {/* <th style={{ padding: "10px" }}>
+                      Umumiy qabul qilingan gr
+                    </th> */}
+                    <th style={{ padding: "10px" }}>Umumiy olingan gr</th>
+                    <th style={{ padding: "10px" }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: "8px" }}>
+                      {filteredTransportions
+                        .reduce((acc, item) => acc + item.sent_gramm, 0)
+                        ?.toFixed(2)}
+                    </td>
+                    {/* <td style={{ padding: "8px" }}>
+                      {filteredTransportions
+                        .reduce(
+                          (acc, item) =>
+                            acc + item.get_gramm - (item.returned_gramm || 0),
+                          0
+                        )
+                        ?.toFixed(2)}
+                    </td> */}
+                    <td style={{ padding: "8px" }}>
+                      {filteredTransportions
+                        .reduce((acc, item) => acc + item.returned_gramm, 0)
+                        ?.toFixed(2)}
+                    </td>
+                    {/* <td style={{ padding: "8px" }}>
+                      {filteredTransportions
+                        .reduce((acc, item) => acc + item.lost_gramm, 0)
+                        ?.toFixed(2)}
+                    </td> */}
+                    <td style={{ padding: "8px" }}>
+                      {filteredTransportions
+                        .reduce(
+                          (acc, item) =>
+                            acc + item.sent_gramm - (item.returned_gramm || 0),
+                          0
+                        )
+                        ?.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <label>
-                <input
-                  type="date"
-                  value={startDate || ""}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />{" "}
-                dan
-              </label>
-              <label>
-                <input
-                  type="date"
-                  value={endDate || ""}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />{" "}
-                gacha
-              </label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Space direction="vertical">
+                  <Select allowClear style={{ width: "200px" }} onChange={setSelectedFrom} value={selectedFrom}>
+                    {users.map((item) => (
+                      <Select.Option value={item._id}>{item.name}</Select.Option>
+                    ))}
+                  </Select>
+                  <Select allowClear style={{ width: "200px" }} onChange={setSelectedTo} value={selectedTo}>
+                    {users.map((item) => (
+                      <Select.Option value={item._id}>{item.name}</Select.Option>
+                    ))}
+                  </Select>
+                </Space>
+                <Space direction="vertical">
+                  <label>
+                    <input
+                      type="date"
+                      value={startDate || ""}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />{" "}
+                    dan
+                  </label>
+                  <label>
+                    <input
+                      type="date"
+                      value={endDate || ""}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />{" "}
+                    gacha
+                  </label>
+                </Space>
+              </div>
             </div>
-          </div>
 
           <Table
             scroll={{ x: "max-content" }}
@@ -728,6 +835,17 @@ const GoldTransportion = () => {
             columns={columns.slice(0, 9)}
           />
         </Tabs.TabPane>
+            <Table
+              scroll={{ x: "max-content" }}
+              size="small"
+              loading={sentLoading}
+              dataSource={filteredTransportions
+                ?.slice()
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
+              columns={columns.slice(0, 9)}
+            />
+          </Tabs.TabPane>
+        )}
       </Tabs>
     </div>
   );
