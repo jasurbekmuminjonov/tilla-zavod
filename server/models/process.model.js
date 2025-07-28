@@ -55,6 +55,11 @@ const ProcessSchema = new mongoose.Schema(
       min: 0,
       default: null,
     },
+    quantity: {
+      type: Number,
+      // required: true,
+      default: null,
+    },
     lost_gramm: {
       type: Number,
       required: false,

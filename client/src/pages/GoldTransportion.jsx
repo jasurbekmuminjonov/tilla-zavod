@@ -57,8 +57,12 @@ const GoldTransportion = () => {
   const [completeForm] = Form.useForm();
   const [returningTransportion, setReturningTransportion] = useState("");
   const [returnModal, setReturnModal] = useState(false);
-  const [selectedFrom, setSelectedFrom] = useState("")
-  const [selectedTo, setSelectedTo] = useState("")
+  const [selectedFrom, setSelectedFrom] = useState(
+    JSON.parse(localStorage.getItem("user")).role === "user"
+      ? JSON.parse(localStorage.getItem("user"))._id
+      : ""
+  );
+  const [selectedTo, setSelectedTo] = useState("");
   const [returnForm] = Form.useForm();
 
   // const selectedGoldSource = useMemo(() => {
@@ -188,19 +192,19 @@ const GoldTransportion = () => {
             record.status === "pending"
               ? "orange"
               : record.status === "completed"
-                ? "green"
-                : record.status === "canceled"
-                  ? "red"
-                  : "red"
+              ? "green"
+              : record.status === "canceled"
+              ? "red"
+              : "red"
           }
         >
           {record.status === "pending"
             ? "Kutilmoqda"
             : record.status === "completed"
-              ? "Qabul qilindi"
-              : record.status === "canceled"
-                ? "Rad etildi"
-                : "Xato"}
+            ? "Qabul qilindi"
+            : record.status === "canceled"
+            ? "Rad etildi"
+            : "Xato"}
         </Tag>
       ),
     },
@@ -312,19 +316,19 @@ const GoldTransportion = () => {
             record.status === "pending"
               ? "orange"
               : record.status === "completed"
-                ? "green"
-                : record.status === "canceled"
-                  ? "red"
-                  : "red"
+              ? "green"
+              : record.status === "canceled"
+              ? "red"
+              : "red"
           }
         >
           {record.status === "pending"
             ? "Kutilmoqda"
             : record.status === "completed"
-              ? "Qabul qilindi"
-              : record.status === "canceled"
-                ? "Rad etildi"
-                : "Xato"}
+            ? "Qabul qilindi"
+            : record.status === "canceled"
+            ? "Rad etildi"
+            : "Xato"}
         </Tag>
       ),
     },
@@ -403,8 +407,8 @@ const GoldTransportion = () => {
     return transportions.filter((item) => {
       const inDateRange = hasDateRange
         ? item.sent_time &&
-        moment(item.sent_time).isSameOrAfter(start) &&
-        moment(item.sent_time).isSameOrBefore(end)
+          moment(item.sent_time).isSameOrAfter(start) &&
+          moment(item.sent_time).isSameOrBefore(end)
         : true;
 
       const matchesFrom = !selectedFrom || item.from_id._id === selectedFrom;
@@ -413,7 +417,6 @@ const GoldTransportion = () => {
       return inDateRange && matchesFrom && matchesTo;
     });
   }, [transportions, startDate, endDate, selectedFrom, selectedTo]);
-
 
   return (
     <div className="gold-transportion">
@@ -527,9 +530,7 @@ const GoldTransportion = () => {
             size="small"
             scroll={{ x: "max-content" }}
             loading={receivedLoading}
-            dataSource={receivedTransportions
-              ?.slice()
-             }
+            dataSource={receivedTransportions?.slice()}
             columns={receivedColumns}
           />
         </Tabs.TabPane>
@@ -538,9 +539,7 @@ const GoldTransportion = () => {
             scroll={{ x: "max-content" }}
             size="small"
             loading={sentLoading}
-            dataSource={sentTransportions
-              ?.slice()
-              }
+            dataSource={sentTransportions?.slice()}
             columns={columns}
           />
         </Tabs.TabPane>
@@ -664,7 +663,7 @@ const GoldTransportion = () => {
             </Form.Item>
           </Form>
         </Tabs.TabPane>
-        <Tabs.TabPane key="4" tab="Jadval">
+        {/* <Tabs.TabPane key="4" tab="Jadval">
           <div
             style={{
               display: "flex",
@@ -720,46 +719,46 @@ const GoldTransportion = () => {
                   </td>
                 </tr>
               </tbody>
-            </table>
-        {self?.role === "admin" && (
-          <Tabs.TabPane key="4" tab="Jadval">
-            <div
+            </table> */}
+        {/* {self?.role === "admin" && ( */}
+        <Tabs.TabPane key="4" tab="Jadval">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              marginTop: 16,
+              flexWrap: "wrap",
+              gap: 20,
+            }}
+          >
+            <table
+              border={1}
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginTop: 16,
-                flexWrap: "wrap",
-                gap: 20,
+                borderCollapse: "collapse",
+                width: "70%",
+                textAlign: "center",
+                fontFamily: "sans-serif",
               }}
             >
-              <table
-                border={1}
-                style={{
-                  borderCollapse: "collapse",
-                  width: "70%",
-                  textAlign: "center",
-                  fontFamily: "sans-serif",
-                }}
-              >
-                <thead>
-                  <tr style={{ backgroundColor: "#f0f0f0" }}>
-                    <th style={{ padding: "10px" }}>Umumiy yuborilgan gr</th>
-                    {/* <th style={{ padding: "10px" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f0f0f0" }}>
+                  <th style={{ padding: "10px" }}>Umumiy berdim</th>
+                  {/* <th style={{ padding: "10px" }}>
                       Umumiy qabul qilingan gr
                     </th> */}
-                    <th style={{ padding: "10px" }}>Umumiy olingan gr</th>
-                    <th style={{ padding: "10px" }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce((acc, item) => acc + item.sent_gramm, 0)
-                        ?.toFixed(2)}
-                    </td>
-                    {/* <td style={{ padding: "8px" }}>
+                  <th style={{ padding: "10px" }}>Umumiy oldim</th>
+                  <th style={{ padding: "10px" }}>Qoldiq</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce((acc, item) => acc + item.sent_gramm, 0)
+                      ?.toFixed(2)}
+                  </td>
+                  {/* <td style={{ padding: "8px" }}>
                       {filteredTransportions
                         .reduce(
                           (acc, item) =>
@@ -768,63 +767,76 @@ const GoldTransportion = () => {
                         )
                         ?.toFixed(2)}
                     </td> */}
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce((acc, item) => acc + item.returned_gramm, 0)
-                        ?.toFixed(2)}
-                    </td>
-                    {/* <td style={{ padding: "8px" }}>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce((acc, item) => acc + item.returned_gramm, 0)
+                      ?.toFixed(2)}
+                  </td>
+                  {/* <td style={{ padding: "8px" }}>
                       {filteredTransportions
                         .reduce((acc, item) => acc + item.lost_gramm, 0)
                         ?.toFixed(2)}
                     </td> */}
-                    <td style={{ padding: "8px" }}>
-                      {filteredTransportions
-                        .reduce(
-                          (acc, item) =>
-                            acc + item.sent_gramm - (item.returned_gramm || 0),
-                          0
-                        )
-                        ?.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div style={{ display: "flex", gap: 8 }}>
-                <Space direction="vertical">
-                  <Select allowClear style={{ width: "200px" }} onChange={setSelectedFrom} value={selectedFrom}>
-                    {users.map((item) => (
-                      <Select.Option value={item._id}>{item.name}</Select.Option>
-                    ))}
-                  </Select>
-                  <Select allowClear style={{ width: "200px" }} onChange={setSelectedTo} value={selectedTo}>
-                    {users.map((item) => (
-                      <Select.Option value={item._id}>{item.name}</Select.Option>
-                    ))}
-                  </Select>
-                </Space>
-                <Space direction="vertical">
-                  <label>
-                    <input
-                      type="date"
-                      value={startDate || ""}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />{" "}
-                    dan
-                  </label>
-                  <label>
-                    <input
-                      type="date"
-                      value={endDate || ""}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />{" "}
-                    gacha
-                  </label>
-                </Space>
-              </div>
+                  <td style={{ padding: "8px" }}>
+                    {filteredTransportions
+                      .reduce(
+                        (acc, item) =>
+                          acc + item.sent_gramm - (item.returned_gramm || 0),
+                        0
+                      )
+                      ?.toFixed(2)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Space direction="vertical">
+                <Select
+                  allowClear
+                  style={{ width: "200px" }}
+                  disabled={
+                    JSON.parse(localStorage.getItem("user")).role === "user"
+                  }
+                  onChange={setSelectedFrom}
+                  value={selectedFrom}
+                >
+                  <Select.Option value="">Barchasi</Select.Option>
+                  {users.map((item) => (
+                    <Select.Option value={item._id}>{item.name}</Select.Option>
+                  ))}
+                </Select>
+                <Select
+                  allowClear
+                  style={{ width: "200px" }}
+                  onChange={setSelectedTo}
+                  value={selectedTo}
+                >
+                  <Select.Option value="">Barchasi</Select.Option>
+                  {users.map((item) => (
+                    <Select.Option value={item._id}>{item.name}</Select.Option>
+                  ))}
+                </Select>
+              </Space>
+              <Space direction="vertical">
+                <label>
+                  <input
+                    type="date"
+                    value={startDate || ""}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />{" "}
+                  dan
+                </label>
+                <label>
+                  <input
+                    type="date"
+                    value={endDate || ""}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />{" "}
+                  gacha
+                </label>
+              </Space>
             </div>
-
+          </div>
           <Table
             scroll={{ x: "max-content" }}
             size="small"
@@ -835,17 +847,7 @@ const GoldTransportion = () => {
             columns={columns.slice(0, 9)}
           />
         </Tabs.TabPane>
-            <Table
-              scroll={{ x: "max-content" }}
-              size="small"
-              loading={sentLoading}
-              dataSource={filteredTransportions
-                ?.slice()
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
-              columns={columns.slice(0, 9)}
-            />
-          </Tabs.TabPane>
-        )}
+        {/* )} */}
       </Tabs>
     </div>
   );

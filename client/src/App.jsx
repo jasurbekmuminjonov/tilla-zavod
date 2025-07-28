@@ -20,6 +20,7 @@ import { useGetReceivedTransportionsQuery } from "./context/services/transportio
 import { notification } from "antd";
 import { useGetReceivedProductTransportionsQuery } from "./context/services/productTransportion.service";
 import Home from "./pages/Home";
+import Core from "./pages/Core";
 
 const App = () => {
   const token = localStorage.getItem("token");
@@ -109,6 +110,7 @@ const App = () => {
         <Route path="process" element={<Process />} />
         <Route path="products" element={<Products />} />
         <Route path="losses" element={<Losses />} />
+        <Route path="core" element={<Core />} />
         <Route path="transfer-product" element={<ProductTransportion />} />
       </Route>
     </Routes>

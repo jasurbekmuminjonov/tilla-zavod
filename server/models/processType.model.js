@@ -11,6 +11,10 @@ const ProcessTypeSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    is_numeral: {
+      type: Boolean,
+      default: false,
+    },
     purity_change: {
       type: Boolean,
       default: false,

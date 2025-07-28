@@ -22,7 +22,7 @@ import { useGetUserByUserIdQuery } from "../context/services/user.service";
 import moment from "moment";
 import { statusOptions } from "../assets/statusOptions";
 import { useGetProductTypesQuery } from "../context/services/productType.service";
-import { FaPlus, FaEdit, FaTrash, FaLock } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaLock, FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 
@@ -89,10 +89,10 @@ const Products = () => {
 
   async function handleCreateProduct(values) {
     try {
-      values.products = productList.map((p) => ({
-        ...p,
-        gold_id: selectedGoldId._id,
-      }));
+      // values.products = productList.map((p) => ({
+      //   ...p,
+      //   gold_id: selectedGoldId._id,
+      // }));
       await createProduct(values).unwrap();
       notification.success({
         message: "Muvaffaqiyatli",
@@ -118,32 +118,34 @@ const Products = () => {
         productTypes.find((item) => item._id === text)?.product_name,
     },
     {
+      title: "Tavsif",
+      dataIndex: "product_type_id",
+      render: (text) =>
+        productTypes.find((item) => item._id === text)?.description,
+    },
+    {
       title: "Soni",
       dataIndex: "quantity",
     },
+    // {
+    //   title: "Gramm / 1 dona",
+    //   dataIndex: "gramm_per_quantity",
+    // },
+    // {
+    //   title: "Proba",
+    //   dataIndex: "purity",
+    // },
+    // {
+    //   title: "Jami потери",
+    //   dataIndex: "total_lost_gramm",
+    // },
     {
-      title: "Gramm / 1 dona",
-      dataIndex: "gramm_per_quantity",
+      title: "Jami gramm",
+      dataIndex: "total_gramm",
     },
     {
-      title: "Proba",
-      dataIndex: "purity",
-    },
-    {
-      title: "Jami потери",
-      dataIndex: "total_lost_gramm",
-    },
-    {
-      title: "Jami oltin(tovar + потери)",
-      render: (_, record) =>
-        record.total_gramm + (record.total_lost_gramm || 0),
-    },
-    {
-      title: "Joylashuv",
-      render: (_, record) =>
-        record.from === "user"
-          ? record.user_id.name
-          : record.warehouse_id.warehouse_name,
+      title: "Ishchi",
+      render: (_, record) => record.user_id.name,
     },
     {
       title: "Sana",
@@ -176,7 +178,7 @@ const Products = () => {
           <Table dataSource={products} columns={columns} size="small" />
         </TabPane>
         <TabPane key="2" tab="Tovar ishlab chiqarish">
-          {Object.keys(selectedGoldId).length > 0 && (
+          {/* {Object.keys(selectedGoldId).length > 0 && (
             <Card>
               <Statistic
                 title="Oltin"
@@ -287,6 +289,44 @@ const Products = () => {
                 },
               ]}
             />
+          </Form> */}
+          <Form
+            onFinish={handleCreateProduct}
+            layout="vertical"
+            autoComplete="off"
+            style={{ width: "50%" }}
+            form={createForm}
+          >
+            <Form.Item
+              name="product_type_id"
+              label="Tovar"
+              rules={[{ required: true, message: "Tovarni tanlang" }]}
+            >
+              <Select>
+                {productTypes.map((p) => (
+                  <Select.Option value={p._id}>{p.product_name}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="quantity"
+              rules={[{ required: true, message: "Sonini kiriting" }]}
+              label="Soni"
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              name="total_gramm"
+              rules={[{ required: true, message: "Umumiy gr kiriting" }]}
+              label="Umumiy gr"
+            >
+              <InputNumber style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" icon={<FaSave />}>
+                Saqlash
+              </Button>
+            </Form.Item>
           </Form>
         </TabPane>
       </Tabs>

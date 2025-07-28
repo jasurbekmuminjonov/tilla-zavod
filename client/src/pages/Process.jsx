@@ -14,7 +14,10 @@ import {
   Tabs,
   Tag,
 } from "antd";
-import { useGetProcessTypesByUserQuery, useGetProcessTypesQuery } from "../context/services/processType.service";
+import {
+  useGetProcessTypesByUserQuery,
+  useGetProcessTypesQuery,
+} from "../context/services/processType.service";
 import { useGetUserByUserIdQuery } from "../context/services/user.service";
 import moment from "moment";
 import { FaFlagCheckered, FaSave } from "react-icons/fa";
@@ -31,18 +34,19 @@ const Process = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [form] = Form.useForm();
   const { data: processTypes = [] } = useGetProcessTypesByUserQuery();
-  const { data: allProcessTypes = [] } = useGetProcessTypesQuery()
+  const { data: allProcessTypes = [] } = useGetProcessTypesQuery();
   const { data: self = [] } = useGetUserByUserIdQuery();
   const [createProcess] = useCreateProcessMutation();
   const { data: processes = [], isLoading: processLoading } =
     useGetProcessesByUserQuery();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [selectedProcess, setSelectedProcess] = useState("")
+  const [selectedProcess, setSelectedProcess] = useState("");
 
   const [isMobile, setIsMobile] = useState(false);
   const [completeProcess] = useEndProcessMutation();
   const [cancelProcess] = useCancelProcessMutation();
+  const [selectedProcessType, setSelectedProcessType] = useState("");
 
   useEffect(() => {
     const handleResize = () => {
@@ -68,6 +72,7 @@ const Process = () => {
         message: "Muvaffaqiyatli",
         description: "Jarayon saqlandi",
       });
+      setSelectedProcessType("");
       form.resetFields();
     } catch (err) {
       console.log(err);
@@ -134,6 +139,10 @@ const Process = () => {
       ),
     },
     {
+      title: "Soni",
+      dataIndex: "quantity",
+    },
+    {
       title: (
         <div
           style={{
@@ -180,7 +189,7 @@ const Process = () => {
           <span
             style={
               record.process_type_id.loss_limit_per_gramm <
-                record.lost_per_gramm
+              record.lost_per_gramm
                 ? { color: "red" }
                 : {}
             }
@@ -277,6 +286,15 @@ const Process = () => {
                 >
                   <InputNumber style={{ width: "100%" }} />
                 </Form.Item>
+                {record.process_type_id.is_numeral && !record.quantity && (
+                  <Form.Item
+                    name="quantity"
+                    label="Soni"
+                    rules={[{ required: true, message: "Sonini kiriting" }]}
+                  >
+                    <InputNumber style={{ width: "100%" }} />
+                  </Form.Item>
+                )}
                 <Form.Item>
                   <Button type="primary" htmlType="submit">
                     Yakunlash
@@ -324,8 +342,12 @@ const Process = () => {
   const filteredProcesses = useMemo(() => {
     const hasDateRange = startDate && endDate;
 
-    const start = hasDateRange ? moment(startDate, "YYYY-MM-DD").startOf("day") : null;
-    const end = hasDateRange ? moment(endDate, "YYYY-MM-DD").endOf("day") : null;
+    const start = hasDateRange
+      ? moment(startDate, "YYYY-MM-DD").startOf("day")
+      : null;
+    const end = hasDateRange
+      ? moment(endDate, "YYYY-MM-DD").endOf("day")
+      : null;
 
     return processes.filter((p) => {
       const matchesProcess =
@@ -334,12 +356,15 @@ const Process = () => {
       const matchesStatus = p.status === "active";
 
       const matchesDate = hasDateRange
-        ? p.start_time && moment(p.start_time).isSameOrAfter(start) && moment(p.start_time).isSameOrBefore(end)
+        ? p.start_time &&
+          moment(p.start_time).isSameOrAfter(start) &&
+          moment(p.start_time).isSameOrBefore(end)
         : true;
 
       return matchesProcess && matchesStatus && matchesDate;
     });
   }, [processes, startDate, endDate, selectedProcess]);
+console.log(filteredProcesses);
 
   return (
     <div className="process">
@@ -398,11 +423,14 @@ const Process = () => {
                         ?.toFixed(2)}
                     </td>
                     <td style={{ padding: "8px" }}>
-                      {Number(filteredProcesses
-                        .reduce((acc, item) => acc + item.lost_gramm, 0)
-                        ?.toFixed(2) / filteredProcesses
-                          .reduce((acc, item) => acc + item.start_gramm, 0)
-                          ?.toFixed(2))?.toFixed(4)}
+                      {Number(
+                        filteredProcesses
+                          .reduce((acc, item) => acc + item.lost_gramm, 0)
+                          ?.toFixed(2) /
+                          filteredProcesses
+                            .reduce((acc, item) => acc + item.start_gramm, 0)
+                            ?.toFixed(2)
+                      )?.toFixed(4)}
                     </td>
                   </tr>
                 </tbody>
@@ -411,11 +439,11 @@ const Process = () => {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <Select onChange={setSelectedProcess} value={selectedProcess}>
                   <Select.Option value={""}>Barchasi</Select.Option>
-                  {
-                    allProcessTypes.map((item) => (
-                      <Select.Option value={item._id} key={item._id}>{item.process_name}</Select.Option>
-                    ))
-                  }
+                  {allProcessTypes.map((item) => (
+                    <Select.Option value={item._id} key={item._id}>
+                      {item.process_name}
+                    </Select.Option>
+                  ))}
                 </Select>
                 <label>
                   <input
@@ -623,6 +651,9 @@ const Process = () => {
                       })}
                   </p> */}
                   <p>
+                    <strong>Soni:</strong> {record.quantity}
+                  </p>
+                  <p>
                     <strong>Oltin grammi:</strong> {record.start_gramm} gr |{" "}
                     {record.end_gramm || "-"} gr
                   </p>
@@ -637,7 +668,7 @@ const Process = () => {
                     <span
                       style={
                         record.process_type_id.loss_limit_per_gramm <
-                          record.lost_per_gramm
+                        record.lost_per_gramm
                           ? { color: "red" }
                           : {}
                       }
@@ -696,8 +727,15 @@ const Process = () => {
                   value: p._id,
                   label: p.process_name,
                 }))}
+                onChange={setSelectedProcessType}
               />
             </Form.Item>
+            {processTypes.find((p) => p._id === selectedProcessType)
+              ?.is_numeral && (
+              <Form.Item name="quantity" label="Soni">
+                <InputNumber style={{ width: "100%" }} />
+              </Form.Item>
+            )}
             {/* <Form.Item
               rules={[{ required: true, message: "Oltinni tanlang" }]}
               name="start_gold_id"

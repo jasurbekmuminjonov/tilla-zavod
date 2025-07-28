@@ -52,6 +52,7 @@ exports.editProcessTypeById = async (req, res) => {
     await ProcessType.findByIdAndUpdate(id, {
       process_name: req.body.process_name,
       weight_loss: req.body.weight_loss,
+      is_numeral: req.body.is_numeral,
       purity_change: req.body.purity_change,
       split_to_product: req.body.split_to_product,
       loss_limit_per_gramm: req.body.loss_limit_per_gramm,

@@ -78,6 +78,11 @@ const ProcessTypes = () => {
       render: (val) => (val ? "✅" : "❌"),
     },
     {
+      title: "Sanaladigan ish",
+      dataIndex: "is_numeral",
+      render: (val) => (val ? "✅" : "❌"),
+    },
+    {
       title: "Limit (1gr)",
       dataIndex: "loss_limit_per_gramm",
       render: (val) => val?.toFixed(3),
@@ -180,6 +185,14 @@ const ProcessTypes = () => {
             <Form.Item
               name="purity_change"
               label="Proba o‘zgaradimi?"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+
+            <Form.Item
+              name="is_numeral"
+              label="Sanaladigan ish?"
               valuePropName="checked"
             >
               <Switch />

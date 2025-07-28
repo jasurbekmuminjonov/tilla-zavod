@@ -6,6 +6,7 @@ import {
   FaUser,
   FaUserTie,
   FaWarehouse,
+  FaCalculator,
 } from "react-icons/fa";
 import { GiBigDiamondRing } from "react-icons/gi";
 import { IoIosWarning, IoMdSettings } from "react-icons/io";
@@ -72,6 +73,11 @@ export const sidebarLinks = [
     path: "/transfer-product",
     label: "Tovar o'tkazmalari",
     icon: <TbCubeSend size={20} />,
+  },
+  {
+    path: "/core",
+    label: "Hisob-kitob",
+    icon: <FaCalculator size={20} />,
   },
   {
     path: "/providers",

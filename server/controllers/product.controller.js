@@ -126,7 +126,16 @@ exports.getProducts = async (req, res) => {
   try {
     const user = await User.findById(req.user.user_id);
     const isAdmin = user.role === "admin";
-    const products = await Product.find({ factory_id: req.user.factory_id });
+    const products = await Product.find({ factory_id: req.user.factory_id }).populate("user_id");
+    console.log(products);
+    
+    return res
+      .status(200)
+      .json(
+        isAdmin
+          ? products
+          : products.filter((p) => p.user_id._id?.toString() === req.user.user_id)
+      );
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });
