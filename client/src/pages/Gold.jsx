@@ -117,7 +117,7 @@ const Gold = () => {
   const columns = [
     {
       title: "Sana",
-      dataIndex: "date",
+      dataIndex: "createdAt",
       render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
     },
     {
@@ -155,7 +155,7 @@ const Gold = () => {
     {
       title: "Tayyorlash",
       dataIndex: "ratio",
-      render: (text) => text?.toFixed(2),
+      render: (text) => text?.toFixed(3),
     },
     {
       title: "Опщий 585",

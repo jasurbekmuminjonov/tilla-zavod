@@ -14,43 +14,35 @@ import {
   Tabs,
   Tag,
 } from "antd";
-import { useGetProcessTypesByUserQuery } from "../context/services/processType.service";
+import { useGetProcessTypesByUserQuery, useGetProcessTypesQuery } from "../context/services/processType.service";
 import { useGetUserByUserIdQuery } from "../context/services/user.service";
 import moment from "moment";
-import { FaFlagCheckered, FaPlay, FaSave } from "react-icons/fa";
+import { FaFlagCheckered, FaSave } from "react-icons/fa";
 import {
   useCancelProcessMutation,
   useCreateProcessMutation,
   useEndProcessMutation,
   useGetProcessesByUserQuery,
-  // useStartProcessMutation,
 } from "../context/services/process.service";
-// import { useGetGoldQuery } from "../context/services/inventory.service";
 import { FaXmark } from "react-icons/fa6";
 import { statusOptions } from "../assets/statusOptions";
-// import ElapsedTimer from "../components/ElapsedTimer";
 
 const Process = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [form] = Form.useForm();
   const { data: processTypes = [] } = useGetProcessTypesByUserQuery();
+  const { data: allProcessTypes = [] } = useGetProcessTypesQuery()
   const { data: self = [] } = useGetUserByUserIdQuery();
   const [createProcess] = useCreateProcessMutation();
   const { data: processes = [], isLoading: processLoading } =
     useGetProcessesByUserQuery();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [selectedProcess, setSelectedProcess] = useState("")
 
-  // const { data: allGold = [] } = useGetGoldQuery();
   const [isMobile, setIsMobile] = useState(false);
-  // const [startProcess] = useStartProcessMutation();
   const [completeProcess] = useEndProcessMutation();
   const [cancelProcess] = useCancelProcessMutation();
-
-  // const userGold = useMemo(
-  //   () => allGold.filter((g) => g.user_id?._id === self._id && g.gramm > 0),
-  //   [allGold]
-  // );
 
   useEffect(() => {
     const handleResize = () => {
@@ -99,7 +91,6 @@ const Process = () => {
         >
           Vaqti
           <br />
-          {/* <div>Boshlanish | Tugash</div> */}
         </div>
       ),
       render: (_, record) => {
@@ -113,22 +104,8 @@ const Process = () => {
 
         return (
           <Space direction="vertical">
-            {/* <div
-              style={{
-                fontSize: "12px",
-                display: "flex",
-                justifyContent: "center",
-                gap: "5px",
-              }}
-            > */}
             <span>{start}</span>
-            {/* <span>|</span> */}
             <span>{end}</span>
-            {/* </div> */}
-            {/* <ElapsedTimer
-              endDate={record.end_time}
-              startDate={record.start_time}
-            /> */}
           </Space>
         );
       },
@@ -203,12 +180,12 @@ const Process = () => {
           <span
             style={
               record.process_type_id.loss_limit_per_gramm <
-              record.lost_per_gramm
+                record.lost_per_gramm
                 ? { color: "red" }
                 : {}
             }
           >
-            {record.lost_per_gramm?.toFixed(3) || "-"}
+            {record.lost_per_gramm?.toFixed(5) || "-"}
           </span>
         </div>
       ),
@@ -235,50 +212,21 @@ const Process = () => {
         </div>
       ),
     },
-    // {
-    //   title: (
-    //     <div
-    //       style={{
-    //         fontSize: "12px",
-    //         display: "flex",
-    //         flexDirection: "column",
-    //         alignItems: "center",
-    //       }}
-    //     >
-    //       Tovar probasi
-    //       <br />
-    //       <div>Boshida | Oxirida</div>
-    //     </div>
-    //   ),
-    //   dataIndex: "start_gold_id",
-    //   render: (text, record) => (
-    //     <div
-    //       style={{
-    //         fontSize: "12px",
-    //         display: "flex",
-    //         justifyContent: "center",
-    //       }}
-    //     >
-    //       {self?.gold?.find((g) => g._id === text)?.product_purity?.toFixed(2)}{" "}
-    //       | {record?.end_product_purity?.toFixed(2) || "-"}
-    //     </div>
-    //   ),
-    // },
     {
       title: "Jarayon turi",
       dataIndex: "process_type_id",
       render: (text) => text.process_name,
     },
-    {
-      title: "Vazn kamayadimi",
-      dataIndex: "process_type_id",
-      render: (text) => (text.weight_loss ? "✅" : "❌"),
-    },
-    {
-      title: "Proba o'zgaradimi",
-      dataIndex: "process_type_id",
-      render: (text) => (text.purity_change ? "✅" : "❌"),
-    },
+    // {
+    //   title: "Vazn kamayadimi",
+    //   dataIndex: "process_type_id",
+    //   render: (text) => (text.weight_loss ? "✅" : "❌"),
+    // },
+    // {
+    //   title: "Proba o'zgaradimi",
+    //   dataIndex: "process_type_id",
+    //   render: (text) => (text.purity_change ? "✅" : "❌"),
+    // },
     {
       title: "1 grda потерия limiti",
       dataIndex: "process_type_id",
@@ -289,32 +237,6 @@ const Process = () => {
       title: "Operatsiyalar",
       render: (_, record) => (
         <Space>
-          {/* <Button
-            disabled={record.status !== "pending"}
-            type="text"
-            icon={
-              <FaPlay color={record.status !== "pending" ? "" : "#389e0d"} />
-            }
-            onClick={async () => {
-              try {
-                if (window.confirm("Jarayonni boshlashni tasdiqlaysizmi?")) {
-                  await startProcess(record._id).unwrap();
-                  notification.success({
-                    message: "Muvaffaqiyatli",
-                    description: "Jarayon boshlandi",
-                  });
-                } else {
-                  return;
-                }
-              } catch (err) {
-                console.log(err);
-                notification.error({
-                  message: "Xatolik",
-                  description: err.data.message,
-                });
-              }
-            }}
-          /> */}
           <Popover
             title="Jarayonni tugallash"
             trigger="click"
@@ -400,16 +322,24 @@ const Process = () => {
   ];
 
   const filteredProcesses = useMemo(() => {
-    if (!startDate || !endDate) return processes;
-    const start = moment(startDate, "YYYY-MM-DD").startOf("day");
-    const end = moment(endDate, "YYYY-MM-DD").endOf("day");
+    const hasDateRange = startDate && endDate;
 
-    return processes.filter(
-      (p) =>
-        moment(p.start_time).isSameOrAfter(start) &&
-        moment(p.start_time).isSameOrBefore(end)
-    );
-  }, [processes, startDate, endDate]);
+    const start = hasDateRange ? moment(startDate, "YYYY-MM-DD").startOf("day") : null;
+    const end = hasDateRange ? moment(endDate, "YYYY-MM-DD").endOf("day") : null;
+
+    return processes.filter((p) => {
+      const matchesProcess =
+        !selectedProcess || p.process_type_id._id === selectedProcess;
+
+      const matchesStatus = p.status === "active";
+
+      const matchesDate = hasDateRange
+        ? p.start_time && moment(p.start_time).isSameOrAfter(start) && moment(p.start_time).isSameOrBefore(end)
+        : true;
+
+      return matchesProcess && matchesStatus && matchesDate;
+    });
+  }, [processes, startDate, endDate, selectedProcess]);
 
   return (
     <div className="process">
@@ -442,6 +372,7 @@ const Process = () => {
                     <th style={{ padding: "10px" }}>Umumiy chiqqan gr</th>
                     <th style={{ padding: "10px" }}>Umumiy astatka gr</th>
                     <th style={{ padding: "10px" }}>Umumiy потери gr</th>
+                    <th style={{ padding: "10px" }}>Umumiy потери 1 grda</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -466,11 +397,26 @@ const Process = () => {
                         .reduce((acc, item) => acc + item.lost_gramm, 0)
                         ?.toFixed(2)}
                     </td>
+                    <td style={{ padding: "8px" }}>
+                      {Number(filteredProcesses
+                        .reduce((acc, item) => acc + item.lost_gramm, 0)
+                        ?.toFixed(2) / filteredProcesses
+                          .reduce((acc, item) => acc + item.start_gramm, 0)
+                          ?.toFixed(2))?.toFixed(4)}
+                    </td>
                   </tr>
                 </tbody>
               </table>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <Select onChange={setSelectedProcess} value={selectedProcess}>
+                  <Select.Option value={""}>Barchasi</Select.Option>
+                  {
+                    allProcessTypes.map((item) => (
+                      <Select.Option value={item._id} key={item._id}>{item.process_name}</Select.Option>
+                    ))
+                  }
+                </Select>
                 <label>
                   <input
                     type="date"
@@ -691,12 +637,12 @@ const Process = () => {
                     <span
                       style={
                         record.process_type_id.loss_limit_per_gramm <
-                        record.lost_per_gramm
+                          record.lost_per_gramm
                           ? { color: "red" }
                           : {}
                       }
                     >
-                      {record.lost_per_gramm?.toFixed(3) || "-"}
+                      {record.lost_per_gramm?.toFixed(5) || "-"}
                     </span>
                   </p>
                   <p>

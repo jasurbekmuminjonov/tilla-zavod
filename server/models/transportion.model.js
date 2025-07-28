@@ -55,7 +55,7 @@ const TransportionSchema = new mongoose.Schema(
       type: Number,
       required: false,
       min: 0,
-      default: null,
+      default: 0,
     },
     status: {
       type: String,
