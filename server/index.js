@@ -3,7 +3,7 @@ const { connectDB } = require("./config/db");
 connectDB();
 const express = require("express");
 const cors = require("cors");
-
+//
 const authMiddleware = require("./middlewares/auth.middleware");
 const app = express();
 const { createServer } = require("node:http");
