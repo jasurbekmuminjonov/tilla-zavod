@@ -2,7 +2,8 @@ import io from "socket.io-client";
 
 // const SOCKET_URL = `https://kwmkqg1t-8080.euw.devtunnels.ms`;
 // const SOCKET_URL = `https://idish25.richman.uz`;
-const SOCKET_URL = `http://localhost:8080`;
+// const SOCKET_URL = `http://localhost:8080`;
+const SOCKET_URL = `https://tilla-zavod-server.vercel.app`;
 const socket = io(SOCKET_URL, { transports: ["websocket"] });
 
 export default socket;
