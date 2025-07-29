@@ -278,11 +278,11 @@ const GoldTransportion = () => {
     //   dataIndex: "lost_gramm",
     //   render: (text) => text?.toFixed(3),
     // },
-    {
-      title: "Qayerdan yuborildi",
-      dataIndex: "from_type",
-      render: (text) => (text === "User" ? "Foydalanuvchi" : "Ombor"),
-    },
+    // {
+    //   title: "Qayerdan yuborildi",
+    //   dataIndex: "from_type",
+    //   render: (text) => (text === "User" ? "Foydalanuvchi" : "Ombor"),
+    // },
     {
       title: "Kimdan yuborildi",
       dataIndex: "from_id",

@@ -106,22 +106,22 @@ const Providers = () => {
     // },
   ];
 
-    if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
-      return (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "15px",
-          }}
-        >
-          <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
-        </div>
-      );
-    }
+  if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+        }}
+      >
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="providers">
@@ -156,14 +156,13 @@ const Providers = () => {
               label="Yetkazib beruvchi nomi"
               rules={[{ required: true, message: "Nomini kiriting" }]}
             >
-              <Input placeholder="Masalan: Oltin Center" />
+              <Input />
             </Form.Item>
             <Form.Item>
               <Button
                 type="primary"
                 htmlType="submit"
-                // style={{ width: "100%" }}
-                 icon={<FaSave />}
+                icon={<FaSave />}
               >
                 Saqlash
               </Button>

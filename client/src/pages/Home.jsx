@@ -17,7 +17,6 @@ const Home = () => {
   const { data: products = [] } = useGetProductQuery();
   const { data: losses = [] } = useGetLossesQuery();
 
-
   const [from, setFrom] = useState(moment().subtract(30, "days"));
   const [to, setTo] = useState(moment());
 
@@ -35,7 +34,10 @@ const Home = () => {
 
     const startGrammTotal = processes
       .filter((p) => isInRange(p.start_time))
-      .reduce((sum, p) => sum + (p.end_gramm || 0), 0);
+      .reduce((sum, p) => sum + (p.start_gramm || 0), 0);
+    const productGrammTotal = products
+      .filter((p) => isInRange(p.createdAt))
+      .reduce((sum, p) => sum + (p.total_gramm || 0), 0);
 
     const filteredProducts = products.filter((p) => isInRange(p.date));
     const totalProducts = filteredProducts.reduce(
@@ -51,13 +53,17 @@ const Home = () => {
       .filter((l) => isInRange(l.date))
       .reduce((sum, l) => sum + (l.lost_gramm || 0), 0);
 
+      const totalAstatka = goldTotal - startGrammTotal - productGrammTotal - lossTotal
+
     return {
       goldTotal,
       userCount,
       startGrammTotal,
+      productGrammTotal,
       totalProducts,
       usedGoldInProducts,
       lossTotal,
+      totalAstatka
     };
   }, [gold, users, processes, products, losses, from, to]);
 
@@ -101,50 +107,50 @@ const Home = () => {
       </div>
 
       <Row gutter={[8, 8]}>
-        <Col span={8}>
+        <Col span={6}>
           <Card>
             <Statistic
-              title="Umumiy oltin"
+              title="Umumiy kirim"
               value={stats.goldTotal}
               precision={2}
               suffix="gr"
             />
           </Card>
         </Col>
-        <Col span={8}>
+        <Col span={6}>
           <Card>
             <Statistic
-              suffix={"ta"}
-              title="Umumiy ishchilar soni"
-              value={stats.userCount}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title="Jarayondan chiqqan gr"
+              title="Jarayonga kirgan"
               value={stats.startGrammTotal}
               precision={2}
               suffix="gr"
             />
           </Card>
         </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title="Tovarlar soni / Oltin gr"
-              value={`${stats.totalProducts} ta / ${stats.usedGoldInProducts} gr`}
-            />
-          </Card>
-        </Col>
-        <Col span={16}>
+        <Col span={6}>
           <Card>
             <Statistic
               title="Umumiy потери"
               value={stats.lossTotal}
               precision={2}
               suffix="gr"
+            />
+          </Card>
+        </Col>
+        <Col span={6}>
+          <Card>
+            <Statistic
+              suffix={"gr"}
+              title="Umumiy tovar"
+              value={stats.productGrammTotal}
+            />
+          </Card>
+        </Col>
+        <Col span={24}>
+          <Card>
+            <Statistic
+              title="Umumiy astatka"
+              value={`${stats.totalAstatka} gr`}
             />
           </Card>
         </Col>

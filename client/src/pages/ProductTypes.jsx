@@ -43,7 +43,7 @@ const ProductTypes = () => {
         await createProductType(values).unwrap();
         notification.success({
           message: "Yaratildi",
-          description: "Yangi mahsulot turi qo‘shildi",
+          description: "Yangi mahsulot turi qo'shildi",
         });
       }
       form.resetFields();
@@ -52,7 +52,7 @@ const ProductTypes = () => {
     } catch (err) {
       notification.error({
         message: "Xatolik",
-        description: err?.data?.message || "So‘rov bajarilmadi",
+        description: err?.data?.message || "So'rov bajarilmadi",
       });
     }
   };
@@ -83,13 +83,13 @@ const ProductTypes = () => {
             }}
           />
           <Popconfirm
-            title="Chindan ham o‘chirishni xohlaysizmi?"
+            title="Chindan ham o'chirishni xohlaysizmi?"
             onConfirm={async () => {
               try {
                 await deleteProductType(record._id).unwrap();
                 notification.success({
                   message: "O'chirildi",
-                  description: "Mahsulot turi o‘chirildi",
+                  description: "Mahsulot turi o'chirildi",
                 });
               } catch (err) {
                 notification.error({
@@ -117,7 +117,7 @@ const ProductTypes = () => {
           gap: "15px",
         }}
       >
-        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
       </div>
     );
   }
@@ -154,11 +154,11 @@ const ProductTypes = () => {
               label="Mahsulot nomi"
               rules={[{ required: true, message: "Mahsulot nomini kiriting" }]}
             >
-              <Input placeholder="Masalan: Uzuk" />
+              <Input />
             </Form.Item>
 
             <Form.Item name="description" label="Izoh">
-              <TextArea rows={4} placeholder="Qo‘shimcha ma’lumot..." />
+              <TextArea rows={4} placeholder="Qo'shimcha ma'lumot..." />
             </Form.Item>
 
             <Form.Item>
@@ -166,7 +166,7 @@ const ProductTypes = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
-                 icon={<FaSave />}
+                icon={<FaSave />}
               >
                 Saqlash
               </Button>

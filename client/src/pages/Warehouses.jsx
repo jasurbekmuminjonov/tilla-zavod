@@ -385,7 +385,7 @@ const Warehouses = () => {
               label="Ombor nomi"
               rules={[{ required: true, message: "Ombor nomini kiriting" }]}
             >
-              <Input placeholder="Masalan: Asosiy ombor" />
+              <Input />
             </Form.Item>
             <Form.Item>
               <Button

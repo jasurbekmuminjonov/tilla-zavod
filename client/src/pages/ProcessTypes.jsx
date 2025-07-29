@@ -44,7 +44,7 @@ const ProcessTypes = () => {
         await createProcessType(values).unwrap();
         notification.success({
           message: "Yaratildi",
-          description: "Yangi jarayon turi qo‘shildi",
+          description: "Yangi jarayon turi qo'shildi",
         });
       }
       form.resetFields();
@@ -53,7 +53,7 @@ const ProcessTypes = () => {
     } catch (err) {
       notification.error({
         message: "Xatolik",
-        description: err?.data?.message || "So‘rov bajarilmadi",
+        description: err?.data?.message || "So'rov bajarilmadi",
       });
     }
   };
@@ -68,12 +68,12 @@ const ProcessTypes = () => {
       dataIndex: "process_name",
     },
     {
-      title: "Gramm yo‘qolishi",
+      title: "Gramm yo'qolishi",
       dataIndex: "weight_loss",
       render: (val) => (val ? "✅" : "❌"),
     },
     {
-      title: "Proba o‘zgaradi",
+      title: "Proba o'zgaradi",
       dataIndex: "purity_change",
       render: (val) => (val ? "✅" : "❌"),
     },
@@ -100,13 +100,13 @@ const ProcessTypes = () => {
             }}
           />
           <Popconfirm
-            title="Chindan ham o‘chirmoqchimisiz?"
+            title="Chindan ham o'chirmoqchimisiz?"
             onConfirm={async () => {
               try {
                 await deleteProcessType(record._id).unwrap();
                 notification.success({
                   message: "O'chirildi",
-                  description: "Jarayon turi o‘chirildi",
+                  description: "Jarayon turi o'chirildi",
                 });
               } catch (err) {
                 notification.error({
@@ -134,7 +134,7 @@ const ProcessTypes = () => {
           gap: "15px",
         }}
       >
-        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
       </div>
     );
   }
@@ -171,12 +171,12 @@ const ProcessTypes = () => {
               label="Jarayon nomi"
               rules={[{ required: true, message: "Jarayon nomini kiriting" }]}
             >
-              <Input placeholder="Masalan: Eritish" />
+              <Input />
             </Form.Item>
 
             <Form.Item
               name="weight_loss"
-              label="Gramm yo‘qotilishi"
+              label="Gramm yo'qotilishi"
               valuePropName="checked"
             >
               <Switch />
@@ -184,7 +184,7 @@ const ProcessTypes = () => {
 
             <Form.Item
               name="purity_change"
-              label="Proba o‘zgaradimi?"
+              label="Proba o'zgaradimi?"
               valuePropName="checked"
             >
               <Switch />
@@ -200,7 +200,7 @@ const ProcessTypes = () => {
 
             <Form.Item
               name="loss_limit_per_gramm"
-              label="Gramm yo‘qotish limiti (1gr uchun)"
+              label="Gramm yo'qotish limiti (1gr uchun)"
               rules={[{ required: true, message: "Limitni kiriting" }]}
             >
               <InputNumber step={0.001} min={0} style={{ width: "100%" }} />
@@ -211,7 +211,7 @@ const ProcessTypes = () => {
                 type="primary"
                 htmlType="submit"
                 // style={{ width: "100%" }}
-                 icon={<FaSave />}
+                icon={<FaSave />}
               >
                 Saqlash
               </Button>

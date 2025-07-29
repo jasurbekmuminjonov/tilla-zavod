@@ -370,7 +370,7 @@ console.log(filteredProcesses);
     <div className="process">
       <Tabs accessKey={activeTab} onChange={setActiveTab}>
         <Tabs.TabPane tab="Jarayonlar" key="1">
-          {self.role === "admin" && (
+          {/* {self.role === "admin" && ( */}
             <div
               style={{
                 display: "flex",
@@ -463,7 +463,7 @@ console.log(filteredProcesses);
                 </label>
               </div>
             </div>
-          )}
+          {/* )} */}
           {!isMobile ? (
             <Table
               style={{ overflowX: "scroll" }}

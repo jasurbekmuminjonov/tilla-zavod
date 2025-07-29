@@ -127,7 +127,6 @@ exports.getProducts = async (req, res) => {
     const user = await User.findById(req.user.user_id);
     const isAdmin = user.role === "admin";
     const products = await Product.find({ factory_id: req.user.factory_id }).populate("user_id");
-    console.log(products);
     
     return res
       .status(200)
