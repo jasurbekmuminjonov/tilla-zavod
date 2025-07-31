@@ -47,7 +47,9 @@ exports.endProcess = async (req, res) => {
 
     process.end_gramm = end_gramm;
     process.astatka_gramm = astatka_gramm;
-    process.quantity = req.body.quantity
+    if (req.body.quantity) {
+      process.quantity = req.body.quantity;
+    }
     process.lost_gramm = lostGramm;
     process.lost_per_gramm = lostPerGramm;
     process.end_purity = process.process_type_id.purity_change
