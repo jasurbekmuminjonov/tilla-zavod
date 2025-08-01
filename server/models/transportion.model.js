@@ -17,10 +17,6 @@ const TransportionSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    // sent_time: {
-    //   type: Date,
-    //   default: Date.now,
-    // },
     sent_time: {
       type: Date,
       default: Date.now,
@@ -29,18 +25,6 @@ const TransportionSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    // get_gramm: {
-    //   type: Number,
-    //   required: false,
-    //   min: 0,
-    //   default: null,
-    // },
-    // returned_gramm: {
-    //   type: Number,
-    //   required: false,
-    //   min: 0,
-    //   default: null,
-    // },
     status: {
       type: String,
       required: true,

@@ -364,7 +364,6 @@ const Process = () => {
       return matchesProcess && matchesStatus && matchesDate;
     });
   }, [processes, startDate, endDate, selectedProcess]);
-console.log(filteredProcesses);
 
   return (
     <div className="process">

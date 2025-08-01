@@ -10,6 +10,13 @@ export const transportionApi = api.injectEndpoints({
       }),
       providesTags: ["Transportion"],
     }),
+    getTransportionsReport: builder.query({
+      query: ({ first_user, second_user }) => ({
+        url: `/transport/report?first_user=${first_user}&second_user=${second_user}`,
+        method: "GET",
+      }),
+      providesTags: ["Transportion"],
+    }),
 
     // Yuborilgan transportatsiyalar
     getSentTransportions: builder.query({
@@ -67,6 +74,21 @@ export const transportionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Transportion"],
     }),
+    getSummaryGived: builder.query({
+      query: (user_id) => ({
+        url: `/transport/summary/gived?user_id=${user_id}`,
+        method: "GET",
+      }),
+      providesTags: ["Transportion"],
+    }),
+
+    getSummaryGet: builder.query({
+      query: (user_id) => ({
+        url: `/transport/summary/get?user_id=${user_id}`,
+        method: "GET",
+      }),
+      providesTags: ["Transportion"],
+    }),
   }),
 });
 
@@ -78,4 +100,7 @@ export const {
   useCompleteTransportionMutation,
   useCancelTransportionMutation,
   useReturnTransportionMutation,
+  useLazyGetTransportionsReportQuery,
+  useLazyGetSummaryGetQuery,
+  useLazyGetSummaryGivedQuery,
 } = transportionApi;

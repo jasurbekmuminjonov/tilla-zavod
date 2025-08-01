@@ -171,7 +171,6 @@ exports.createGold = async (req, res) => {
     req.body.user_id = req.user.user_id;
     req.body.factory_id = req.user.factory_id;
     req.body.ratio = req.body.purity / 585;
-    console.log(Number(req.body.ratio?.toFixed(3)))
     req.body.gramm = req.body.entered_gramm * Number(req.body.ratio?.toFixed(3));
     await Gold.create(req.body);
     return res.status(201).end();

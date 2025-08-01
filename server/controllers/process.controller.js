@@ -1,5 +1,6 @@
 const Process = require("../models/process.model");
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 
 exports.createProcess = async (req, res) => {
   try {
@@ -90,118 +91,6 @@ exports.cancelProcess = async (req, res) => {
   }
 };
 
-// exports.createProcess = async (req, res) => {
-//   try {
-//     const { user_id, factory_id } = req.user;
-//     const { start_gold_id, start_gramm } = req.body;
-//     const user = await User.findById(user_id);
-//     const userGold = user.gold.find(
-//       (item) => item._id.toString() === start_gold_id
-//     );
-
-//     userGold.gramm -= start_gramm;
-//     req.body.user_id = user_id;
-//     req.body.factory_id = factory_id;
-//     await user.save();
-//     await Process.create(req.body);
-//     return res.status(201).end();
-//   } catch (err) {
-//     console.log(err.message);
-//     return res.status(500).json({ message: "Serverda xatolik", err });
-//   }
-// };
-// exports.startProcess = async (req, res) => {
-//   try {
-//     const { process_id } = req.params;
-//     const { user_id } = req.user;
-//     const process = await Process.findById(process_id);
-//     if (process.user_id.toString() !== user_id) {
-//       return res
-//         .status(400)
-//         .json({ message: "Siz bundan huquqqa ega emassiz" });
-//     }
-//     process.start_time = Date.now();
-//     process.status = "in_progress";
-//     await process.save();
-//     return res.status(200).end();
-//   } catch (err) {
-//     console.log(err.message);
-//     return res.status(500).json({ message: "Serverda xatolik", err });
-//   }
-// };
-// exports.endProcess = async (req, res) => {
-//   try {
-//     const { process_id } = req.params;
-//     const { user_id } = req.user;
-//     const process = await Process.findById(process_id);
-//     const processType = await ProcessType.findById(process.process_type_id);
-//     const user = await User.findById(process.user_id);
-//     const userGold = user.gold.find(
-//       (item) => item._id.toString() === process.start_gold_id.toString()
-//     );
-//     if (process.user_id.toString() !== user_id) {
-//       return res
-//         .status(400)
-//         .json({ message: "Siz bundan huquqqa ega emassiz" });
-//     }
-//     let differenceGramm;
-//     let differencePerGramm;
-//     if (processType.weight_loss) {
-//       differenceGramm = process.start_gramm - req.body.end_gramm;
-//       differencePerGramm = differenceGramm / process.start_gramm;
-//     }
-//     let endPurity;
-//     let endProductPurity;
-//     if (processType.purity_change) {
-//       endPurity =
-//         (userGold.gold_purity * process.start_gramm) / req.body.end_gramm;
-//       endProductPurity =
-//         (userGold.product_purity * process.start_gramm) / req.body.end_gramm;
-//     }
-
-//     const newGold = {
-//       gramm: req.body.end_gramm,
-//       gold_purity: endPurity ? endPurity : userGold.gold_purity,
-//       product_purity: endProductPurity
-//         ? endProductPurity
-//         : userGold.product_purity,
-//       ratio: userGold.ratio,
-//       provider_id: userGold.provider_id,
-//       process_id,
-//     };
-//     user.gold.push(newGold);
-//     await user.save();
-//     const updatedUser = await User.findById(user_id);
-//     const updatedGold = updatedUser.gold.slice(-1)[0];
-//     process.end_gold_id = updatedGold._id;
-//     process.lost_gramm = differenceGramm;
-//     process.lost_per_gramm = differencePerGramm;
-//     process.end_purity = endPurity ? endPurity : userGold.gold_purity;
-//     process.end_product_purity = endProductPurity
-//       ? endProductPurity
-//       : userGold.product_purity;
-//     process.end_gramm = req.body.end_gramm;
-//     process.end_time = Date.now();
-//     process.status = "completed";
-//     await process.save();
-//     return res.status(200).end();
-//   } catch (err) {
-//     console.log(err.message);
-//     return res.status(500).json({ message: "Serverda xatolik", err });
-//   }
-// };
-
-// exports.getProcess = async (req, res) => {
-//   try {
-//     const process = await Process.find({
-//       factory_id: req.user.factory_id,
-//     }).populate("process_type_id");
-//     return res.status(200).json(process);
-//   } catch (err) {
-//     console.log(err.message);
-//     return res.status(500).json({ message: "Serverda xatolik", err });
-//   }
-// };
 exports.getProcessByUserId = async (req, res) => {
   try {
     const user = await User.findById(req.user.user_id);
@@ -217,6 +106,49 @@ exports.getProcessByUserId = async (req, res) => {
       .json(
         process.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       );
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.getLossesSummary = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const result = await Process.aggregate([
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(user_id),
+          lost_gramm: { $gt: 0 },
+        },
+      },
+      {
+        $group: {
+          _id: "$process_type_id",
+          total_lost: { $sum: "$lost_gramm" },
+        },
+      },
+      {
+        $lookup: {
+          from: "processtypes",
+          localField: "_id",
+          foreignField: "_id",
+          as: "process_type_id",
+        },
+      },
+      {
+        $unwind: "$process_type_id",
+      },
+      {
+        $project: {
+          total_lost: 1,
+          process_type_id: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json(result);
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });

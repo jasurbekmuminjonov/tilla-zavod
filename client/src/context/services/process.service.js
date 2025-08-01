@@ -55,6 +55,12 @@ export const processApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Process"],
     }),
+    getLossesSummary: builder.query({
+      query: (user_id) => ({
+        url: `/process/lost/summary?user_id=${user_id}`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -65,4 +71,5 @@ export const {
   useEndProcessMutation,
   useCancelProcessMutation,
   useGetProcessesByUserQuery,
+  useLazyGetLossesSummaryQuery,
 } = processApi;

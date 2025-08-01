@@ -1,5 +1,6 @@
 const Transportion = require("../models/transportion.model");
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 
 exports.createTransportion = async (req, res) => {
   try {
@@ -57,6 +58,7 @@ exports.getGetTransportions = async (req, res) => {
     })
       .populate("from_id")
       .populate("to_id");
+
     return res.status(200).json(transportions);
   } catch (err) {
     console.log(err.message);
@@ -95,14 +97,179 @@ exports.cancelTransportion = async (req, res) => {
   }
 };
 
-exports.getReportsFromUserId = async (req, res) => {
+exports.getTransportionReport = async (req, res) => {
   try {
-    const gived = await Transportion.find({ from_id: req.user.user_id });
-    const get = await Transportion.find({ to_id: req.user.user_id });
-    res.status(200).json({
+    const { first_user, second_user } = req.query;
+
+    if (!first_user) {
+      return res.status(400).json({ message: "first_user kerak" });
+    }
+
+    const firstUserId = new mongoose.Types.ObjectId(first_user);
+
+    let gived = 0;
+    let get = 0;
+
+    if (second_user && second_user.trim() !== "") {
+      const secondUserId = new mongoose.Types.ObjectId(second_user);
+
+      const givedAgg = await Transportion.aggregate([
+        {
+          $match: {
+            from_id: firstUserId,
+            to_id: secondUserId,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$gramm" },
+          },
+        },
+      ]);
+
+      gived = givedAgg[0]?.total || 0;
+
+      const getAgg = await Transportion.aggregate([
+        {
+          $match: {
+            from_id: secondUserId,
+            to_id: firstUserId,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$gramm" },
+          },
+        },
+      ]);
+
+      get = getAgg[0]?.total || 0;
+    } else {
+      const givedAgg = await Transportion.aggregate([
+        {
+          $match: {
+            from_id: firstUserId,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$gramm" },
+          },
+        },
+      ]);
+
+      gived = givedAgg[0]?.total || 0;
+
+      const getAgg = await Transportion.aggregate([
+        {
+          $match: {
+            to_id: firstUserId,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$gramm" },
+          },
+        },
+      ]);
+
+      get = getAgg[0]?.total || 0;
+    }
+
+    res.json({
       gived,
       get,
+      difference: gived - get,
     });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Serverda xatolik yuz berdi" });
+  }
+};
+
+exports.getSummaryGived = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+    console.log(user_id);
+    const allTransportions = await Transportion.find();
+    console.log(allTransportions);
+
+    const summary = await Transportion.aggregate([
+      {
+        $match: { from_id: new mongoose.Types.ObjectId(user_id) },
+      },
+      {
+        $group: {
+          _id: "$to_id",
+          totalGramm: { $sum: "$gramm" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "to_user",
+        },
+      },
+      {
+        $unwind: "$to_user",
+      },
+      {
+        $project: {
+          _id: 0,
+          to_id: "$to_user",
+          totalGramm: 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json(summary);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.getSummaryGet = async (req, res) => {
+  try {
+    const { user_id } = req.query;
+
+    const summary = await Transportion.aggregate([
+      {
+        $match: { to_id: new mongoose.Types.ObjectId(user_id) },
+      },
+      {
+        $group: {
+          _id: "$from_id",
+          totalGramm: { $sum: "$gramm" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "from_user",
+        },
+      },
+      {
+        $unwind: "$from_user",
+      },
+      {
+        $project: {
+          _id: 0,
+          from_id: "$from_user",
+          totalGramm: 1,
+        },
+      },
+    ]);
+
+    return res.status(200).json(summary);
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });

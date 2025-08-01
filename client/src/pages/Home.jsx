@@ -53,7 +53,8 @@ const Home = () => {
       .filter((l) => isInRange(l.date))
       .reduce((sum, l) => sum + (l.lost_gramm || 0), 0);
 
-      const totalAstatka = goldTotal - startGrammTotal - productGrammTotal - lossTotal
+    const totalAstatka =
+      goldTotal - startGrammTotal - productGrammTotal - lossTotal;
 
     return {
       goldTotal,
@@ -63,7 +64,7 @@ const Home = () => {
       totalProducts,
       usedGoldInProducts,
       lossTotal,
-      totalAstatka
+      totalAstatka,
     };
   }, [gold, users, processes, products, losses, from, to]);
 
@@ -79,7 +80,7 @@ const Home = () => {
           gap: "15px",
         }}
       >
-        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
       </div>
     );
   }
@@ -150,7 +151,7 @@ const Home = () => {
           <Card>
             <Statistic
               title="Umumiy astatka"
-              value={`${stats.totalAstatka} gr`}
+              value={`${stats.totalAstatka?.toFixed(4)} gr`}
             />
           </Card>
         </Col>

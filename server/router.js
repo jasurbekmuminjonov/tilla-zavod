@@ -27,7 +27,6 @@ const {
 const {
   createGold,
   getGold,
-  // searchGoldFromAnyWhere,
   getAllLosses,
 } = require("./controllers/gold.controller");
 const {
@@ -49,11 +48,11 @@ const {
 
 const {
   createProcess,
-  // startProcess,
   endProcess,
   cancelProcess,
   getProcesses,
   getProcessByUserId,
+  getLossesSummary,
 } = require("./controllers/process.controller");
 
 const {
@@ -89,7 +88,9 @@ const {
   getGetTransportions,
   completeTransportion,
   cancelTransportion,
-  returnTransportion,
+  getTransportionReport,
+  getSummaryGived,
+  getSummaryGet,
 } = require("./controllers/transportion.controller");
 const {
   createProvider,
@@ -119,7 +120,6 @@ rt.get("/factory", getFactory);
 // Gold routes
 rt.post("/gold/create", createGold);
 rt.get("/gold", getGold);
-// rt.get("/gold/search/:gold_id", searchGoldFromAnyWhere);
 rt.get("/losses", getAllLosses);
 
 // Tool routes
@@ -140,9 +140,9 @@ rt.delete("/product-type/:id", deleteProductType);
 rt.post("/process/create", createProcess);
 rt.get("/process", getProcesses);
 rt.get("/process/user", getProcessByUserId);
-// rt.put("/process/start/:process_id", startProcess);
 rt.put("/process/end/:process_id", endProcess);
 rt.put("/process/cancel/:process_id", cancelProcess);
+rt.get("/process/lost/summary", getLossesSummary);
 
 // Process Type routes
 rt.post("/process-type/create", createProcessType);
@@ -174,7 +174,9 @@ rt.get("/transport/sent", getSentTransportions);
 rt.get("/transport/received", getGetTransportions);
 rt.put("/transport/complete/:transportion_id", completeTransportion);
 rt.put("/transport/cancel/:transportion_id", cancelTransportion);
-rt.put("/transport/return/:transportion_id", returnTransportion);
+rt.get("/transport/report", getTransportionReport);
+rt.get("/transport/summary/gived", getSummaryGived);
+rt.get("/transport/summary/get", getSummaryGet);
 
 // Provider routes
 rt.post("/provider/create", createProvider);
