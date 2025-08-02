@@ -22,9 +22,10 @@ const Core = () => {
   const { data: processTypes = [] } = useGetProcessTypesQuery();
   const { data: golds = [] } = useGetGoldQuery();
   const { data: products = [] } = useGetProductQuery();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState({});
+  const localeUser = JSON.parse(localStorage.getItem("user"));
   const [selectedUser, setSelectedUser] = useState(
-    user.role === "admin" ? "" : user._id
+    localeUser.role === "admin" ? "" : localeUser._id
   );
   const [getReport, { data = {} }] = useLazyGetTransportionsReportQuery();
   const [getSummaryLost, { data: summaryLost = [] }] =
@@ -73,6 +74,7 @@ const Core = () => {
           await getSummaryGived(selectedUser);
           await getSummaryGet(selectedUser);
           await getSummaryLost(selectedUser);
+          setUser(users.find((u) => u._id === selectedUser));
         }
       } catch (err) {
         console.log(err);
@@ -81,7 +83,7 @@ const Core = () => {
 
     fetchReport();
   }, [selectedUser]);
-  console.log(selectedUser);
+  console.log(user);
 
   const filteredData = useMemo(() => {
     const gold = selectedUser
@@ -126,7 +128,7 @@ const Core = () => {
       tovar;
 
     setRealAstatka(astatka);
-  }, [filteredData, processTypes, data, selectedUser]);
+  }, [filteredData, processTypes, data, selectedUser, user]);
 
   const handleSubmit = () => {
     const parsed = parseFloat(inputValue);
@@ -141,12 +143,14 @@ const Core = () => {
     borderRight: "1px solid #eee",
   };
 
+  console.log(selectedUser);
+
   return (
     <div className="core">
       <br />
       <Space style={{ display: "flex", alignItems: "center" }}>
         <Select
-          disabled={user.role === "user"}
+          disabled={localeUser.role === "user"}
           value={selectedUser}
           onChange={setSelectedUser}
           style={{ width: "200px" }}

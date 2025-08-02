@@ -34,7 +34,7 @@ const Home = () => {
 
     const startGrammTotal = processes
       .filter((p) => isInRange(p.start_time))
-      .reduce((sum, p) => sum + (p.start_gramm || 0), 0);
+      .reduce((sum, p) => sum + (p.end_gramm || 0), 0);
     const productGrammTotal = products
       .filter((p) => isInRange(p.createdAt))
       .reduce((sum, p) => sum + (p.total_gramm || 0), 0);
