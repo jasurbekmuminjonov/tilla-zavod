@@ -82,7 +82,7 @@ const Core = () => {
     };
 
     fetchReport();
-  }, [selectedUser]);
+  }, [selectedUser, user]);
   console.log(user);
 
   const filteredData = useMemo(() => {
@@ -122,7 +122,7 @@ const Core = () => {
 
     const astatka =
       kirgan +
-      (user.create_gold ? 0 : data.get || 0) -
+      (user?.create_gold ? 0 : data.get || 0) -
       (data.gived || 0) -
       totalLoss -
       tovar;
@@ -143,7 +143,7 @@ const Core = () => {
     borderRight: "1px solid #eee",
   };
 
-  console.log(selectedUser);
+  console.log(user);
 
   return (
     <div className="core">
@@ -211,8 +211,8 @@ const Core = () => {
             }}
           >
             <tr>
-              {user.create_gold && <th style={thStyle}>Kirim</th>}
-              {!user.create_gold && <th style={thStyle}>Olgan</th>}
+              {user?.create_gold && <th style={thStyle}>Kirim</th>}
+              {!user?.create_gold && <th style={thStyle}>Olgan</th>}
               <th style={thStyle}>Bergan</th>
               <th style={thStyle}>Потери</th>
               <th style={thStyle}>Tovar</th>
@@ -221,14 +221,14 @@ const Core = () => {
           </thead>
           <tbody>
             <tr>
-              {user.create_gold && (
+              {user?.create_gold && (
                 <td>
                   {filteredData.gold
                     .reduce((acc, item) => acc + item.gramm, 0)
                     .toFixed(4)}
                 </td>
               )}
-              {!user.create_gold && (
+              {!user?.create_gold && (
                 <td>
                   <Popover
                     content={

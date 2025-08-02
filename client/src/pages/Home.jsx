@@ -121,7 +121,7 @@ const Home = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              title="Jarayonga kirgan"
+              title="Jarayondan chiqqan"
               value={stats.startGrammTotal}
               precision={2}
               suffix="gr"
