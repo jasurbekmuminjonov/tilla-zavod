@@ -3,26 +3,20 @@ import {
   Form,
   InputNumber,
   Select,
-  Space,
   Tabs,
-  Tag,
   Modal,
   Table,
-  Statistic,
-  Card,
   notification,
 } from "antd";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   useCreateProductMutation,
-  useGetGoldQuery,
   useGetProductQuery,
 } from "../context/services/inventory.service";
 import { useGetUserByUserIdQuery } from "../context/services/user.service";
 import moment from "moment";
-import { statusOptions } from "../assets/statusOptions";
 import { useGetProductTypesQuery } from "../context/services/productType.service";
-import { FaPlus, FaEdit, FaTrash, FaLock, FaSave } from "react-icons/fa";
+import { FaLock, FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 
@@ -30,77 +24,22 @@ const Products = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [createProduct] = useCreateProductMutation();
   const { data: self = {} } = useGetUserByUserIdQuery();
-  const { data: allGold = [] } = useGetGoldQuery();
   const { data: productTypes = [] } = useGetProductTypesQuery();
   const { data: products = [], isLoading: productLoading } =
     useGetProductQuery();
 
   const [form] = Form.useForm();
-  const [selectedGoldId, setSelectedGoldId] = useState({});
-  const [productList, setProductList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null);
   const [createForm] = Form.useForm();
-
-  const userGold = useMemo(
-    () => allGold.filter((g) => g.user_id?._id === self._id && g.gramm > 0),
-    [allGold, self._id]
-  );
-
-  const totalGramm = useMemo(() => {
-    return productList.reduce(
-      (sum, item) =>
-        sum + item.gramm_per_quantity * item.quantity + item.total_lost_gramm,
-      0
-    );
-  }, [productList]);
-
-  const handleAddClick = () => {
-    form.resetFields();
-    setEditingIndex(null);
-    setIsModalVisible(true);
-  };
-
-  const handleEditClick = (index) => {
-    form.setFieldsValue(productList[index]);
-    setEditingIndex(index);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = (index) => {
-    const updated = [...productList];
-    updated.splice(index, 1);
-    setProductList(updated);
-  };
-
-  const handleModalSubmit = () => {
-    form.validateFields().then((values) => {
-      const updated = [...productList];
-      if (editingIndex === null) {
-        updated.push(values);
-      } else {
-        updated[editingIndex] = values;
-      }
-      setProductList(updated);
-      setIsModalVisible(false);
-      form.resetFields();
-    });
-  };
 
   async function handleCreateProduct(values) {
     try {
-      // values.products = productList.map((p) => ({
-      //   ...p,
-      //   gold_id: selectedGoldId._id,
-      // }));
       await createProduct(values).unwrap();
       notification.success({
         message: "Muvaffaqiyatli",
         description: "Tovar yaratildi",
       });
       createForm.resetFields();
-      setProductList([]);
-      setSelectedGoldId({});
     } catch (err) {
       console.log(err);
       notification.error({
@@ -127,21 +66,14 @@ const Products = () => {
       title: "Soni",
       dataIndex: "quantity",
     },
-    // {
-    //   title: "Gramm / 1 dona",
-    //   dataIndex: "gramm_per_quantity",
-    // },
-    // {
-    //   title: "Proba",
-    //   dataIndex: "purity",
-    // },
-    // {
-    //   title: "Jami потери",
-    //   dataIndex: "total_lost_gramm",
-    // },
     {
       title: "Jami gramm",
       dataIndex: "total_gramm",
+    },
+    {
+      title: "Ish",
+      dataIndex: "ratio",
+      render: (text) => text?.toFixed(4),
     },
     {
       title: "Ishchi",
@@ -175,7 +107,12 @@ const Products = () => {
     <div className="products">
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane key="1" tab="Tovarlar">
-          <Table dataSource={products} columns={columns} size="small" />
+          <Table
+            loading={productLoading}
+            dataSource={products}
+            columns={columns}
+            size="small"
+          />
         </TabPane>
         <TabPane key="2" tab="Tovar ishlab chiqarish">
           {/* {Object.keys(selectedGoldId).length > 0 && (
@@ -330,64 +267,6 @@ const Products = () => {
           </Form>
         </TabPane>
       </Tabs>
-
-      <Modal
-        open={isModalVisible}
-        title={editingIndex !== null ? "Tahrirlash" : "Tovar qo'shish"}
-        onCancel={() => setIsModalVisible(false)}
-        onOk={handleModalSubmit}
-        okText={editingIndex !== null ? "Yangilash" : "Qo'shish"}
-      >
-        <Form layout="vertical" form={form}>
-          <Form.Item
-            name="product_type_id"
-            label="Tovar turi"
-            rules={[{ required: true, message: "Tovar turini tanlang" }]}
-          >
-            <Select placeholder="Tovar turini tanlang">
-              {productTypes?.map((type) => (
-                <Select.Option key={type._id} value={type._id}>
-                  {type.product_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="quantity"
-            label="Soni"
-            rules={[{ required: true, message: "Sonini kiriting" }]}
-          >
-            <InputNumber style={{ width: "100%" }} min={0} />
-          </Form.Item>
-
-          <Form.Item
-            name="purity"
-            label="Proba"
-            rules={[{ required: true, message: "Proba kiritilsin" }]}
-          >
-            <InputNumber style={{ width: "100%" }} min={1} max={1000} />
-          </Form.Item>
-
-          <Form.Item
-            name="gramm_per_quantity"
-            label="1 dona gramm"
-            rules={[{ required: true, message: "1 dona gramm kiritilsin" }]}
-          >
-            <InputNumber style={{ width: "100%" }} min={0} />
-          </Form.Item>
-
-          <Form.Item
-            name="total_lost_gramm"
-            label="Jami yo'qotilgan gr"
-            rules={[
-              { required: true, message: "Yo'qotilgan gramm kiritilsin" },
-            ]}
-          >
-            <InputNumber style={{ width: "100%" }} min={0} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 };

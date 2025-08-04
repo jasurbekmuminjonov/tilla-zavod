@@ -32,6 +32,8 @@ const {
 const {
   createTool,
   getAllToolTypes,
+  getTools,
+  getToolCreatings,
 } = require("./controllers/tool.controller");
 
 const {
@@ -66,10 +68,6 @@ const {
 const {
   createToolTransportion,
   getToolTransportion,
-  getSentToolTransportion,
-  getGetToolTransportions,
-  completeToolTransportion,
-  cancelToolTransportion,
 } = require("./controllers/toolTransportion.controller");
 
 const {
@@ -123,8 +121,9 @@ rt.get("/gold", getGold);
 rt.get("/losses", getAllLosses);
 
 // Tool routes
-rt.post("/tool/:warehouse_id/create", createTool);
-rt.get("/tool/types", getAllToolTypes);
+rt.post("/tool/create", createTool);
+rt.get("/tool", getTools);
+rt.get("/tool/creatings", getToolCreatings);
 
 // Product routes
 rt.post("/product/create", createProduct);
@@ -154,10 +153,6 @@ rt.delete("/process-type/:id", deleteProcessTypeById);
 // Tool Transportion routes
 rt.post("/tool-transport/create", createToolTransportion);
 rt.get("/tool-transport", getToolTransportion);
-rt.get("/tool-transport/sent", getSentToolTransportion);
-rt.get("/tool-transport/received", getGetToolTransportions);
-rt.put("/tool-transport/complete/:id", completeToolTransportion);
-rt.put("/tool-transport/cancel/:id", cancelToolTransportion);
 
 // Product Transportion routes
 rt.post("/product-transport/create", createProductTransportion);

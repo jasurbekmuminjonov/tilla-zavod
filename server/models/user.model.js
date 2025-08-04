@@ -182,6 +182,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    create_tool: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

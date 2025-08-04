@@ -286,6 +286,16 @@ const Users = () => {
       dataIndex: "create_gold",
       render: (text) => (text ? "✅" : "❌"),
     },
+    {
+      title: "запчасть kirim",
+      dataIndex: "create_tool",
+      render: (text) => (text ? "✅" : "❌"),
+    },
+    {
+      title: "Tovar chiqarish",
+      dataIndex: "allow_production",
+      render: (text) => (text ? "✅" : "❌"),
+    },
     // {
     //   title: "",
     //   dataIndex: "attached_warehouses",
@@ -326,6 +336,7 @@ const Users = () => {
                 ),
                 allow_production: record.allow_production,
                 create_gold: record.create_gold,
+                create_tool: record.create_tool,
               });
               setActiveTab("2");
             }}
@@ -531,6 +542,9 @@ const Users = () => {
               <Switch />
             </Form.Item>
             <Form.Item name="create_gold" label="Oltin kirim">
+              <Switch />
+            </Form.Item>
+            <Form.Item name="create_tool" label="запчасть kirim">
               <Switch />
             </Form.Item>
             <Form.Item>

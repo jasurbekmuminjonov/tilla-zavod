@@ -36,6 +36,7 @@ exports.createProduct = async (req, res) => {
     // await user.save();
     req.body.user_id = req.user.user_id;
     req.body.factory_id = req.user.factory_id;
+    req.body.ratio = req.body.total_gramm / req.body.quantity;
 
     await Product.create(req.body);
 
@@ -126,14 +127,18 @@ exports.getProducts = async (req, res) => {
   try {
     const user = await User.findById(req.user.user_id);
     const isAdmin = user.role === "admin";
-    const products = await Product.find({ factory_id: req.user.factory_id }).populate("user_id");
-    
+    const products = await Product.find({
+      factory_id: req.user.factory_id,
+    }).populate("user_id");
+
     return res
       .status(200)
       .json(
         isAdmin
           ? products
-          : products.filter((p) => p.user_id._id?.toString() === req.user.user_id)
+          : products.filter(
+              (p) => p.user_id._id?.toString() === req.user.user_id
+            )
       );
   } catch (err) {
     console.log(err.message);

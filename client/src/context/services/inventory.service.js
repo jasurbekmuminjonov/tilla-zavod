@@ -2,7 +2,6 @@ import { api } from "./api";
 
 export const inventoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // GOLD: Omborga tilla qo'shish
     createGold: builder.mutation({
       query: (body) => ({
         url: `/gold/create`,
@@ -12,20 +11,25 @@ export const inventoryApi = api.injectEndpoints({
       invalidatesTags: ["Gold"],
     }),
 
-    // TOOL: Omborga asbob qo'shish
     createTool: builder.mutation({
-      query: ({ warehouse_id, body }) => ({
-        url: `/tool/${warehouse_id}/create`,
+      query: (body) => ({
+        url: `/tool/create`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Tool", "Warehouse"],
+      invalidatesTags: ["Tool"],
     }),
 
-    // TOOL: Barcha asbob turlarini olish
-    getAllToolTypes: builder.query({
+    getTools: builder.query({
       query: () => ({
-        url: "/tool/types",
+        url: "/tool",
+        method: "GET",
+      }),
+      providesTags: ["Tool"],
+    }),
+    getToolCreatings: builder.query({
+      query: () => ({
+        url: "/tool/creatings",
         method: "GET",
       }),
       providesTags: ["Tool"],
@@ -73,10 +77,11 @@ export const inventoryApi = api.injectEndpoints({
 export const {
   useCreateGoldMutation,
   useCreateToolMutation,
-  useGetAllToolTypesQuery,
+  useGetToolsQuery,
   useCreateProductMutation,
   useGetGoldQuery,
   useGetProductQuery,
   useLazySearchGoldQuery,
   useGetLossesQuery,
+  useGetToolCreatingsQuery,
 } = inventoryApi;

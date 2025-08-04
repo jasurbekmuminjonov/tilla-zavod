@@ -1,32 +1,28 @@
 const mongoose = require("mongoose");
 
-const ToolTransportionSchema = new mongoose.Schema(
+const ToolCreatingSchema = new mongoose.Schema(
   {
     tool_id: {
       type: mongoose.Types.ObjectId,
       ref: "Tool",
       required: true,
     },
-    quantity: {
-      type: Number,
+    user_id: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
       required: true,
-      min: 0,
-    },
-    user_name: {
-      type: String,
-      required: true,
-    },
-    date: {
-      type: Date,
-      default: Date.now,
     },
     factory_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Factory",
       required: true,
     },
+    quantity: {
+      type: Number,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("ToolTransportion", ToolTransportionSchema);
+module.exports = mongoose.model("ToolCreating", ToolCreatingSchema);

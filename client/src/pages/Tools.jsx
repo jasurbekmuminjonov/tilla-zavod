@@ -1,47 +1,60 @@
 import React, { useMemo, useState } from "react";
 import {
-  useGetUserByUserIdQuery,
-  useGetUsersQuery,
-} from "../context/services/user.service";
-import { useGetWarehousesQuery } from "../context/services/warehouse.service";
-import {
   Button,
   Form,
   InputNumber,
+  AutoComplete,
   Modal,
   notification,
-  Select,
   Table,
+  Tabs,
 } from "antd";
-import { unitOptions } from "../assets/unitOptions";
 import moment from "moment";
 import { useCreateToolTransportionMutation } from "../context/services/toolTransportion.service";
 import { GiHandTruck } from "react-icons/gi";
 import { MdSend } from "react-icons/md";
+import {
+  useCreateToolMutation,
+  useGetToolCreatingsQuery,
+  useGetToolsQuery,
+} from "../context/services/inventory.service";
+import { useGetToolTransportionQuery } from "../context/services/toolTransportion.service";
 
 const Tools = () => {
-  const { data: self = {}, isLoading: selfLoading } = useGetUserByUserIdQuery();
-  const { data: warehouses = [], isLoading: warehousesLoading } =
-    useGetWarehousesQuery();
   const [createToolTransportion, { isLoading: toolTransportionLoading }] =
     useCreateToolTransportionMutation();
-  const { data: users = [] } = useGetUsersQuery();
+  const { data: tools = [], isLoading } = useGetToolsQuery();
+  const { data: toolCreatings = [] } = useGetToolCreatingsQuery();
+  const { data: toolTransportions = [] } = useGetToolTransportionQuery();
+  const [createTool] = useCreateToolMutation();
+
   const [transportingTool, setTransportingTool] = useState({});
   const [transportingModal, setTransportingModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("1");
   const [transportingForm] = Form.useForm();
+  const [form] = Form.useForm();
+
+  const userNameOptions = useMemo(() => {
+    const names = new Set(toolTransportions.map((t) => t.user_name));
+    return [...names].map((name) => ({ label: name, value: name }));
+  }, [toolTransportions]);
+
+  const toolNameOptions = tools.map((item) => ({
+    label: item.tool_name,
+    value: item.tool_name,
+  }));
 
   async function handleTransportion(values) {
     try {
       const payload = {
         tool_id: transportingTool._id,
-        warehouse_id: transportingTool.warehouseId,
-        user_id: values.user_id,
+        user_name: values.user_name,
         quantity: values.quantity,
       };
-      await createToolTransportion(payload).unwrap();
+      const res = await createToolTransportion(payload).unwrap();
       notification.success({
-        message: "Muvaffaqiyatli",
-        description: "Запчасть o'tkazildi",
+        message: res.message,
+        description: "",
       });
       transportingForm.resetFields();
       setTransportingModal(false);
@@ -55,58 +68,33 @@ const Tools = () => {
     }
   }
 
-  const userTools = useMemo(() => {
-    if (!warehouses || !self) return [];
+  async function handleCreateTool(values) {
+    try {
+      const res = await createTool(values).unwrap();
+      console.log(res);
 
-    const attachedIds = self.attached_warehouses?.map((w) => w._id) || [];
-
-    const relevantWarehouses = warehouses.filter((w) =>
-      attachedIds.includes(w._id)
-    );
-
-    const warehouseTools = relevantWarehouses.flatMap((w) =>
-      w.tools?.map((tool) => ({
-        ...tool,
-        locationName: w.warehouse_name,
-        warehouseId: w._id,
-      }))
-    );
-
-    const selfTools =
-      self.tools?.map((tool) => ({
-        ...tool,
-        locationName: self.name || "Foydalanuvchi",
-        warehouseId: null,
-      })) || [];
-
-    return [...warehouseTools, ...selfTools].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  }, [warehouses, self]);
+      notification.success({
+        message: res.message,
+        description: "",
+      });
+      form.resetFields();
+      setActiveTab("1");
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: err.data.message,
+        description: "",
+      });
+    }
+  }
 
   const columns = [
     { title: "Запчасть", dataIndex: "tool_name" },
-    { title: "Miqdor", dataIndex: "quantity" },
-    { title: "Birlik", dataIndex: "unit", render: (text) => unitOptions[text] },
-    {
-      title: "Tan narxi 1 dona",
-      dataIndex: "buy_price",
-      render: (text) => text.toLocaleString(),
-    },
-    {
-      title: "Joylashuvi",
-      dataIndex: "locationName",
-    },
-    {
-      title: "Kirim sanasi",
-      dataIndex: "date",
-      render: (text) => moment(text).format("DD.MM.YYYY"),
-    },
+    { title: "Miqdor", dataIndex: "stock" },
     {
       title: "Operatsiyalar",
       render: (_, record) => (
         <Button
-          disabled={!record.warehouseId}
           onClick={() => {
             setTransportingTool(record);
             setTransportingModal(true);
@@ -118,52 +106,146 @@ const Tools = () => {
       ),
     },
   ];
+  const creatingColumns = [
+    {
+      title: "Запчасть",
+      dataIndex: "tool_id",
+      render: (text) => text.tool_name,
+    },
+    { title: "Miqdor", dataIndex: "quantity" },
+    {
+      title: "Sana",
+      dataIndex: "createdAt",
+      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+    },
+  ];
+
+  const transportionColumns = [
+    {
+      title: "Запчасть",
+      dataIndex: "tool_id",
+      render: (text) => text.tool_name,
+    },
+    { title: "Miqdor", dataIndex: "quantity" },
+    { title: "Kimga", dataIndex: "user_name" },
+    {
+      title: "Sana",
+      dataIndex: "createdAt",
+      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+    },
+  ];
 
   return (
     <div className="tools">
-      <Modal
-        open={transportingModal}
-        title="Запчасть ni ishchiga jo'natish"
-        onCancel={() => setTransportingModal(false)}
-        footer={null}
-      >
-        <Form
-          onFinish={handleTransportion}
-          form={transportingForm}
-          layout="vertical"
-          autoComplete="off"
-        >
-          <Form.Item name="user_id" label="Yuboriladigan ishchi">
-            <Select>
-              {users.map((item) => (
-                <Select.Option
-                  disabled={
-                    item.role === "admin" ||
-                    JSON.parse(localStorage.getItem("user"))._id === item._id
+      <Tabs onChange={setActiveTab} activeKey={activeTab}>
+        <Tabs.TabPane key="1" tab="Запчасть">
+          <Modal
+            open={transportingModal}
+            title="Запчасть ni chiqim qilish"
+            onCancel={() => setTransportingModal(false)}
+            footer={null}
+          >
+            <Form
+              onFinish={handleTransportion}
+              form={transportingForm}
+              layout="vertical"
+              autoComplete="off"
+            >
+              <Form.Item
+                name="user_name"
+                label="Kimga yuborish"
+                rules={[
+                  { required: true, message: "Foydalanuvchi ismini kiriting" },
+                ]}
+              >
+                <AutoComplete
+                  options={userNameOptions}
+                  placeholder="Yangi ism yozish yoki tanlash"
+                  filterOption={(inputValue, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(inputValue.toLowerCase())
                   }
-                  key={item._id}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="quantity"
+                label="Запчасть miqdori"
+                rules={[{ required: true, message: "Miqdor kiriting" }]}
+              >
+                <InputNumber style={{ width: "100%" }} />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<MdSend />}
+                  loading={toolTransportionLoading}
                 >
-                  {item.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="quantity" label="Запчасть miqdori">
-            <InputNumber style={{ width: "100%" }} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" icon={<MdSend />}>
-              Yuborish
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Table
-        loading={selfLoading || warehousesLoading}
-        columns={columns}
-        dataSource={userTools}
-        size="small"
-      />
+                  Yuborish
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+          <Table
+            loading={isLoading}
+            columns={columns}
+            dataSource={tools}
+            size="small"
+            rowKey="_id"
+          />
+        </Tabs.TabPane>
+        <Tabs.TabPane key="2" tab="Запчасть kirim qilish">
+          <Form layout="vertical" form={form} onFinish={handleCreateTool}>
+            <Form.Item
+              name="tool_name"
+              label="Запчасть nomi"
+              rules={[{ required: true, message: "Запчасть nomini kiriting" }]}
+            >
+              <AutoComplete
+                options={toolNameOptions}
+                placeholder="Nomi yozish yoki tanlash"
+                filterOption={(inputValue, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(inputValue.toLowerCase())
+                }
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="stock"
+              label="Запас miqdori"
+              rules={[{ required: true, message: "Miqdor kiriting" }]}
+            >
+              <InputNumber style={{ width: "100%" }} min={1} />
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Saqlash
+              </Button>
+            </Form.Item>
+          </Form>
+        </Tabs.TabPane>
+        <Tabs.TabPane key="3" tab="Kirim">
+          <Table
+            columns={creatingColumns}
+            dataSource={toolCreatings}
+            size="small"
+            rowKey="_id"
+          />
+        </Tabs.TabPane>
+        <Tabs.TabPane key="4" tab="Chiqim">
+          <Table
+            columns={transportionColumns}
+            dataSource={toolTransportions}
+            size="small"
+            rowKey="_id"
+          />
+        </Tabs.TabPane>
+      </Tabs>
     </div>
   );
 };

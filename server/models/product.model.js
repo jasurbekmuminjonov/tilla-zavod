@@ -17,6 +17,10 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    ratio: {
+      type: Number,
+      required: true,
+    },
     user_id: {
       type: mongoose.Types.ObjectId,
       ref: "User",
