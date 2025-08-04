@@ -24,11 +24,11 @@ export const sidebarLinks = [
     label: "Ishchilar",
     icon: <FaUser size={20} />,
   },
-  {
-    path: "/warehouses",
-    label: "Omborlar",
-    icon: <FaWarehouse size={20} />,
-  },
+  // {
+  //   path: "/warehouses",
+  //   label: "Omborlar",
+  //   icon: <FaWarehouse size={20} />,
+  // },
   {
     path: "/process",
     label: "Jarayonlar",
@@ -69,11 +69,11 @@ export const sidebarLinks = [
     label: "Oltin o'tkazmalari",
     icon: <AiFillGold size={20} />,
   },
-  {
-    path: "/transfer-product",
-    label: "Tovar o'tkazmalari",
-    icon: <TbCubeSend size={20} />,
-  },
+  // {
+  //   path: "/transfer-product",
+  //   label: "Tovar o'tkazmalari",
+  //   icon: <TbCubeSend size={20} />,
+  // },
   {
     path: "/core",
     label: "Hisob-kitob",
