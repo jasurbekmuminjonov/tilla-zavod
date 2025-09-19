@@ -40,8 +40,7 @@ const ProcessSchema = new mongoose.Schema(
     end_purity: {
       type: Number,
       required: false,
-      min: 0,
-      default: 585,
+      default: null,
     },
     // end_product_purity: {
     //   type: Number,
@@ -72,7 +71,7 @@ const ProcessSchema = new mongoose.Schema(
     },
     start_time: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     end_time: {
       type: Date,
