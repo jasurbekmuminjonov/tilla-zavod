@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: "https://apitillazavod.balerion.uz/api/v1",
   // baseUrl: "https://kwmkqg1t-8080.euw.devtunnels.ms/api/v1",
-  // baseUrl: "https://tilla-zavod-server.vercel.app/api/v1",
+  // baseUrl: "http://localhost:8080/api/v1",
   prepareHeaders: (headers) => {
     const token = localStorage.getItem("token");
     if (token) {

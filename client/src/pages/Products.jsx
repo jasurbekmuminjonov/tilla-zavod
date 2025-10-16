@@ -112,6 +112,7 @@ const Products = () => {
             dataSource={products}
             columns={columns}
             size="small"
+            bordered
           />
         </TabPane>
         <TabPane key="2" tab="Tovar ishlab chiqarish">

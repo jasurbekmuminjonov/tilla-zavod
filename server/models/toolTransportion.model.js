@@ -14,7 +14,12 @@ const ToolTransportionSchema = new mongoose.Schema(
     },
     user_name: {
       type: String,
-      required: true,
+      default: null,
+    },
+    user_id: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
     date: {
       type: Date,

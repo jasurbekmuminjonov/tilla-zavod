@@ -67,11 +67,47 @@ exports.getToolCreatings = async (req, res) => {
     if (isAdmin) {
       tools = await ToolCreating.find({ factory_id }).populate("tool_id");
     } else {
-      tools = await ToolCreating.find({ factory_id, user_id }).populate("tool_id");
+      tools = await ToolCreating.find({ factory_id, user_id }).populate(
+        "tool_id"
+      );
     }
     res.status(200).json(tools);
   } catch (err) {
     console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.deleteTool = async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { id } = req.params;
+
+    const tool = await Tool.findById(id);
+    if (!tool) {
+      return res.status(404).json({ message: "Zapchast topilmadi" });
+    }
+
+    const user = await User.findById(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
+    }
+
+    if (user.role !== "admin" && tool.user_id?.toString() !== user_id) {
+      return res.status(400).json({
+        message: "Zapchastni faqat admin yoki uni kiritgan xodim o‘chira oladi",
+      });
+    }
+
+    await tool.deleteOne();
+
+    await ToolCreating.deleteMany({ tool_id: id });
+
+    res
+      .status(200)
+      .json({ message: "Zapchast va unga bog‘langan hujjatlar o‘chirildi" });
+  } catch (err) {
+    console.error(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

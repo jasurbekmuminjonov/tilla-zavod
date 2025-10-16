@@ -359,6 +359,7 @@ const ProductTransportion = () => {
         <Tabs.TabPane tab="Siz uchun" key="1">
           <Table
             size="small"
+            bordered
             loading={receivedLoading}
             dataSource={receivedTransportions
               ?.slice()
@@ -371,6 +372,7 @@ const ProductTransportion = () => {
         <Tabs.TabPane tab="Yuborilgan" key="2">
           <Table
             size="small"
+            bordered
             loading={sentLoading}
             dataSource={sentTransportions
               ?.slice()

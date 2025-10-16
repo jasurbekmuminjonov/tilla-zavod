@@ -10,6 +10,20 @@ export const inventoryApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Gold"],
     }),
+    deleteGold: builder.mutation({
+      query: (id) => ({
+        url: `/gold/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Gold"],
+    }),
+    deleteTool: builder.mutation({
+      query: (id) => ({
+        url: `/tool/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Tool"],
+    }),
 
     createTool: builder.mutation({
       query: (body) => ({
@@ -84,4 +98,6 @@ export const {
   useLazySearchGoldQuery,
   useGetLossesQuery,
   useGetToolCreatingsQuery,
+  useDeleteGoldMutation,
+  useDeleteToolMutation,
 } = inventoryApi;

@@ -28,12 +28,14 @@ const {
   createGold,
   getGold,
   getAllLosses,
+  deleteGold,
 } = require("./controllers/gold.controller");
 const {
   createTool,
   getAllToolTypes,
   getTools,
   getToolCreatings,
+  deleteTool,
 } = require("./controllers/tool.controller");
 
 const {
@@ -118,12 +120,14 @@ rt.get("/factory", getFactory);
 // Gold routes
 rt.post("/gold/create", createGold);
 rt.get("/gold", getGold);
+rt.delete("/gold/delete/:id", deleteGold);
 rt.get("/losses", getAllLosses);
 
 // Tool routes
 rt.post("/tool/create", createTool);
 rt.get("/tool", getTools);
 rt.get("/tool/creatings", getToolCreatings);
+rt.delete("/tool/delete/:id", deleteTool)
 
 // Product routes
 rt.post("/product/create", createProduct);

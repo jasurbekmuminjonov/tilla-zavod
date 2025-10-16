@@ -171,7 +171,8 @@ exports.createGold = async (req, res) => {
     req.body.user_id = req.user.user_id;
     req.body.factory_id = req.user.factory_id;
     req.body.ratio = req.body.purity / 585;
-    req.body.gramm = req.body.entered_gramm * Number(req.body.ratio?.toFixed(3));
+    req.body.gramm =
+      req.body.entered_gramm * Number(req.body.ratio?.toFixed(3));
     await Gold.create(req.body);
     return res.status(201).end();
   } catch (err) {
@@ -272,5 +273,23 @@ exports.getAllLosses = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Serverda xatolik", error: err.message });
+  }
+};
+
+exports.deleteGold = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.user;
+    const user = await User.findById(user_id);
+    if (user.role !== "admin") {
+      return res
+        .status(400)
+        .json({ message: "Kirimni faqat admin o'chira oladi" });
+    }
+    await Gold.findByIdAndDelete(id);
+    res.status(200).json({ message: "Kirim o'chirildi" });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

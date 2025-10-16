@@ -157,6 +157,7 @@ const Warehouses = () => {
             style={{ minWidth: "300px" }}
             content={
               <Table
+                bordered
                 columns={[
                   { title: "Ism", dataIndex: "name" },
                   { title: "Telefon", dataIndex: "phone" },
@@ -184,6 +185,7 @@ const Warehouses = () => {
           placement="bottom"
           content={
             <Table
+              bordered
               columns={[
                 {
                   title: "Yetkazuvchi",
@@ -242,6 +244,7 @@ const Warehouses = () => {
           placement="bottom"
           content={
             <Table
+              bordered
               columns={[
                 { title: "Nom", dataIndex: "tool_name" },
                 {
@@ -281,6 +284,7 @@ const Warehouses = () => {
           placement="bottom"
           content={
             <Table
+              bordered
               columns={[
                 {
                   title: "Turi",
@@ -365,6 +369,7 @@ const Warehouses = () => {
       >
         <TabPane tab="Omborlar" key="1">
           <Table
+            bordered
             loading={isLoading}
             columns={columns}
             size="small"

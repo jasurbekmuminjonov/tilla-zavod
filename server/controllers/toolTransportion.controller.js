@@ -4,7 +4,7 @@ const Tool = require("../models/tool.model");
 
 exports.createToolTransportion = async (req, res) => {
   try {
-    const { tool_id, user_name, quantity } = req.body;
+    const { tool_id, user_name, quantity, user_id } = req.body;
     req.body.factory_id = req.user.factory_id;
     const tool = await Tool.findById(tool_id);
     if (tool.stock - quantity <= 0) {
@@ -19,6 +19,7 @@ exports.createToolTransportion = async (req, res) => {
       quantity,
       user_name,
       factory_id: req.body.factory_id,
+      user_id,
     });
     await tool.save();
 
@@ -42,10 +43,12 @@ exports.getToolTransportion = async (req, res) => {
 
     let toolTransportions = await ToolTransportion.find({
       factory_id,
-    }).populate({
-      path: "tool_id",
-      select: "user_id tool_name",
-    });
+    })
+      .populate({
+        path: "tool_id",
+        select: "user_id tool_name",
+      })
+      .populate("user_id");
 
     if (!isAdmin) {
       toolTransportions = toolTransportions.filter(
@@ -61,3 +64,4 @@ exports.getToolTransportion = async (req, res) => {
     });
   }
 };
+

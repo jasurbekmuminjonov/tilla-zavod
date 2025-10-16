@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
   useCreateGoldMutation,
+  useDeleteGoldMutation,
   useGetGoldQuery,
   // useLazySearchGoldQuery,
 } from "../context/services/inventory.service";
@@ -34,7 +35,8 @@ const Gold = () => {
   // const { data: warehouses = [] } = useGetWarehousesQuery();
   // const [startGoldInfo, setStartGoldInfo] = useState({});
   const [activeTab, setActiveTab] = useState("1");
-  const [createGold] = useCreateGoldMutation();
+  const [createGold, { isLoading: createLoading }] = useCreateGoldMutation();
+  const [deleteGold] = useDeleteGoldMutation();
   const [createProvider] = useCreateProviderMutation();
 
   const [form] = Form.useForm();
@@ -161,6 +163,21 @@ const Gold = () => {
       title: "Опщий 585",
       dataIndex: "gramm",
       render: (text) => text.toFixed(2),
+    },
+    {
+      title: "O'chirish",
+      render: (_, record) => (
+        <Button
+          onClick={() => {
+            if (!confirm("Chindan ham kirimni o'chirmoqchimisiz?")) {
+              return;
+            }
+            handleDeleteGold(record._id);
+          }}
+        >
+          O'chirish
+        </Button>
+      ),
     },
 
     // { title: "Tavsif", dataIndex: "description" },
@@ -328,6 +345,20 @@ const Gold = () => {
         message: "Muvaffaqiyatli",
         description: "Oltin kirim qilindi",
       });
+      setActiveTab("1");
+      form.resetFields();
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err.data.message,
+      });
+    }
+  }
+
+  async function handleDeleteGold(id) {
+    try {
+      await deleteGold(id).unwrap();
     } catch (err) {
       console.log(err);
       notification.error({
@@ -438,9 +469,10 @@ const Gold = () => {
           <Table
             size="small"
             columns={columns}
+            bordered
             dataSource={filteredData.filter((item) => item.gramm > 0)}
             rowKey={(r) => r._id || Math.random()}
-            style={{ overflowX: "scroll" }}
+            style={{ overflowX: "scroll", background: "#FAFAFA" }}
             loading={isLoading}
           />
         </Tabs.TabPane>
@@ -506,7 +538,7 @@ const Gold = () => {
                 width: "100%",
               }}
             >
-              <Button htmlType="submit" type="primary">
+              <Button loading={createLoading} htmlType="submit" type="primary">
                 <FaSave /> Saqlash
               </Button>
               <Button type="primary" onClick={() => setProviderModal(true)}>

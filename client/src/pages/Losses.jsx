@@ -128,6 +128,7 @@ const Losses = () => {
         <Table
           size="small"
           columns={columns}
+          bordered
           dataSource={filteredLosses}
           rowKey={(record, idx) => idx}
           pagination={{ pageSize: 10 }}

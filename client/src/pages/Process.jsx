@@ -34,7 +34,7 @@ const Process = () => {
   const [form] = Form.useForm();
   const { data: processTypes = [] } = useGetProcessTypesByUserQuery();
   const { data: allProcessTypes = [] } = useGetProcessTypesQuery();
-  const [createProcess] = useCreateProcessMutation();
+  const [createProcess, { isLoading }] = useCreateProcessMutation();
   const { data: processes = [], isLoading: processLoading } =
     useGetProcessesByUserQuery();
   const [startDate, setStartDate] = useState(null);
@@ -286,6 +286,7 @@ const Process = () => {
             <Table
               size="small"
               columns={columns}
+              bordered
               dataSource={[...filteredProcesses].sort(
                 (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
               )}
@@ -500,7 +501,12 @@ const Process = () => {
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" icon={<FaSave />}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<FaSave />}
+              loading={isLoading}
+            >
               Saqlash
             </Button>
           </Form.Item>

@@ -26,7 +26,6 @@ import { GrUserAdmin } from "react-icons/gr";
 import { Form } from "antd";
 import { useGetWarehousesQuery } from "../context/services/warehouse.service";
 import { useGetProcessTypesQuery } from "../context/services/processType.service";
-import { unitOptions } from "../assets/unitOptions";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -39,7 +38,7 @@ const Users = () => {
   const { data: processTypes = [] } = useGetProcessTypesQuery();
   const [editUser, { isLoading: editLoading }] = useEditUserMutation();
   const [createUser, { isLoading: createLoading }] = useCreateUserMutation();
-  const [deleteUser, { isLoading: deleteLoading }] = useDeleteUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
   const [passwordModal, setPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState({});
   const [activeTab, setActiveTab] = useState("1");
@@ -254,6 +253,7 @@ const Users = () => {
           trigger="click"
           content={
             <Table
+              bordered
               style={{ minWidth: "300px" }}
               columns={[
                 { title: "Jarayon turi", dataIndex: "process_name" },

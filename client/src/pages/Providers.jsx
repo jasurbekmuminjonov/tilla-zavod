@@ -138,6 +138,7 @@ const Providers = () => {
             columns={columns}
             dataSource={providers}
             loading={isLoading}
+            bordered
             rowKey="_id"
             size="small"
           />

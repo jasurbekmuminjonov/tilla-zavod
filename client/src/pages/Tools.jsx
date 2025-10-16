@@ -8,6 +8,8 @@ import {
   notification,
   Table,
   Tabs,
+  Select,
+  Space,
 } from "antd";
 import moment from "moment";
 import { useCreateToolTransportionMutation } from "../context/services/toolTransportion.service";
@@ -15,18 +17,22 @@ import { GiHandTruck } from "react-icons/gi";
 import { MdSend } from "react-icons/md";
 import {
   useCreateToolMutation,
+  useDeleteToolMutation,
   useGetToolCreatingsQuery,
   useGetToolsQuery,
 } from "../context/services/inventory.service";
 import { useGetToolTransportionQuery } from "../context/services/toolTransportion.service";
+import { useGetUsersQuery } from "../context/services/user.service";
 
 const Tools = () => {
   const [createToolTransportion, { isLoading: toolTransportionLoading }] =
     useCreateToolTransportionMutation();
+  const { data: users = [] } = useGetUsersQuery();
   const { data: tools = [], isLoading } = useGetToolsQuery();
   const { data: toolCreatings = [] } = useGetToolCreatingsQuery();
   const { data: toolTransportions = [] } = useGetToolTransportionQuery();
   const [createTool] = useCreateToolMutation();
+  const [deleteTool] = useDeleteToolMutation();
 
   const [transportingTool, setTransportingTool] = useState({});
   const [transportingModal, setTransportingModal] = useState(false);
@@ -49,6 +55,7 @@ const Tools = () => {
       const payload = {
         tool_id: transportingTool._id,
         user_name: values.user_name,
+        user_id: values.user_id,
         quantity: values.quantity,
       };
       const res = await createToolTransportion(payload).unwrap();
@@ -71,7 +78,6 @@ const Tools = () => {
   async function handleCreateTool(values) {
     try {
       const res = await createTool(values).unwrap();
-      console.log(res);
 
       notification.success({
         message: res.message,
@@ -94,15 +100,27 @@ const Tools = () => {
     {
       title: "Operatsiyalar",
       render: (_, record) => (
-        <Button
-          onClick={() => {
-            setTransportingTool(record);
-            setTransportingModal(true);
-            transportingForm.resetFields();
-          }}
-          type="dashed"
-          icon={<GiHandTruck size={20} />}
-        />
+        <Space>
+          <Button
+            onClick={() => {
+              setTransportingTool(record);
+              setTransportingModal(true);
+              transportingForm.resetFields();
+            }}
+            type="dashed"
+            icon={<GiHandTruck size={20} />}
+          />
+          <Button
+            onClick={() => {
+              if (!confirm("Chindan ham zapchastni o'chirmoqchimisiz?")) {
+                return;
+              }
+              handleDeleteTool(record._id);
+            }}
+          >
+            O'chirish
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -124,16 +142,29 @@ const Tools = () => {
     {
       title: "Запчасть",
       dataIndex: "tool_id",
-      render: (text) => text.tool_name,
+      render: (text) => text?.tool_name,
     },
     { title: "Miqdor", dataIndex: "quantity" },
     { title: "Kimga", dataIndex: "user_name" },
+    { title: "Xodim", dataIndex: "user_id", render: (text) => text?.name },
     {
       title: "Sana",
       dataIndex: "createdAt",
       render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
     },
   ];
+
+  async function handleDeleteTool(id) {
+    try {
+      await deleteTool(id).unwrap();
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err.data.message,
+      });
+    }
+  }
 
   return (
     <div className="tools">
@@ -151,13 +182,7 @@ const Tools = () => {
               layout="vertical"
               autoComplete="off"
             >
-              <Form.Item
-                name="user_name"
-                label="Kimga yuborish"
-                rules={[
-                  { required: true, message: "Foydalanuvchi ismini kiriting" },
-                ]}
-              >
+              <Form.Item name="user_name" label="Kimga yuborish">
                 <AutoComplete
                   options={userNameOptions}
                   placeholder="Yangi ism yozish yoki tanlash"
@@ -167,6 +192,13 @@ const Tools = () => {
                       .includes(inputValue.toLowerCase())
                   }
                 />
+              </Form.Item>
+              <Form.Item name="user_id" label="Xodim">
+                <Select defaultValue={null}>
+                  {users.map((u) => (
+                    <Select.Option value={u._id}>{u.name}</Select.Option>
+                  ))}
+                </Select>
               </Form.Item>
 
               <Form.Item
@@ -194,6 +226,7 @@ const Tools = () => {
             dataSource={tools}
             size="small"
             rowKey="_id"
+            bordered
           />
         </Tabs.TabPane>
         <Tabs.TabPane key="2" tab="Запчасть kirim qilish">
@@ -234,6 +267,7 @@ const Tools = () => {
             columns={creatingColumns}
             dataSource={toolCreatings}
             size="small"
+            bordered
             rowKey="_id"
           />
         </Tabs.TabPane>
@@ -243,6 +277,7 @@ const Tools = () => {
             dataSource={toolTransportions}
             size="small"
             rowKey="_id"
+            bordered
           />
         </Tabs.TabPane>
       </Tabs>

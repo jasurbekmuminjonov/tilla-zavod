@@ -82,20 +82,27 @@ const Core = () => {
     };
 
     fetchReport();
-  }, [selectedUser, user]);
-  console.log(user);
+  }, [
+    selectedUser,
+    user,
+    getSummaryGived,
+    getSummaryGet,
+    getSummaryLost,
+    getReport,
+    users,
+  ]);
 
   const filteredData = useMemo(() => {
     const gold = selectedUser
-      ? golds.filter((g) => g.user_id._id === selectedUser)
+      ? golds.filter((g) => g?.user_id?._id === selectedUser)
       : golds;
 
     const process = selectedUser
-      ? processes.filter((p) => p.user_id === selectedUser)
+      ? processes?.filter((p) => p?.user_id === selectedUser)
       : processes;
 
     const product = selectedUser
-      ? products.filter((p) => p.user_id._id === selectedUser)
+      ? products?.filter((p) => p?.user_id?._id === selectedUser)
       : products;
 
     return { gold, process, product };
@@ -143,7 +150,6 @@ const Core = () => {
     borderRight: "1px solid #eee",
   };
 
-  console.log(user);
 
   return (
     <div className="core">

@@ -136,6 +136,7 @@ const ProductTypes = () => {
             columns={columns}
             dataSource={productTypes}
             loading={isLoading}
+            bordered
             rowKey="_id"
             size="small"
           />

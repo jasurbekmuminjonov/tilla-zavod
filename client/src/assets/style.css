@@ -33,3 +33,11 @@ input[type="date"] {
   border: 1px solid #ccc;
   border-radius: 5px;
 }
+.ant-table-tbody > tr > td {
+  background: #eaeaea;
+  color: #000;
+}
+.ant-table-tbody > tr:hover > td {
+  background: #d6d6d6 !important;
+  transition: background 0.2s ease;
+}

@@ -13,7 +13,7 @@ const Layout = () => {
   return (
     <AntLayout>
       <Sidebar />
-      <AntLayout>
+      <AntLayout style={{ background: "#d6d6d6" }}>
         <Modal
           footer={null}
           open={notificationModal}

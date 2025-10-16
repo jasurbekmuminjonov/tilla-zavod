@@ -85,7 +85,7 @@ const ProcessTypes = () => {
     {
       title: "Limit (1gr)",
       dataIndex: "loss_limit_per_gramm",
-      render: (val) => val?.toFixed(3),
+      render: (val) => val?.toFixed(4),
     },
     {
       title: "Amallar",
@@ -152,6 +152,7 @@ const ProcessTypes = () => {
           <Table
             columns={columns}
             dataSource={processTypes}
+            bordered
             loading={isLoading}
             rowKey="_id"
             size="small"

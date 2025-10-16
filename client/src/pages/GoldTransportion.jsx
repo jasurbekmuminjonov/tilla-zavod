@@ -68,7 +68,7 @@ const GoldTransportion = () => {
     };
 
     fetchReport();
-  }, [selectedFrom, selectedTo]);
+  }, [selectedFrom, selectedTo, getReport]);
 
   async function handleCreateTransportionSubmit(values) {
     try {
@@ -97,7 +97,6 @@ const GoldTransportion = () => {
         description: "O'tkazma qabul qilindi",
       });
       completeForm.resetFields();
-      setCompleteModal(false);
     } catch (err) {
       console.error(err);
       notification.error({
@@ -116,7 +115,7 @@ const GoldTransportion = () => {
     {
       title: "Kimga yuborildi",
       dataIndex: "to_id",
-      render: (text) => text.name,
+      render: (text) => text?.name,
     },
     {
       title: "Yuborilgan vaqti",
@@ -256,8 +255,8 @@ const GoldTransportion = () => {
           moment(item.sent_time).isSameOrBefore(end)
         : true;
 
-      const matchesFrom = !selectedFrom || item.from_id._id === selectedFrom;
-      const matchesTo = !selectedTo || item.to_id._id === selectedTo;
+      const matchesFrom = !selectedFrom || item?.from_id?._id === selectedFrom;
+      const matchesTo = !selectedTo || item?.to_id?._id === selectedTo;
 
       return inDateRange && matchesFrom && matchesTo;
     });
@@ -270,6 +269,7 @@ const GoldTransportion = () => {
           <Table
             size="small"
             scroll={{ x: "max-content" }}
+            bordered
             loading={receivedLoading}
             dataSource={receivedTransportions?.filter(
               (t) => t.status === "pending"
@@ -281,6 +281,7 @@ const GoldTransportion = () => {
           <Table
             scroll={{ x: "max-content" }}
             size="small"
+            bordered
             loading={sentLoading}
             dataSource={sentTransportions?.slice()}
             columns={columns}
@@ -290,6 +291,7 @@ const GoldTransportion = () => {
           <Table
             scroll={{ x: "max-content" }}
             size="small"
+            bordered
             loading={sentLoading}
             dataSource={receivedTransportions?.filter(
               (t) => t.status === "completed"
@@ -429,6 +431,7 @@ const GoldTransportion = () => {
           <Table
             scroll={{ x: "max-content" }}
             size="small"
+            bordered
             loading={sentLoading}
             dataSource={filteredTransportions
               ?.slice()

@@ -194,9 +194,6 @@ exports.getTransportionReport = async (req, res) => {
 exports.getSummaryGived = async (req, res) => {
   try {
     const { user_id } = req.query;
-    console.log(user_id);
-    const allTransportions = await Transportion.find();
-    console.log(allTransportions);
 
     const summary = await Transportion.aggregate([
       {
