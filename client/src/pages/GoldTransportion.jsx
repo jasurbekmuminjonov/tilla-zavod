@@ -363,7 +363,7 @@ const GoldTransportion = () => {
               }}
             >
               <thead>
-                <tr style={{ backgroundColor: "#f0f0f0" }}>
+                <tr >
                   <th style={{ padding: "10px" }}>Umumiy berdim</th>
 
                   <th style={{ padding: "10px" }}>Umumiy oldim</th>

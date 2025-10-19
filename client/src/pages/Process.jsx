@@ -164,7 +164,7 @@ const Process = () => {
     {
       title: "gr ga bo'lganda",
       dataIndex: "lost_per_gramm",
-      render: (text) => text?.toFixed(3),
+      render: (text) => text?.toFixed(5),
     },
     {
       title: "Jarayon turi",
@@ -407,7 +407,7 @@ const Process = () => {
             }}
           >
             <thead>
-              <tr style={{ backgroundColor: "#f0f0f0" }}>
+              <tr>
                 <th>Umumiy kirgan gr</th>
                 <th>Umumiy chiqqan gr</th>
                 <th>Umumiy astatka gr</th>

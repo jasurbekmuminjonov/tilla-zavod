@@ -125,21 +125,42 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const user = await User.findById(req.user.user_id);
-    const isAdmin = user.role === "admin";
     const products = await Product.find({
       factory_id: req.user.factory_id,
-    }).populate("user_id");
+    })
+      .populate("user_id")
+      .sort("-createdAt");
 
-    return res
-      .status(200)
-      .json(
-        isAdmin
-          ? products
-          : products.filter(
-              (p) => p.user_id._id?.toString() === req.user.user_id
-            )
-      );
+    return res.status(200).json(products);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.editProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    req.body.ratio = req.body.total_gramm / req.body.quantity;
+    await Product.findByIdAndUpdate(id, req.body);
+    res.json({ message: "Tahrirlandi" });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+exports.deleteProduct = async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const user = await User.findById(user_id);
+    if (user.role !== "admin") {
+      return res
+        .status(400)
+        .json({ message: "Tovarni faqat admin o'chira oladi" });
+    }
+    const { id } = req.params;
+    await Product.findByIdAndDelete(id);
+    res.json({ message: "O'chirildi" });
   } catch (err) {
     console.log(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });

@@ -36,7 +36,7 @@ const Providers = () => {
       //     await editProvider({ id: editingItem._id, body: values }).unwrap();
       //     notification.success({
       //       message: "Tahrirlandi",
-      //       description: "Yetkazib beruvchi yangilandi",
+      //       description: "Hamkor yangilandi",
       //     });
       //   } else {
       //     await createProvider(values).unwrap();
@@ -67,7 +67,7 @@ const Providers = () => {
       render: (_, __, index) => index + 1,
     },
     {
-      title: "Yetkazib beruvchi nomi",
+      title: "Hamkor nomi",
       dataIndex: "provider_name",
     },
     // {
@@ -89,7 +89,7 @@ const Providers = () => {
     //             await deleteProvider(record._id).unwrap();
     //             notification.success({
     //               message: "O‘chirildi",
-    //               description: "Yetkazib beruvchi o‘chirildi",
+    //               description: "Hamkor o‘chirildi",
     //             });
     //           } catch (err) {
     //             notification.error({
@@ -133,7 +133,7 @@ const Providers = () => {
           //   setEditingItem(null);
         }}
       >
-        <TabPane tab="Yetkazib beruvchilar" key="1">
+        <TabPane tab="Hamkorlar" key="1">
           <Table
             columns={columns}
             dataSource={providers}
@@ -144,7 +144,7 @@ const Providers = () => {
           />
         </TabPane>
 
-        <TabPane tab="Yangi yetkazib beruvchi" key="2">
+        <TabPane tab="Yangi hamkor" key="2">
           <Form
             layout="vertical"
             style={{ width: "50%" }}
@@ -154,7 +154,7 @@ const Providers = () => {
           >
             <Form.Item
               name="provider_name"
-              label="Yetkazib beruvchi nomi"
+              label="Hamkor nomi"
               rules={[{ required: true, message: "Nomini kiriting" }]}
             >
               <Input />

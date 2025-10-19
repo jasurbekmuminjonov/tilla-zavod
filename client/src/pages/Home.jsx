@@ -121,13 +121,22 @@ const Home = () => {
         <Col span={6}>
           <Card>
             <Statistic
+              suffix={"gr"}
+              title="Umumiy tovar"
+              value={stats.productGrammTotal}
+            />
+          </Card>
+        </Col>
+        {/* <Col span={6}>
+          <Card>
+            <Statistic
               title="Jarayondan chiqqan"
               value={stats.startGrammTotal}
               precision={2}
               suffix="gr"
             />
           </Card>
-        </Col>
+        </Col> */}
         <Col span={6}>
           <Card>
             <Statistic
@@ -139,15 +148,6 @@ const Home = () => {
           </Card>
         </Col>
         <Col span={6}>
-          <Card>
-            <Statistic
-              suffix={"gr"}
-              title="Umumiy tovar"
-              value={stats.productGrammTotal}
-            />
-          </Card>
-        </Col>
-        <Col span={24}>
           <Card>
             <Statistic
               title="Umumiy astatka"

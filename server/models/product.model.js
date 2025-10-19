@@ -7,6 +7,11 @@ const ProductSchema = new mongoose.Schema(
       ref: "ProductType",
       required: true,
     },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     quantity: {
       type: Number,
       required: true,
@@ -28,7 +33,7 @@ const ProductSchema = new mongoose.Schema(
     },
     factory_id: {
       type: mongoose.Types.ObjectId,
-      ref: "Factory",
+      ref: "Factory", 
       required: true,
     },
   },

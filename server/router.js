@@ -36,6 +36,7 @@ const {
   getTools,
   getToolCreatings,
   deleteTool,
+  editTool,
 } = require("./controllers/tool.controller");
 
 const {
@@ -48,6 +49,8 @@ const {
 const {
   createProduct,
   getProducts,
+  editProduct,
+  deleteProduct,
 } = require("./controllers/product.controller");
 
 const {
@@ -127,11 +130,14 @@ rt.get("/losses", getAllLosses);
 rt.post("/tool/create", createTool);
 rt.get("/tool", getTools);
 rt.get("/tool/creatings", getToolCreatings);
-rt.delete("/tool/delete/:id", deleteTool)
+rt.delete("/tool/delete/:id", deleteTool);
+rt.put("/tool/update/:id", editTool);
 
 // Product routes
 rt.post("/product/create", createProduct);
 rt.get("/product", getProducts);
+rt.put("/product/edit/:id", editProduct);
+rt.delete("/product/delete/:id", deleteProduct);
 
 // Product Type routes
 rt.post("/product-type/create", createProductType);

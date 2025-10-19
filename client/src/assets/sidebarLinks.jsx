@@ -81,7 +81,7 @@ export const sidebarLinks = [
   },
   {
     path: "/providers",
-    label: "Yetkazib beruvchilar",
+    label: "Hamkorlar",
     icon: <FaUserTie size={20} />,
   },
   // {

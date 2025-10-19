@@ -1,0 +1,10 @@
+1. warehouse update✅
+1. product update✅
+2. process full delete✅
+3. new model - astatka
+5. home delete card✅
+6. gold transportion between user and provider
+7. process limit toFixed✅
+8. 
+9.
+10.

@@ -24,6 +24,29 @@ export const inventoryApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Tool"],
     }),
+    editTool: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/tool/update/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Tool"],
+    }),
+    deleteProduct: builder.mutation({
+      query: (id) => ({
+        url: `/product/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Product"],
+    }),
+    editProduct: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/product/edit/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Product"],
+    }),
 
     createTool: builder.mutation({
       query: (body) => ({
@@ -76,7 +99,6 @@ export const inventoryApi = api.injectEndpoints({
       }),
       providesTags: ["Losses"],
     }),
-    // PRODUCT: Yangi mahsulot qo‘shish
     createProduct: builder.mutation({
       query: (body) => ({
         url: "/product/create",
@@ -100,4 +122,7 @@ export const {
   useGetToolCreatingsQuery,
   useDeleteGoldMutation,
   useDeleteToolMutation,
+  useEditToolMutation,
+  useDeleteProductMutation,
+  useEditProductMutation,
 } = inventoryApi;

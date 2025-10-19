@@ -458,7 +458,7 @@ const Warehouses = () => {
             </Form.Item>
             <Form.Item
               rules={[
-                { required: true, message: "Yetkazib beruvchini tanlang" },
+                { required: true, message: "Hamkorni tanlang" },
               ]}
               name="provider_id"
               label="Kimdan kelgan"

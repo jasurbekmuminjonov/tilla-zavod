@@ -1,16 +1,17 @@
 const User = require("../models/user.model");
 const Tool = require("../models/tool.model");
 const ToolCreating = require("../models/toolCreating.model");
+const ToolTransportion = require("../models/toolTransportion.model");
 
 exports.createTool = async (req, res) => {
   try {
     const { user_id, factory_id } = req.user;
-    const { tool_name, stock } = req.body;
+    const { tool_name, stock, description, usd_price, uzs_price } = req.body;
     const user = await User.findById(user_id);
     if (!user.create_tool) {
       return res.status(403).json({ message: "Sizda bunday huquq yo'q" });
     }
-    const tool = await Tool.findOne({ tool_name, user_id });
+    const tool = await Tool.findOne({ tool_name, user_id, description });
     if (tool) {
       tool.stock += stock;
       await tool.save();
@@ -19,6 +20,8 @@ exports.createTool = async (req, res) => {
         quantity: stock,
         user_id,
         factory_id,
+        usd_price,
+        uzs_price,
       });
     } else {
       req.body.user_id = user_id;
@@ -29,6 +32,9 @@ exports.createTool = async (req, res) => {
         quantity: stock,
         user_id,
         factory_id,
+        usd_price,
+        uzs_price,
+        description,
       });
     }
     res.status(201).json({
@@ -47,9 +53,9 @@ exports.getTools = async (req, res) => {
     const isAdmin = user.role === "admin";
     let tools;
     if (isAdmin) {
-      tools = await Tool.find({ factory_id });
+      tools = await Tool.find({ factory_id }).sort("-createdAt");
     } else {
-      tools = await Tool.find({ factory_id, user_id });
+      tools = await Tool.find({ factory_id, user_id }).sort("-createdAt");
     }
     res.status(200).json(tools);
   } catch (err) {
@@ -65,11 +71,13 @@ exports.getToolCreatings = async (req, res) => {
     const isAdmin = user.role === "admin";
     let tools;
     if (isAdmin) {
-      tools = await ToolCreating.find({ factory_id }).populate("tool_id");
+      tools = await ToolCreating.find({ factory_id })
+        .populate("tool_id")
+        .sort("-createdAt");
     } else {
-      tools = await ToolCreating.find({ factory_id, user_id }).populate(
-        "tool_id"
-      );
+      tools = await ToolCreating.find({ factory_id, user_id })
+        .populate("tool_id")
+        .sort("-createdAt");
     }
     res.status(200).json(tools);
   } catch (err) {
@@ -102,12 +110,32 @@ exports.deleteTool = async (req, res) => {
     await tool.deleteOne();
 
     await ToolCreating.deleteMany({ tool_id: id });
+    await ToolTransportion.deleteMany({ tool_id: id });
 
     res
       .status(200)
       .json({ message: "Zapchast va unga bog‘langan hujjatlar o‘chirildi" });
   } catch (err) {
     console.error(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
+exports.editTool = async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const user = await User.findById(user_id);
+    const isAdmin = user.role === "admin";
+
+    const { id } = req.params;
+    if (isAdmin) {
+      await Tool.findByIdAndUpdate(id, req.body);
+    } else {
+      await Tool.findOneAndUpdate({ _id: id, user_id }, req.body);
+    }
+    res.json({ message: "Tahrirlandi" });
+  } catch (err) {
+    console.log(err.message);
     return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

@@ -66,10 +66,10 @@ const ProductTypes = () => {
       title: "Mahsulot nomi",
       dataIndex: "product_name",
     },
-    {
-      title: "Izoh",
-      dataIndex: "description",
-    },
+    // {
+    //   title: "Izoh",
+    //   dataIndex: "description",
+    // },
     {
       title: "Amallar",
       render: (_, record) => (
@@ -158,9 +158,9 @@ const ProductTypes = () => {
               <Input />
             </Form.Item>
 
-            <Form.Item name="description" label="Izoh">
+            {/* <Form.Item name="description" label="Izoh">
               <TextArea rows={4} placeholder="Qo'shimcha ma'lumot..." />
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item>
               <Button

@@ -83,7 +83,7 @@ exports.cancelProcess = async (req, res) => {
     }
     process.status = "inactive";
     // await user.save();
-    await process.save();
+    await process.deleteOne();
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);

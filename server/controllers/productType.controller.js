@@ -7,7 +7,7 @@ exports.createProductType = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -19,7 +19,7 @@ exports.getProductTypes = async (req, res) => {
     return res.status(200).json(productTypes);
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -28,12 +28,11 @@ exports.editProductType = async (req, res) => {
     const { id } = req.params;
     await ProductType.findByIdAndUpdate(id, {
       product_name: req.body.product_name,
-      description: req.body.description,
     });
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -44,6 +43,6 @@ exports.deleteProductType = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

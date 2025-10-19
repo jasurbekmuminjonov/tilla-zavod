@@ -4,19 +4,25 @@ import {
   InputNumber,
   Select,
   Tabs,
-  Modal,
   Table,
   notification,
+  AutoComplete,
+  DatePicker,
+  Space,
 } from "antd";
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useCreateProductMutation,
+  useDeleteProductMutation,
   useGetProductQuery,
 } from "../context/services/inventory.service";
-import { useGetUserByUserIdQuery } from "../context/services/user.service";
+import {
+  useGetUserByUserIdQuery,
+  useGetUsersQuery,
+} from "../context/services/user.service";
 import moment from "moment";
 import { useGetProductTypesQuery } from "../context/services/productType.service";
-import { FaLock, FaSave } from "react-icons/fa";
+import { FaLock, FaRegTrashAlt, FaSave } from "react-icons/fa";
 
 const { TabPane } = Tabs;
 
@@ -24,13 +30,37 @@ const Products = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [createProduct] = useCreateProductMutation();
   const { data: self = {} } = useGetUserByUserIdQuery();
+  const { data: users = [] } = useGetUsersQuery();
   const { data: productTypes = [] } = useGetProductTypesQuery();
   const { data: products = [], isLoading: productLoading } =
     useGetProductQuery();
+  const [deleteProduct] = useDeleteProductMutation();
 
-  const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [createForm] = Form.useForm();
+
+  const [filteredDescriptions, setFilteredDescriptions] = useState([]);
+  const [filterUser, setFilterUser] = useState(null);
+  const [filterProductType, setFilterProductType] = useState(null);
+  const [filterDescription, setFilterDescription] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
+
+  useEffect(() => {
+    if (self && self.role !== "admin") {
+      setFilterUser(self._id);
+    }
+  }, [self]);
+
+  const handleProductTypeChange = (productTypeId) => {
+    const filtered = products
+      .filter((p) => p.product_type_id === productTypeId)
+      .map((p) => p.description)
+      .filter((desc) => desc && desc.trim() !== "");
+
+    const uniqueDescriptions = [...new Set(filtered)];
+    setFilteredDescriptions(uniqueDescriptions);
+    createForm.setFieldsValue({ description: "" });
+  };
 
   async function handleCreateProduct(values) {
     try {
@@ -40,11 +70,13 @@ const Products = () => {
         description: "Tovar yaratildi",
       });
       createForm.resetFields();
+      setFilteredDescriptions([]);
+      setActiveTab("1");
     } catch (err) {
       console.log(err);
       notification.error({
         message: "Xatolik",
-        description: err.data.message,
+        description: err?.data?.message || "Server xatosi",
       });
     }
   }
@@ -57,10 +89,8 @@ const Products = () => {
         productTypes.find((item) => item._id === text)?.product_name,
     },
     {
-      title: "Tavsif",
-      dataIndex: "product_type_id",
-      render: (text) =>
-        productTypes.find((item) => item._id === text)?.description,
+      title: "Turi",
+      dataIndex: "description",
     },
     {
       title: "Soni",
@@ -71,18 +101,137 @@ const Products = () => {
       dataIndex: "total_gramm",
     },
     {
-      title: "Ish",
-      dataIndex: "ratio",
-      render: (text) => text?.toFixed(4),
-    },
-    {
       title: "Ishchi",
-      render: (_, record) => record.user_id.name,
+      render: (_, record) => record.user_id?.name,
     },
     {
       title: "Sana",
-      dataIndex: "date",
+      dataIndex: "createdAt",
       render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+    },
+    {
+      title: "O'chirish",
+      render: (_, record) => (
+        <Button
+          icon={<FaRegTrashAlt />}
+          onClick={async () => {
+            if (
+              !window.confirm(
+                `${
+                  productTypes.find(
+                    (item) => item._id === record.product_type_id
+                  )?.product_name
+                } - ${record.description}, ${
+                  record.quantity
+                } ta, ni o'chirib tashlamoqchimisiz?`
+              )
+            )
+              return;
+            try {
+              await deleteProduct(record._id).unwrap();
+            } catch (err) {
+              notification.error({
+                message: "Xatolik",
+                description: err.data?.message,
+              });
+            }
+          }}
+        />
+      ),
+    },
+  ];
+
+const groupedData = useMemo(() => {
+  let filtered = [...products];
+
+  if (filterUser) {
+    filtered = filtered.filter((p) => p.user_id?._id === filterUser);
+  }
+
+  if (fromDate || toDate) {
+    filtered = filtered.filter((p) => {
+      const created = moment(p.createdAt).startOf("day");
+      if (fromDate && toDate) {
+        return (
+          created.isSameOrAfter(moment(fromDate).startOf("day")) &&
+          created.isSameOrBefore(moment(toDate).endOf("day"))
+        );
+      } else if (fromDate && !toDate) {
+        return created.isSameOrAfter(moment(fromDate).startOf("day"));
+      } else if (!fromDate && toDate) {
+        return created.isSameOrBefore(moment(toDate).endOf("day"));
+      }
+      return true;
+    });
+  }
+
+  // 🔽 Faqat bitta productType tanlansa, shuni olamiz
+  const visibleProductTypes = filterProductType
+    ? productTypes.filter((t) => t._id === filterProductType)
+    : productTypes;
+
+  const result = visibleProductTypes.map((type) => {
+    const typeProducts = filtered.filter(
+      (p) => p.product_type_id === type._id
+    );
+
+    // 🔽 faqat shu turdagi description tanlangan bo‘lsa, bitta o‘zi chiqsin
+    const allDescriptions = filterDescription
+      ? [filterDescription]
+      : [
+          ...new Set(
+            products
+              .filter((p) => p.product_type_id === type._id)
+              .map((p) => p.description || "—")
+          ),
+        ];
+
+    const childGroups = allDescriptions.map((desc) => {
+      const sameDesc = typeProducts.filter((p) => p.description === desc);
+      return {
+        key: `${type._id}_${desc}`,
+        product_name: desc,
+        quantity: sameDesc.reduce((sum, p) => sum + p.quantity, 0),
+        total_gramm: sameDesc.reduce((sum, p) => sum + p.total_gramm, 0),
+      };
+    });
+
+    return {
+      key: type._id,
+      product_name: type.product_name,
+      quantity: childGroups.reduce((sum, c) => sum + c.quantity, 0),
+      total_gramm: childGroups.reduce((sum, c) => sum + c.total_gramm, 0),
+      children: childGroups,
+    };
+  });
+
+  return result;
+}, [
+  products,
+  productTypes,
+  filterUser,
+  fromDate,
+  toDate,
+  filterProductType,
+  filterDescription,
+]);
+
+
+  const groupedColumns = [
+    {
+      title: "Mahsulot / Turi",
+      dataIndex: "product_name",
+      key: "product_name",
+    },
+    {
+      title: "Soni",
+      dataIndex: "quantity",
+      key: "quantity",
+    },
+    {
+      title: "Jami gramm",
+      dataIndex: "total_gramm",
+      key: "total_gramm",
     },
   ];
 
@@ -109,125 +258,16 @@ const Products = () => {
         <TabPane key="1" tab="Tovarlar">
           <Table
             loading={productLoading}
-            dataSource={products}
+            dataSource={products.filter((p) =>
+              self.role === "user" ? p.user_id._id === self._id : true
+            )}
             columns={columns}
             size="small"
             bordered
           />
         </TabPane>
+
         <TabPane key="2" tab="Tovar ishlab chiqarish">
-          {/* {Object.keys(selectedGoldId).length > 0 && (
-            <Card>
-              <Statistic
-                title="Oltin"
-                value={totalGramm + " gr"}
-                suffix={" / " + selectedGoldId.gramm + " gr"}
-              />
-              <Button
-                disabled={productList.length < 1}
-                type="dashed"
-                onClick={() => createForm.submit()}
-                style={{ marginTop: 12 }}
-              >
-                Tasdiqlash
-              </Button>
-            </Card>
-          )}
-          <Form
-            onFinish={handleCreateProduct}
-            layout="vertical"
-            autoComplete="off"
-            form={createForm}
-          >
-            <Form.Item
-              name="gold_id"
-              label="Tovar uchun oltin"
-              rules={[{ required: true, message: "Oltinni tanlang" }]}
-            >
-              <Select
-                onChange={(value) =>
-                  setSelectedGoldId(userGold.find((item) => item._id === value))
-                }
-                placeholder="Oltin tanlang"
-              >
-                {userGold?.map((g) => (
-                  <Select.Option key={g._id} value={g._id}>
-                    {g.gramm} gr - {g.gold_purity?.toFixed(2)} proba -{" "}
-                    {moment(g.date).format("DD.MM.YYYY")}{" "}
-                    {g.processes?.map((p, i) => {
-                      const status = statusOptions[p.status] || {
-                        color: "default",
-                      };
-                      return (
-                        <Tag key={i} color={status.color}>
-                          {p.process_type_id?.process_name}
-                        </Tag>
-                      );
-                    })}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Button
-              type="dashed"
-              icon={<FaPlus />}
-              onClick={handleAddClick}
-              style={{ marginBottom: 16 }}
-              disabled={Object.keys(selectedGoldId).length < 1}
-            >
-              Tovar qo'shish
-            </Button>
-
-            <Table
-              bordered
-              dataSource={productList}
-              rowKey={(record, index) => index}
-              pagination={false}
-              size="small"
-              columns={[
-                {
-                  title: "Tovar turi",
-                  dataIndex: "product_type_id",
-                  render: (id) =>
-                    productTypes.find((pt) => pt._id === id)?.product_name ||
-                    id,
-                },
-                {
-                  title: "Soni",
-                  dataIndex: "quantity",
-                },
-                {
-                  title: "Proba",
-                  dataIndex: "purity",
-                },
-                {
-                  title: "1 dona gramm",
-                  dataIndex: "gramm_per_quantity",
-                },
-                {
-                  title: "Jami yo'qotilgan gr",
-                  dataIndex: "total_lost_gramm",
-                },
-                {
-                  title: "Amallar",
-                  render: (_, __, index) => (
-                    <Space>
-                      <Button
-                        icon={<FaEdit />}
-                        onClick={() => handleEditClick(index)}
-                      />
-                      <Button
-                        danger
-                        icon={<FaTrash />}
-                        onClick={() => handleDelete(index)}
-                      />
-                    </Space>
-                  ),
-                },
-              ]}
-            />
-          </Form> */}
           <Form
             onFinish={handleCreateProduct}
             layout="vertical"
@@ -240,12 +280,37 @@ const Products = () => {
               label="Tovar"
               rules={[{ required: true, message: "Tovarni tanlang" }]}
             >
-              <Select>
+              <Select
+                placeholder="Tovarni tanlang"
+                onChange={handleProductTypeChange}
+              >
                 {productTypes.map((p) => (
-                  <Select.Option value={p._id}>{p.product_name}</Select.Option>
+                  <Select.Option key={p._id} value={p._id}>
+                    {p.product_name}
+                  </Select.Option>
                 ))}
               </Select>
             </Form.Item>
+
+            <Form.Item
+              name="description"
+              label="Turi"
+              rules={[
+                {
+                  required: true,
+                  message: "Turini tanlang yoki yangi kiriting",
+                },
+              ]}
+            >
+              <AutoComplete
+                options={filteredDescriptions.map((desc) => ({ value: desc }))}
+                placeholder="Turini tanlang yoki yangi yozing"
+                filterOption={(input, option) =>
+                  option.value.toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            </Form.Item>
+
             <Form.Item
               name="quantity"
               rules={[{ required: true, message: "Sonini kiriting" }]}
@@ -253,19 +318,95 @@ const Products = () => {
             >
               <InputNumber style={{ width: "100%" }} />
             </Form.Item>
+
             <Form.Item
               name="total_gramm"
-              rules={[{ required: true, message: "Umumiy gr kiriting" }]}
-              label="Umumiy gr"
+              rules={[{ required: true, message: "Umumiy grammni kiriting" }]}
+              label="Umumiy gramm"
             >
               <InputNumber style={{ width: "100%" }} />
             </Form.Item>
+
             <Form.Item>
               <Button type="primary" htmlType="submit" icon={<FaSave />}>
                 Saqlash
               </Button>
             </Form.Item>
           </Form>
+        </TabPane>
+
+        <TabPane key="3" tab="Umumiy hisobot">
+          <Space style={{ marginBottom: 16, flexWrap: "wrap" }}>
+            <Select
+              placeholder="Foydalanuvchi"
+              style={{ width: 200 }}
+              allowClear
+              value={filterUser}
+              disabled={self.role !== "admin"}
+              onChange={(v) => setFilterUser(v || null)}
+            >
+              {users.map((u) => (
+                <Select.Option key={u._id} value={u._id}>
+                  {u.name}
+                </Select.Option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="Tovar"
+              style={{ width: 200 }}
+              allowClear
+              onChange={(v) => {
+                setFilterProductType(v || null);
+                setFilterDescription(null);
+              }}
+            >
+              {productTypes.map((t) => (
+                <Select.Option key={t._id} value={t._id}>
+                  {t.product_name}
+                </Select.Option>
+              ))}
+            </Select>
+
+            {filterProductType && (
+              <Select
+                placeholder="Turi"
+                style={{ width: 200 }}
+                allowClear
+                value={filterDescription}
+                onChange={(v) => setFilterDescription(v || null)}
+              >
+                {[
+                  ...new Set(
+                    products
+                      .filter((p) => p.product_type_id === filterProductType)
+                      .map((p) => p.description)
+                  ),
+                ].map((desc) => (
+                  <Select.Option key={desc} value={desc}>
+                    {desc}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+
+            <DatePicker
+              placeholder="Boshlanish"
+              onChange={(d) => setFromDate(d ? d.toDate() : null)}
+            />
+            <DatePicker
+              placeholder="Tugash"
+              onChange={(d) => setToDate(d ? d.toDate() : null)}
+            />
+          </Space>
+
+          <Table
+            columns={groupedColumns}
+            dataSource={groupedData}
+            bordered
+            pagination={false}
+            expandable={{ defaultExpandAllRows: true }}
+          />
         </TabPane>
       </Tabs>
     </div>
