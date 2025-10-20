@@ -21,6 +21,7 @@ import { notification } from "antd";
 import { useGetReceivedProductTransportionsQuery } from "./context/services/productTransportion.service";
 import Home from "./pages/Home";
 import Core from "./pages/Core";
+import ExternalTransportion from "./pages/ExternalTransportion";
 
 const App = () => {
   const token = localStorage.getItem("token");
@@ -107,6 +108,7 @@ const App = () => {
         <Route path="gold" element={<Gold />} />
         <Route path="tools" element={<Tools />} />
         <Route path="transfer-gold" element={<GoldTransportion />} />
+        <Route path="external-transportion" element={<ExternalTransportion />} />
         <Route path="process" element={<Process />} />
         <Route path="products" element={<Products />} />
         <Route path="losses" element={<Losses />} />

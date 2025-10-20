@@ -6,13 +6,11 @@ const { Title } = Typography;
 
 import { Typography } from "antd";
 import { useState } from "react";
-import { useGetUserByUserIdQuery } from "../context/services/user.service";
 
 const { Sider } = Layout;
 
 const Sidebar = () => {
   const location = useLocation();
-  const { data: self = {} } = useGetUserByUserIdQuery();
   const [collapsed, setCollapsed] = useState(false);
   const { data: factory = {} } = useGetFactoryQuery();
   const baseStyle = {

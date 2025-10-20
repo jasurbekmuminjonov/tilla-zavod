@@ -11,7 +11,7 @@ import {
 import { GiBigDiamondRing } from "react-icons/gi";
 import { IoIosWarning, IoMdSettings } from "react-icons/io";
 import { IoCutSharp } from "react-icons/io5";
-import { TbCubeSend } from "react-icons/tb";
+import { TbCubeSend, TbTransfer } from "react-icons/tb";
 
 export const sidebarLinks = [
   {
@@ -68,6 +68,11 @@ export const sidebarLinks = [
     path: "/transfer-gold",
     label: "Oltin o'tkazmalari",
     icon: <AiFillGold size={20} />,
+  },
+  {
+    path: "/external-transportion",
+    label: "Tashqi o'tkazmalar",
+    icon: <TbTransfer  size={20} />,
   },
   // {
   //   path: "/transfer-product",

@@ -10,6 +10,13 @@ export const transportionApi = api.injectEndpoints({
       }),
       providesTags: ["Transportion"],
     }),
+    getExternalTransportions: builder.query({
+      query: () => ({
+        url: "/external-transport/get",
+        method: "GET",
+      }),
+      providesTags: ["ExtTransportion"],
+    }),
     getTransportionsReport: builder.query({
       query: ({ first_user, second_user }) => ({
         url: `/transport/report?first_user=${first_user}&second_user=${second_user}`,
@@ -44,6 +51,22 @@ export const transportionApi = api.injectEndpoints({
         body,
       }),
       invalidatesTags: ["Transportion"],
+    }),
+    createExtTransportion: builder.mutation({
+      query: (body) => ({
+        url: "/external-transport/create",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExtTransportion"],
+    }),
+
+    deleteExtTransportion: builder.mutation({
+      query: (transportion_id) => ({
+        url: `/external-transport/delete/${transportion_id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ExtTransportion"],
     }),
 
     // Transportatsiyani yakunlash
@@ -103,4 +126,7 @@ export const {
   useLazyGetTransportionsReportQuery,
   useLazyGetSummaryGetQuery,
   useLazyGetSummaryGivedQuery,
+  useCreateExtTransportionMutation,
+  useGetExternalTransportionsQuery,
+  useDeleteExtTransportionMutation
 } = transportionApi;

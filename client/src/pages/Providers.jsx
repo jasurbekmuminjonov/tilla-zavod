@@ -106,22 +106,22 @@ const Providers = () => {
     // },
   ];
 
-  if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "15px",
-        }}
-      >
-        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
-      </div>
-    );
-  }
+  // if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
+  //   return (
+  //     <div
+  //       style={{
+  //         width: "100%",
+  //         height: "100%",
+  //         display: "flex",
+  //         alignItems: "center",
+  //         justifyContent: "center",
+  //         gap: "15px",
+  //       }}
+  //     >
+  //       <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo‘q</h2>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="providers">

@@ -1,7 +1,6 @@
 const express = require("express");
 const rt = express.Router();
 
-// Controllers
 const {
   createUser,
   loginUser,
@@ -99,6 +98,11 @@ const {
   createProvider,
   getProviders,
 } = require("./controllers/provider.controller");
+const {
+  createExtTransportion,
+  getExtTransportion,
+  deleteExtTransportion,
+} = require("./controllers/externalTransportion.controller");
 
 // User routes
 rt.post("/user/create", createUser);
@@ -186,5 +190,10 @@ rt.get("/transport/summary/get", getSummaryGet);
 // Provider routes
 rt.post("/provider/create", createProvider);
 rt.get("/provider", getProviders);
+
+// External transportion routes
+rt.post("/external-transport/create", createExtTransportion);
+rt.get("/external-transport/get", getExtTransportion);
+rt.delete("/external-transport/delete/:id", deleteExtTransportion);
 
 module.exports = rt;

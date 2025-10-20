@@ -24,13 +24,17 @@ import {
   useGetToolsQuery,
 } from "../context/services/inventory.service";
 import { useGetToolTransportionQuery } from "../context/services/toolTransportion.service";
-import { useGetUsersQuery } from "../context/services/user.service";
-import { FaRegTrashAlt } from "react-icons/fa";
+import {
+  useGetUserByUserIdQuery,
+  useGetUsersQuery,
+} from "../context/services/user.service";
+import { FaLock, FaRegTrashAlt } from "react-icons/fa";
 
 const Tools = () => {
   const [createToolTransportion, { isLoading: toolTransportionLoading }] =
     useCreateToolTransportionMutation();
   const { data: users = [] } = useGetUsersQuery();
+  const { data: self = {} } = useGetUserByUserIdQuery();
   const { data: tools = [], isLoading } = useGetToolsQuery();
   const { data: toolCreatings = [] } = useGetToolCreatingsQuery();
   const { data: toolTransportions = [] } = useGetToolTransportionQuery();
@@ -316,6 +320,23 @@ const Tools = () => {
     }
   }
 
+  if (self?.role !== "admin" && !self?.create_tool) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+        }}
+      >
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
+      </div>
+    );
+  }
+
   return (
     <div className="tools">
       <Tabs onChange={setActiveTab} activeKey={activeTab}>
@@ -371,7 +392,6 @@ const Tools = () => {
             </Form>
           </Modal>
 
-          {/* 🔹 Jadval */}
           <Table
             loading={isLoading}
             columns={columns}

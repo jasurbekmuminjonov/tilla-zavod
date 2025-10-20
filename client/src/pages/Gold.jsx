@@ -22,7 +22,8 @@ import {
   useCreateProviderMutation,
   useGetProvidersQuery,
 } from "../context/services/provider.service";
-import { FaPlus, FaSave } from "react-icons/fa";
+import { FaLock, FaPlus, FaSave } from "react-icons/fa";
+import { useGetUserByUserIdQuery } from "../context/services/user.service";
 // import { FaList } from "react-icons/fa";
 // import { useGetUsersQuery } from "../context/services/user.service";
 // import { useGetWarehousesQuery } from "../context/services/warehouse.service";
@@ -38,6 +39,7 @@ const Gold = () => {
   const [createGold, { isLoading: createLoading }] = useCreateGoldMutation();
   const [deleteGold] = useDeleteGoldMutation();
   const [createProvider] = useCreateProviderMutation();
+  const { data: self = {} } = useGetUserByUserIdQuery();
 
   const [form] = Form.useForm();
   const [providerForm] = Form.useForm();
@@ -386,6 +388,23 @@ const Gold = () => {
       });
     }
   };
+
+  if (self?.role !== "admin" && !self?.create_gold) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "15px",
+        }}
+      >
+        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="gold">
