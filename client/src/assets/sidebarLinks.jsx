@@ -81,7 +81,7 @@ export const sidebarLinks = [
   // },
   {
     path: "/core",
-    label: "Hisob-kitob",
+    label: "Astatka",
     icon: <FaCalculator size={20} />,
   },
   {

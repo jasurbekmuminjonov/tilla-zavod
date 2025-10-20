@@ -1,4 +1,5 @@
 const ProductType = require("../models/productType.model");
+const Product = require("../models/product.model");
 
 exports.createProductType = async (req, res) => {
   try {
@@ -40,6 +41,7 @@ exports.deleteProductType = async (req, res) => {
   try {
     const { id } = req.params;
     await ProductType.findByIdAndDelete(id);
+    await Product.deleteMany({ product_type_id: id });
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);

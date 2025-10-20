@@ -93,16 +93,25 @@ const {
   getTransportionReport,
   getSummaryGived,
   getSummaryGet,
+  deleteTransportion,
 } = require("./controllers/transportion.controller");
 const {
   createProvider,
   getProviders,
+  editProvider,
+  deleteProvider,
 } = require("./controllers/provider.controller");
 const {
   createExtTransportion,
   getExtTransportion,
   deleteExtTransportion,
 } = require("./controllers/externalTransportion.controller");
+const {
+  createAstatka,
+  getAstatka,
+  editAstatka,
+  deleteAstatka,
+} = require("./controllers/astatka.controller");
 
 // User routes
 rt.post("/user/create", createUser);
@@ -186,14 +195,23 @@ rt.put("/transport/cancel/:transportion_id", cancelTransportion);
 rt.get("/transport/report", getTransportionReport);
 rt.get("/transport/summary/gived", getSummaryGived);
 rt.get("/transport/summary/get", getSummaryGet);
+rt.delete("/transportion/delete/:id", deleteTransportion);
 
 // Provider routes
 rt.post("/provider/create", createProvider);
 rt.get("/provider", getProviders);
+rt.put("/provider/edit/:id", editProvider);
+rt.delete("/provider/delete/:id", deleteProvider);
 
 // External transportion routes
 rt.post("/external-transport/create", createExtTransportion);
 rt.get("/external-transport/get", getExtTransportion);
 rt.delete("/external-transport/delete/:id", deleteExtTransportion);
+
+//Astatka routes
+rt.post("/astatka/create", createAstatka);
+rt.get("/astatka/get", getAstatka);
+rt.put("/astatka/edit/:id", editAstatka);
+rt.delete("/astatka/delete/:id", deleteAstatka);
 
 module.exports = rt;

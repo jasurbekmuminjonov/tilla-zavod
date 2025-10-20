@@ -14,7 +14,25 @@ import {
 } from "../context/services/transportion.service";
 import { useGetUsersQuery } from "../context/services/user.service";
 import { useGetProcessTypesQuery } from "../context/services/processType.service";
-import { Button, Input, Select, Space, Popover, Table } from "antd";
+import {
+  Button,
+  Input,
+  Select,
+  Space,
+  Popover,
+  Table,
+  Tabs,
+  Modal,
+  message,
+} from "antd";
+import {
+  useCreateAstatkaMutation,
+  useDeleteAstatkaMutation,
+  useEditAstatkaMutation,
+  useGetAstatkaQuery,
+} from "../context/services/astatka.service";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
 
 const Core = () => {
   const { data: users = [] } = useGetUsersQuery();
@@ -22,22 +40,31 @@ const Core = () => {
   const { data: processTypes = [] } = useGetProcessTypesQuery();
   const { data: golds = [] } = useGetGoldQuery();
   const { data: products = [] } = useGetProductQuery();
+  const { data: astatka = [], isLoading: astatkaLoading } = useGetAstatkaQuery();
+  const [createAstatka] = useCreateAstatkaMutation();
+  const [editAstatka] = useEditAstatkaMutation();
+  const [deleteAstatka] = useDeleteAstatkaMutation();
   const [user, setUser] = useState({});
   const localeUser = JSON.parse(localStorage.getItem("user"));
   const [selectedUser, setSelectedUser] = useState(
     localeUser.role === "admin" ? "" : localeUser._id
   );
   const [getReport, { data = {} }] = useLazyGetTransportionsReportQuery();
-  const [getSummaryLost, { data: summaryLost = [] }] =
-    useLazyGetLossesSummaryQuery();
-  const [getSummaryGived, { data: summaryGived = [] }] =
-    useLazyGetSummaryGivedQuery();
-  const [getSummaryGet, { data: summaryGet = [] }] =
-    useLazyGetSummaryGetQuery();
+  const [getSummaryLost, { data: summaryLost = [] }] = useLazyGetLossesSummaryQuery();
+  const [getSummaryGived, { data: summaryGived = [] }] = useLazyGetSummaryGivedQuery();
+  const [getSummaryGet, { data: summaryGet = [] }] = useLazyGetSummaryGetQuery();
 
   const [inputValue, setInputValue] = useState("");
   const [difference, setDifference] = useState(null);
   const [realAstatka, setRealAstatka] = useState(0);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalValue, setModalValue] = useState("");
+
+  // yangi: edit modal uchun
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editRecord, setEditRecord] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   const summaryColumns = [
     {
@@ -144,168 +171,361 @@ const Core = () => {
     setDifference(diff);
   };
 
+  const handleSave = async () => {
+    try {
+      await createAstatka({
+        user_id: selectedUser,
+        total_import: user?.create_gold
+          ? filteredData.gold.reduce((a, i) => a + i.gramm, 0)
+          : data.get,
+        total_export: data.gived,
+        total_losses: summaryLost.reduce((a, i) => a + i.total_lost, 0),
+        total_product: filteredData.product.reduce(
+          (a, i) => a + i.total_gramm,
+          0
+        ),
+        real_astatka: parseFloat(modalValue),
+      }).unwrap();
+      message.success("Astatka saqlandi!");
+      setIsModalOpen(false);
+      setModalValue("");
+    } catch (err) {
+      message.error("Xatolik yuz berdi!");
+      console.log(err);
+    }
+  };
+
+  // yangi: editni saqlash
+  const handleEditSave = async () => {
+    if (!editRecord) return;
+    const newReal = parseFloat(editValue);
+    if (isNaN(newReal)) return message.warning("Qiymat noto‘g‘ri!");
+
+    const diff = editRecord.calculated_astatka - newReal;
+
+    try {
+      await editAstatka({
+        id: editRecord._id,
+        body: {
+          real_astatka: newReal,
+          difference: diff,
+        },
+      }).unwrap();
+      message.success("Astatka tahrirlandi!");
+      setIsEditModalOpen(false);
+      setEditRecord(null);
+      setEditValue("");
+    } catch (err) {
+      message.error("Tahrirlashda xatolik yuz berdi!");
+      console.log(err);
+    }
+  };
+
+  const handleDelete = async (record) => {
+    if (!window.confirm("Haqiqatan ham o‘chirmoqchimisiz?")) return;
+    try {
+      await deleteAstatka(record._id).unwrap();
+      message.success("Astatka o‘chirildi!");
+    } catch (err) {
+      message.error("O‘chirishda xatolik yuz berdi!");
+      console.log(err);
+    }
+  };
+
   const thStyle = {
     padding: "10px",
     borderBottom: "1px solid #ddd",
     borderRight: "1px solid #eee",
   };
 
-
   return (
     <div className="core">
-      <br />
-      <Space style={{ display: "flex", alignItems: "center" }}>
-        <Select
-          disabled={localeUser.role === "user"}
-          value={selectedUser}
-          onChange={setSelectedUser}
-          style={{ width: "200px" }}
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            option?.children?.toLowerCase().includes(input.toLowerCase())
-          }
-          showSearch
-        >
-          <Select.Option value="">Ishchini tanlang</Select.Option>
-          {users.map((item) => (
-            <Select.Option
-              key={item._id}
-              disabled={item.role === "admin"}
-              value={item._id}
+      <Tabs defaultActiveKey="1">
+        <Tabs.TabPane tab="Hisobot" key="1">
+          <br />
+          <Space style={{ display: "flex", alignItems: "center" }}>
+            <Select
+              disabled={localeUser.role === "user"}
+              value={selectedUser}
+              onChange={setSelectedUser}
+              style={{ width: "200px" }}
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                option?.children?.toLowerCase().includes(input.toLowerCase())
+              }
+              showSearch
             >
-              {item.name}
-            </Select.Option>
-          ))}
-        </Select>
-        <Input
-          step="0.0001"
-          placeholder="Astatka kiriting"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          allowClear
-        />
-        <Button onClick={handleSubmit}>Tekshirish</Button>
-        {difference !== null && (
-          <p>
-            {Math.abs(difference).toFixed(4)} gramm{" "}
-            {difference < 0 ? "kam" : "ko'p"}
-          </p>
-        )}
-      </Space>
+              <Select.Option value="">Ishchini tanlang</Select.Option>
+              {users.map((item) => (
+                <Select.Option
+                  key={item._id}
+                  disabled={item.role === "admin"}
+                  value={item._id}
+                >
+                  {item.name}
+                </Select.Option>
+              ))}
+            </Select>
+            <Input
+              step="0.0001"
+              placeholder="Astatka kiriting"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              allowClear
+            />
+            <Button onClick={handleSubmit}>Tekshirish</Button>
+            {difference !== null && (
+              <p>
+                {Math.abs(difference).toFixed(4)} gramm{" "}
+                {difference < 0 ? "kam" : "ko'p"}
+              </p>
+            )}
+          </Space>
 
-      <br />
-      <br />
-      {selectedUser && (
-        <table
-          style={{
-            borderCollapse: "separate",
-            borderSpacing: 0,
-            width: "90%",
-            textAlign: "center",
-            fontFamily: "sans-serif",
-            background: "#fff",
-            border: "1px solid #ddd",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            overflow: "hidden",
-          }}
-        >
-          <thead
-            style={{
-              backgroundColor: "#f3f3f3",
-              fontWeight: "bold",
-              fontSize: "15px",
-            }}
+          <br />
+          <br />
+          {selectedUser && (
+            <div style={{ width: "90%" }}>
+              <table
+                style={{
+                  borderCollapse: "separate",
+                  borderSpacing: 0,
+                  width: "100%",
+                  textAlign: "center",
+                  fontFamily: "sans-serif",
+                  background: "#fff",
+                  border: "1px solid #ddd",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                }}
+              >
+                <thead
+                  style={{
+                    backgroundColor: "#f3f3f3",
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                  }}
+                >
+                  <tr>
+                    {user?.create_gold && <th style={thStyle}>Kirim</th>}
+                    {!user?.create_gold && <th style={thStyle}>Olgan</th>}
+                    <th style={thStyle}>Bergan</th>
+                    <th style={thStyle}>Потери</th>
+                    <th style={thStyle}>Tovar</th>
+                    <th style={thStyle}>Astatka</th>
+                    <th style={thStyle}>Harakat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {user?.create_gold && (
+                      <td>
+                        {filteredData.gold
+                          .reduce((acc, item) => acc + item.gramm, 0)
+                          .toFixed(4)}
+                      </td>
+                    )}
+                    {!user?.create_gold && (
+                      <td>
+                        <Popover
+                          content={
+                            <Table
+                              dataSource={summaryGet}
+                              columns={summaryColumns.map((col) =>
+                                col.dataIndex === "to_id"
+                                  ? { ...col, dataIndex: "from_id" }
+                                  : col
+                              )}
+                              rowKey={(record) => record.from_id?._id}
+                              pagination={false}
+                              size="small"
+                            />
+                          }
+                          title="Olganlar"
+                          trigger="click"
+                        >
+                          <Button type="link">{data.get}</Button>
+                        </Popover>
+                      </td>
+                    )}
+                    <td>
+                      <Popover
+                        content={
+                          <Table
+                            dataSource={summaryGived}
+                            columns={summaryColumns}
+                            rowKey={(record) => record.to_id?._id}
+                            pagination={false}
+                            size="small"
+                          />
+                        }
+                        title="Berganlar"
+                        trigger="click"
+                      >
+                        <Button type="link">{data.gived}</Button>
+                      </Popover>
+                    </td>
+                    <td>
+                      <Popover
+                        content={
+                          <Table
+                            dataSource={summaryLost}
+                            columns={summaryLostColumns}
+                            rowKey={(record) => record.process_type_id?._id}
+                            pagination={false}
+                            size="small"
+                          />
+                        }
+                        title="Потери"
+                        trigger="click"
+                      >
+                        <Button type="link">
+                          {summaryLost
+                            .reduce((acc, item) => acc + item.total_lost, 0)
+                            ?.toFixed(4)}
+                        </Button>
+                      </Popover>
+                    </td>
+                    <td>
+                      {filteredData.product
+                        .reduce((acc, item) => acc + item.total_gramm, 0)
+                        .toFixed(4)}
+                    </td>
+                    <td>{realAstatka.toFixed(4)}</td>
+                    <td>
+                      <Button
+                        type="primary"
+                        onClick={() => setIsModalOpen(true)}
+                      >
+                        Saqlash
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <Modal
+            title="Astatka saqlash"
+            open={isModalOpen}
+            onCancel={() => setIsModalOpen(false)}
+            onOk={handleSave}
+            okText="Saqlash"
           >
-            <tr>
-              {user?.create_gold && <th style={thStyle}>Kirim</th>}
-              {!user?.create_gold && <th style={thStyle}>Olgan</th>}
-              <th style={thStyle}>Bergan</th>
-              <th style={thStyle}>Потери</th>
-              <th style={thStyle}>Tovar</th>
-              <th style={thStyle}>Astatka</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {user?.create_gold && (
-                <td>
-                  {filteredData.gold
-                    .reduce((acc, item) => acc + item.gramm, 0)
-                    .toFixed(4)}
-                </td>
-              )}
-              {!user?.create_gold && (
-                <td>
-                  <Popover
-                    content={
-                      <Table
-                        dataSource={summaryGet}
-                        columns={summaryColumns.map((col) =>
-                          col.dataIndex === "to_id"
-                            ? { ...col, dataIndex: "from_id" }
-                            : col
-                        )}
-                        rowKey={(record) => record.from_id?._id}
-                        pagination={false}
-                        size="small"
-                      />
-                    }
-                    title="Olganlar"
-                    trigger="click"
-                  >
-                    <Button type="link">{data.get}</Button>
-                  </Popover>
-                </td>
-              )}
-              <td>
-                <Popover
-                  content={
-                    <Table
-                      dataSource={summaryGived}
-                      columns={summaryColumns}
-                      rowKey={(record) => record.to_id?._id}
-                      pagination={false}
+            <Input
+              type="number"
+              placeholder="Real astatka kiriting"
+              value={modalValue}
+              onChange={(e) => setModalValue(e.target.value)}
+            />
+          </Modal>
+        </Tabs.TabPane>
+
+        {/* Astatka tarixi */}
+        <Tabs.TabPane tab="Astatka tarixi" key="2">
+          <br />
+          <Table
+            loading={astatkaLoading}
+            dataSource={astatka}
+            size="small"
+            rowKey={(r) => r._id}
+            pagination={false}
+            bordered
+            columns={[
+              {
+                title: "Ishchi",
+                dataIndex: "user_id",
+                render: (v) => v?.name || "-",
+              },
+              {
+                title: "Kirim",
+                dataIndex: "total_import",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Bergan",
+                dataIndex: "total_export",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Потери",
+                dataIndex: "total_losses",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Tovar",
+                dataIndex: "total_product",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Astatka",
+                dataIndex: "calculated_astatka",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Kiritilgan astatka",
+                dataIndex: "real_astatka",
+                render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Farq",
+                dataIndex: "difference",
+                render: (text) => {
+                  const value = parseFloat(text) || 0;
+                  if (value === 0) return value.toFixed(4);
+                  return `${Math.abs(value).toFixed(4)} ${
+                    value < 0 ? "ko'p" : "kam"
+                  }`;
+                },
+              },
+              {
+                title: "Sana",
+                dataIndex: "createdAt",
+                render: (v) => new Date(v).toLocaleString(),
+              },
+              {
+                title: "Harakat",
+                render: (record) => (
+                  <Space>
+                    <Button
                       size="small"
-                    />
-                  }
-                  title="Berganlar"
-                  trigger="click"
-                >
-                  <Button type="link">{data.gived}</Button>
-                </Popover>
-              </td>
-              <td>
-                <Popover
-                  content={
-                    <Table
-                      dataSource={summaryLost}
-                      columns={summaryLostColumns}
-                      rowKey={(record) => record.process_type_id?._id}
-                      pagination={false}
+                      onClick={() => {
+                        setEditRecord(record);
+                        setEditValue(record.real_astatka);
+                        setIsEditModalOpen(true);
+                      }}
+                    >
+                      <MdEdit />
+                    </Button>
+                    <Button
+                      danger
                       size="small"
-                    />
-                  }
-                  title="Потери"
-                  trigger="click"
-                >
-                  <Button type="link">
-                    {" "}
-                    {summaryLost
-                      .reduce((acc, item) => acc + item.total_lost, 0)
-                      ?.toFixed(4)}
-                  </Button>
-                </Popover>
-              </td>
-              <td>
-                {filteredData.product
-                  .reduce((acc, item) => acc + item.total_gramm, 0)
-                  .toFixed(4)}
-              </td>
-              <td>{realAstatka.toFixed(4)}</td>
-            </tr>
-          </tbody>
-        </table>
-      )}
+                      onClick={() => handleDelete(record)}
+                    >
+                      <FaRegTrashAlt />
+                    </Button>
+                  </Space>
+                ),
+              },
+            ]}
+          />
+
+          <Modal
+            title="Astatka tahrirlash"
+            open={isEditModalOpen}
+            onCancel={() => setIsEditModalOpen(false)}
+            onOk={handleEditSave}
+            okText="Saqlash"
+          >
+            <Input
+              type="number"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              placeholder="Yangi real astatka"
+            />
+          </Modal>
+        </Tabs.TabPane>
+      </Tabs>
     </div>
   );
 };

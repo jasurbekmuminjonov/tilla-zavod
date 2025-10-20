@@ -20,10 +20,27 @@ export const providerApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Provider"],
     }),
+    deleteProvider: builder.mutation({
+      query: (id) => ({
+        url: `/provider/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Provider"],
+    }),
+    editProvider: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/provider/edit/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Provider"],
+    }),
   }),
 });
 
 export const {
   useGetProvidersQuery,
   useCreateProviderMutation,
+  useDeleteProviderMutation,
+  useEditProviderMutation,
 } = providerApi;

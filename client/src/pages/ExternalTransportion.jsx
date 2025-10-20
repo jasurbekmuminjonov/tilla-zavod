@@ -1,29 +1,31 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Button,
   Form,
   InputNumber,
-  Modal,
   notification,
-  Popconfirm,
   Select,
-  Space,
   Table,
   Tabs,
   Tag,
+  DatePicker,
+  Space,
 } from "antd";
+import moment from "moment";
 import {
   useGetUserByUserIdQuery,
   useGetUsersQuery,
 } from "../context/services/user.service";
-import moment from "moment";
 import {
   useCreateExtTransportionMutation,
   useDeleteExtTransportionMutation,
   useGetExternalTransportionsQuery,
 } from "../context/services/transportion.service";
-import { FaArrowDown, FaArrowUp } from "react-icons/fa";
+import { FaArrowDown, FaArrowUp, FaRegTrashAlt } from "react-icons/fa";
 import { useGetProvidersQuery } from "../context/services/provider.service";
+
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const ExternalTransportion = () => {
   const [createGoldTransportion, { isLoading: transportionLoading }] =
@@ -35,17 +37,13 @@ const ExternalTransportion = () => {
   const { data: self = {} } = useGetUserByUserIdQuery();
 
   const [deleteTransportion] = useDeleteExtTransportionMutation();
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
   const [form] = Form.useForm();
-  const [selectedUser, setSelectedUser] = useState(
-    JSON.parse(localStorage.getItem("user")).role === "user"
-      ? JSON.parse(localStorage.getItem("user"))._id
-      : ""
-  );
-  const [selectedProvider, setSelectedProvider] = useState("");
-  const [selectedType, setSelectedType] = useState("");
+
+  const [filterUser, setFilterUser] = useState(null);
+  const [filterProvider, setFilterProvider] = useState(null);
+  const [fromDate, setFromDate] = useState(null);
+  const [toDate, setToDate] = useState(null);
 
   async function handleCreateTransportionSubmit(values) {
     try {
@@ -60,7 +58,7 @@ const ExternalTransportion = () => {
       console.error(err);
       notification.error({
         message: "Xatolik",
-        description: err.data.message,
+        description: err.data?.message || "Xatolik yuz berdi",
       });
     }
   }
@@ -95,35 +93,96 @@ const ExternalTransportion = () => {
       dataIndex: "createdAt",
       render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
     },
+    {
+      title: "O'chirish",
+      render: (_, record) => (
+        <Button
+          icon={<FaRegTrashAlt />}
+          danger
+          onClick={async () => {
+            try {
+              if (
+                !window.confirm(
+                  "Chindan ham oldi-berdini o'chirib tashlamoqchimisiz?"
+                )
+              ) {
+                return;
+              }
+              const res = await deleteTransportion(record._id).unwrap();
+              notification.success({
+                message: "Muvaffaqiyatli",
+                description: res.message,
+              });
+            } catch (err) {
+              console.log(err);
+              notification.error({
+                message: "Xatolik",
+                description: err.data?.message || "O'chirishda xatolik",
+              });
+            }
+          }}
+        />
+      ),
+    },
   ];
 
-  const filteredTransportions = useMemo(() => {
-    const hasDateRange = startDate && endDate;
-    const start = hasDateRange ? moment(startDate).startOf("day") : null;
-    const end = hasDateRange ? moment(endDate).endOf("day") : null;
+  const filteredData = useMemo(() => {
+    let filtered = [...transportions];
 
-    return transportions.filter((item) => {
-      const inDateRange = hasDateRange
-        ? item.createdAt &&
-          moment(item.createdAt).isSameOrAfter(start) &&
-          moment(item.createdAt).isSameOrBefore(end)
-        : true;
+    if (filterUser) {
+      filtered = filtered.filter((t) => t.user_id?._id === filterUser);
+    }
+    if (filterProvider) {
+      filtered = filtered.filter((t) => t.provider_id?._id === filterProvider);
+    }
 
-      const matchesFrom = !selectedUser || item?.user_id?._id === selectedUser;
-      const matchesTo =
-        !selectedProvider || item?.provider_id?._id === selectedProvider;
-      const matchesType = !selectedType || item?.type === selectedType;
+    if (fromDate || toDate) {
+      filtered = filtered.filter((p) => {
+        const created = moment(p.createdAt).startOf("day");
+        if (fromDate && toDate) {
+          return (
+            created.isSameOrAfter(moment(fromDate).startOf("day")) &&
+            created.isSameOrBefore(moment(toDate).endOf("day"))
+          );
+        } else if (fromDate && !toDate) {
+          return created.isSameOrAfter(moment(fromDate).startOf("day"));
+        } else if (!fromDate && toDate) {
+          return created.isSameOrBefore(moment(toDate).endOf("day"));
+        }
+        return true;
+      });
+    }
 
-      return inDateRange && matchesFrom && matchesTo && matchesType;
+    const grouped = {};
+    filtered.forEach((item) => {
+      const key = `${item.user_id?._id}-${item.provider_id?._id}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          key,
+          user: item.user_id?.name,
+          provider: item.provider_id?.provider_name,
+          total_import: 0,
+          total_export: 0,
+        };
+      }
+      if (item.type === "import") grouped[key].total_import += item.gramm;
+      else grouped[key].total_export += item.gramm;
     });
-  }, [
-    transportions,
-    startDate,
-    endDate,
-    selectedUser,
-    selectedProvider,
-    selectedType,
-  ]);
+
+    return Object.values(grouped);
+  }, [transportions, filterUser, filterProvider, fromDate, toDate]);
+
+  const reportColumns = [
+    { title: "Xodim", dataIndex: "user" },
+    { title: "Hamkor", dataIndex: "provider" },
+    { title: "Jami berilgan", dataIndex: "total_export" },
+    { title: "Jami olingan", dataIndex: "total_import" },
+    {
+      title: "Farq",
+      render: (record) =>
+        (record.total_export - record.total_import).toFixed(2),
+    },
+  ];
 
   return (
     <div className="gold-transportion">
@@ -136,8 +195,10 @@ const ExternalTransportion = () => {
             loading={isLoading}
             dataSource={transportions}
             columns={columns}
+            rowKey="_id"
           />
         </Tabs.TabPane>
+
         <Tabs.TabPane tab="Yangi o'tkazma" key="2">
           <Form
             onFinish={handleCreateTransportionSubmit}
@@ -160,12 +221,13 @@ const ExternalTransportion = () => {
                 disabled={self?.role !== "admin"}
               >
                 {users?.map((item) => (
-                  <Select.Option key={item?._id} value={item?._id}>
+                  <Option key={item?._id} value={item?._id}>
                     {item.name}
-                  </Select.Option>
+                  </Option>
                 ))}
               </Select>
             </Form.Item>
+
             <Form.Item
               rules={[{ required: true, message: "Tanlash shart" }]}
               name="provider_id"
@@ -177,9 +239,9 @@ const ExternalTransportion = () => {
                 optionFilterProp="children"
               >
                 {providers?.map((item) => (
-                  <Select.Option key={item?._id} value={item?._id}>
+                  <Option key={item?._id} value={item?._id}>
                     {item.provider_name}
-                  </Select.Option>
+                  </Option>
                 ))}
               </Select>
             </Form.Item>
@@ -187,20 +249,22 @@ const ExternalTransportion = () => {
             <Form.Item
               rules={[{ required: true, message: "Kiritish shart" }]}
               name="gramm"
-              label="Yuborilayotgan gramm"
+              label="Gramm"
             >
               <InputNumber placeholder="0" style={{ width: "100%" }} />
             </Form.Item>
+
             <Form.Item
               rules={[{ required: true, message: "Tanlash shart" }]}
               name="type"
               label="Turi"
             >
               <Select placeholder="Tanlang">
-                <Option value={"import"}>Kirish</Option>
-                <Option value={"export"}>Chiqish</Option>
+                <Option value={"import"}>Kirim</Option>
+                <Option value={"export"}>Chiqim</Option>
               </Select>
             </Form.Item>
+
             <Form.Item>
               <Button
                 loading={transportionLoading}
@@ -212,103 +276,61 @@ const ExternalTransportion = () => {
             </Form.Item>
           </Form>
         </Tabs.TabPane>
-        {/* <Tabs.TabPane key="5" tab="Jadval">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              marginTop: 16,
-              flexWrap: "wrap",
-              gap: 20,
-            }}
+
+        <Tabs.TabPane tab="Hisobot" key="3">
+          <Space
+            wrap
+            size="middle"
+            style={{ marginBottom: 20, alignItems: "center" }}
           >
-            <table
-              border={1}
-              style={{
-                borderCollapse: "collapse",
-                width: "70%",
-                textAlign: "center",
-                fontFamily: "sans-serif",
-              }}
+            <Select
+              placeholder="Xodim"
+              style={{ width: 200 }}
+              showSearch
+              value={filterUser}
+              disabled={self.role !== "admin"}
+              onChange={setFilterUser}
+              allowClear
             >
-              <thead>
-                <tr>
-                  <th style={{ padding: "10px" }}>Umumiy berdim</th>
+              {users?.map((item) => (
+                <Option key={item._id} value={item._id}>
+                  {item.name}
+                </Option>
+              ))}
+            </Select>
 
-                  <th style={{ padding: "10px" }}>Umumiy oldim</th>
-                  <th style={{ padding: "10px" }}>Qoldiq</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ padding: "8px" }}>{data.gived}</td>
+            <Select
+              placeholder="Hamkor"
+              style={{ width: 200 }}
+              showSearch
+              value={filterProvider}
+              onChange={setFilterProvider}
+              allowClear
+            >
+              {providers?.map((item) => (
+                <Option key={item._id} value={item._id}>
+                  {item.provider_name}
+                </Option>
+              ))}
+            </Select>
 
-                  <td style={{ padding: "8px" }}>{data.get}</td>
+            <RangePicker
+              format="DD.MM.YYYY"
+              onChange={(dates) => {
+                setFromDate(dates?.[0]);
+                setToDate(dates?.[1]);
+              }}
+            />
+          </Space>
 
-                  <td style={{ padding: "8px" }}>{data.difference}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Space direction="vertical">
-                <Select
-                  allowClear
-                  style={{ width: "200px" }}
-                  disabled={
-                    JSON.parse(localStorage.getItem("user")).role === "user"
-                  }
-                  onChange={setSelectedUser}
-                  value={selectedUser}
-                >
-                  <Select.Option value="">Barchasi</Select.Option>
-                  {users.map((item) => (
-                    <Select.Option value={item._id}>{item.name}</Select.Option>
-                  ))}
-                </Select>
-                <Select
-                  allowClear
-                  style={{ width: "200px" }}
-                  onChange={setSelectedProvider}
-                  value={selectedProvider}
-                >
-                  <Select.Option value="">Barchasi</Select.Option>
-                  {users.map((item) => (
-                    <Select.Option value={item._id}>{item.name}</Select.Option>
-                  ))}
-                </Select>
-              </Space>
-              <Space direction="vertical">
-                <label>
-                  <input
-                    type="date"
-                    value={startDate || ""}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />{" "}
-                  dan
-                </label>
-                <label>
-                  <input
-                    type="date"
-                    value={endDate || ""}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />{" "}
-                  gacha
-                </label>
-              </Space>
-            </div>
-          </div>
           <Table
-            scroll={{ x: "max-content" }}
             size="small"
             bordered
-            loading={sentLoading}
-            dataSource={filteredTransportions
-              ?.slice()
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))}
-            columns={columns.slice(0, 9)}
+            pagination={false}
+            columns={reportColumns}
+            dataSource={filteredData}
           />
-        </Tabs.TabPane> */}
+        </Tabs.TabPane>
       </Tabs>
     </div>
   );

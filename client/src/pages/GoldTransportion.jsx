@@ -3,6 +3,7 @@ import {
   useCancelTransportionMutation,
   useCompleteTransportionMutation,
   useCreateTransportionMutation,
+  useDeleteTransportionMutation,
   useGetReceivedTransportionsQuery,
   useGetSentTransportionsQuery,
   useGetTransportionsQuery,
@@ -27,6 +28,7 @@ import {
 } from "../context/services/user.service";
 import moment from "moment";
 import { FaCheck, FaXmark } from "react-icons/fa6";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 const GoldTransportion = () => {
   const [createGoldTransportion, { isLoading: transportionLoading }] =
@@ -37,6 +39,7 @@ const GoldTransportion = () => {
   const [completeTransportion] = useCompleteTransportionMutation();
   const [cancelTransportion] = useCancelTransportionMutation();
   const [startDate, setStartDate] = useState(null);
+  const [deleteTransportion] = useDeleteTransportionMutation();
   const [endDate, setEndDate] = useState(null);
   const { data: sentTransportions, isLoading: sentLoading } =
     useGetSentTransportionsQuery();
@@ -149,6 +152,37 @@ const GoldTransportion = () => {
             ? "Rad etildi"
             : "Xato"}
         </Tag>
+      ),
+    },
+    {
+      title: "O'chirish",
+      render: (_, record) => (
+        <Button
+          icon={<FaRegTrashAlt />}
+          danger
+          onClick={async () => {
+            try {
+              if (
+                !window.confirm(
+                  "Chindan ham oldi-berdini o'chirib tashlamoqchimisiz?"
+                )
+              ) {
+                return;
+              }
+              const res = await deleteTransportion(record._id).unwrap();
+              notification.success({
+                message: "Muvaffaqiyatli",
+                description: res.message,
+              });
+            } catch (err) {
+              console.log(err);
+              notification.error({
+                message: "Xatolik",
+                description: err.data?.message || "O'chirishda xatolik",
+              });
+            }
+          }}
+        />
       ),
     },
   ];
@@ -363,7 +397,7 @@ const GoldTransportion = () => {
               }}
             >
               <thead>
-                <tr >
+                <tr>
                   <th style={{ padding: "10px" }}>Umumiy berdim</th>
 
                   <th style={{ padding: "10px" }}>Umumiy oldim</th>

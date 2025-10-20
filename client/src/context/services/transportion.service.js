@@ -68,6 +68,13 @@ export const transportionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["ExtTransportion"],
     }),
+    deleteTransportion: builder.mutation({
+      query: (transportion_id) => ({
+        url: `/transportion/delete/${transportion_id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Transportion"],
+    }),
 
     // Transportatsiyani yakunlash
     completeTransportion: builder.mutation({
@@ -128,5 +135,6 @@ export const {
   useLazyGetSummaryGivedQuery,
   useCreateExtTransportionMutation,
   useGetExternalTransportionsQuery,
-  useDeleteExtTransportionMutation
+  useDeleteExtTransportionMutation,
+  useDeleteTransportionMutation,
 } = transportionApi;

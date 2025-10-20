@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import {
   useGetProvidersQuery,
   useCreateProviderMutation,
-  //   useEditProviderMutation,
-  //   useDeleteProviderMutation,
+  useEditProviderMutation,
+  useDeleteProviderMutation,
 } from "../context/services/provider.service";
 import {
   Table,
@@ -12,10 +12,13 @@ import {
   Form,
   Input,
   notification,
+  Space,
+  Popconfirm,
   //   Popconfirm,
   //   Space,
 } from "antd";
 import { FaLock, FaSave } from "react-icons/fa";
+import { MdDelete, MdEdit } from "react-icons/md";
 // import { MdEdit, MdDelete } from "react-icons/md";
 
 const { TabPane } = Tabs;
@@ -23,35 +26,30 @@ const { TabPane } = Tabs;
 const Providers = () => {
   const { data: providers = [], isLoading } = useGetProvidersQuery();
   const [createProvider] = useCreateProviderMutation();
-  //   const [editProvider] = useEditProviderMutation();
-  //   const [deleteProvider] = useDeleteProviderMutation();
+  const [editProvider] = useEditProviderMutation();
+  const [deleteProvider] = useDeleteProviderMutation();
 
   const [form] = Form.useForm();
   const [activeTab, setActiveTab] = useState("1");
-  //   const [editingItem, setEditingItem] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
 
   const handleSubmit = async (values) => {
     try {
-      //   if (editingItem) {
-      //     await editProvider({ id: editingItem._id, body: values }).unwrap();
-      //     notification.success({
-      //       message: "Tahrirlandi",
-      //       description: "Hamkor yangilandi",
-      //     });
-      //   } else {
-      //     await createProvider(values).unwrap();
-      //     notification.success({
-      //       message: "Yaratildi",
-      //       description: "Yangi yetkazib beruvchi qo‘shildi",
-      //     });
-      //   }
-      await createProvider(values).unwrap();
-      notification.success({
-        message: "Yaratildi",
-        description: "Yangi yetkazib beruvchi qo‘shildi",
-      });
+      if (editingItem) {
+        await editProvider({ id: editingItem._id, body: values }).unwrap();
+        notification.success({
+          message: "Tahrirlandi",
+          description: "Hamkor yangilandi",
+        });
+      } else {
+        await createProvider(values).unwrap();
+        notification.success({
+          message: "Yaratildi",
+          description: "Hamkor qo‘shildi",
+        });
+      }
       form.resetFields();
-      //   setEditingItem(null);
+      setEditingItem(null);
       setActiveTab("1");
     } catch (err) {
       notification.error({
@@ -70,40 +68,40 @@ const Providers = () => {
       title: "Hamkor nomi",
       dataIndex: "provider_name",
     },
-    // {
-    //   title: "Amallar",
-    //   render: (_, record) => (
-    //     <Space>
-    //       <Button
-    //         icon={<MdEdit />}
-    //         onClick={() => {
-    //           setEditingItem(record);
-    //           form.setFieldsValue(record);
-    //           setActiveTab("2");
-    //         }}
-    //       />
-    //       <Popconfirm
-    //         title="Chindan ham o‘chirishni xohlaysizmi?"
-    //         onConfirm={async () => {
-    //           try {
-    //             await deleteProvider(record._id).unwrap();
-    //             notification.success({
-    //               message: "O‘chirildi",
-    //               description: "Hamkor o‘chirildi",
-    //             });
-    //           } catch (err) {
-    //             notification.error({
-    //               message: "Xatolik",
-    //               description: err?.data?.message || "Serverda xatolik",
-    //             });
-    //           }
-    //         }}
-    //       >
-    //         <Button danger icon={<MdDelete />} />
-    //       </Popconfirm>
-    //     </Space>
-    //   ),
-    // },
+    {
+      title: "Amallar",
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<MdEdit />}
+            onClick={() => {
+              setEditingItem(record);
+              form.setFieldsValue(record);
+              setActiveTab("2");
+            }}
+          />
+          <Popconfirm
+            title="Chindan ham o‘chirishni xohlaysizmi?"
+            onConfirm={async () => {
+              try {
+                await deleteProvider(record._id).unwrap();
+                notification.success({
+                  message: "O‘chirildi",
+                  description: "Hamkor o‘chirildi",
+                });
+              } catch (err) {
+                notification.error({
+                  message: "Xatolik",
+                  description: err?.data?.message || "Serverda xatolik",
+                });
+              }
+            }}
+          >
+            <Button danger icon={<MdDelete />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   // if (JSON.parse(localStorage.getItem("user"))?.role !== "admin") {
@@ -160,11 +158,7 @@ const Providers = () => {
               <Input />
             </Form.Item>
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<FaSave />}
-              >
+              <Button type="primary" htmlType="submit" icon={<FaSave />}>
                 Saqlash
               </Button>
             </Form.Item>
