@@ -103,6 +103,11 @@ const Process = () => {
       render: (_, record) => moment(record?.start_time).format("HH:mm"),
     },
     {
+      title: "Jarayon turi",
+      dataIndex: "process_type_id",
+      render: (text) => text.process_name,
+    },
+    {
       title: "Tavsif",
       dataIndex: "description",
     },
@@ -126,7 +131,7 @@ const Process = () => {
     //   ),
     // },
     {
-      title: "Soni",
+      title: "Kirgan soni",
       dataIndex: "quantity",
     },
     {
@@ -139,22 +144,17 @@ const Process = () => {
       render: (text) => text?.toFixed(3),
     },
     {
-      title: "Chiqdi",
-      dataIndex: "end_gramm",
-    },
-    {
-      title: "Soat",
+      title: "Chiqqan soat",
       render: (_, record) =>
         record.end_time ? moment(record.end_time).format("HH:mm") : "",
     },
     {
-      title: "Proba",
-      dataIndex: "end_purity",
-      render: (text) => text?.toFixed(3),
+      title: "Chiqqan soni",
+      dataIndex: "end_quantity",
     },
     {
-      title: "Astatka",
-      dataIndex: "astatka_gramm",
+      title: "Chiqdi",
+      dataIndex: "end_gramm",
     },
     {
       title: "угар",
@@ -162,15 +162,20 @@ const Process = () => {
       render: (text) => text?.toFixed(3),
     },
     {
+      title: "Proba",
+      dataIndex: "end_purity",
+      render: (text) => text?.toFixed(3),
+    },
+    // {
+    //   title: "Astatka",
+    //   dataIndex: "astatka_gramm",
+    // },
+    {
       title: "gr ga bo'lganda",
       dataIndex: "lost_per_gramm",
       render: (text) => text?.toFixed(5),
     },
-    {
-      title: "Jarayon turi",
-      dataIndex: "process_type_id",
-      render: (text) => text.process_name,
-    },
+
     {
       title: "потерия limiti",
       dataIndex: "process_type_id",
@@ -183,7 +188,7 @@ const Process = () => {
           <Button
             disabled={record.status === "inactive"}
             type="text"
-            icon={<FaFlagCheckered />}
+            icon={<FaFlagCheckered color="#fff" />}
             onClick={() => setEndModal({ open: true, record })}
           />
           <Button
@@ -292,6 +297,15 @@ const Process = () => {
               )}
               loading={processLoading}
               rowKey="_id"
+              onRow={(record) => {
+                return {
+                  style: {
+                    backgroundColor:
+                      record?.process_type_id?.background_color || "#fff",
+                    color: "#ffffff",
+                  },
+                };
+              }}
             />
           ) : (
             <div className="card-container">
@@ -541,16 +555,12 @@ const Process = () => {
             }
           }}
         >
-          <Form.Item
-            name="astatka_gramm"
-            label="Astatka gramm"
-            initialValue={0}
-          >
+          <Form.Item name="end_quantity" label="Chiqqan soni">
             <InputNumber style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
             name="end_gramm"
-            label="Ishlatilgan gramm"
+            label="Chiqqan gramm"
             rules={[{ required: true, message: "Grammni kiriting" }]}
           >
             <InputNumber style={{ width: "100%" }} />

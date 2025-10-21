@@ -13,7 +13,10 @@ import {
   Input,
 } from "antd";
 import moment from "moment";
-import { useCreateToolTransportionMutation } from "../context/services/toolTransportion.service";
+import {
+  useCreateToolTransportionMutation,
+  useDeleteToolTransportionMutation,
+} from "../context/services/toolTransportion.service";
 import { GiHandTruck } from "react-icons/gi";
 import { MdEdit, MdSend } from "react-icons/md";
 import {
@@ -42,6 +45,7 @@ const Tools = () => {
   const [deleteTool] = useDeleteToolMutation();
   const [editTool] = useEditToolMutation();
   const [editingTool, setEditingTool] = useState({});
+  const [deleteToolTransportion] = useDeleteToolTransportionMutation();
 
   const [transportingTool, setTransportingTool] = useState({});
   const [transportingModal, setTransportingModal] = useState(false);
@@ -147,6 +151,18 @@ const Tools = () => {
       notification.error({
         message: err.data.message,
         description: "",
+      });
+    }
+  }
+
+  async function handleDeleteToolTransportion(id) {
+    try {
+      await deleteToolTransportion(id).unwrap();
+    } catch (err) {
+      console.log(err);
+      notification.error({
+        message: "Xatolik",
+        description: err.data.message,
       });
     }
   }
@@ -305,6 +321,21 @@ const Tools = () => {
       title: "Sana",
       dataIndex: "createdAt",
       render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
+    },
+    {
+      title: "Operatsiyalar",
+      render: (_, record) => (
+        <Space>
+          <Button
+            onClick={() => {
+              if (window.confirm("Chindan ham o‘chirmoqchimisiz?")) {
+                handleDeleteToolTransportion(record._id);
+              }
+            }}
+            icon={<FaRegTrashAlt />}
+          />
+        </Space>
+      ),
     },
   ];
 

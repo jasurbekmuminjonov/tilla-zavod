@@ -24,6 +24,11 @@ const ProcessTypeSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    background_color: {
+      type: String,
+      required: false,
+      default: "#ffffff",
+    },
     factory_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Factory",

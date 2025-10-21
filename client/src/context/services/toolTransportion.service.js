@@ -18,10 +18,18 @@ export const toolTransportionApi = api.injectEndpoints({
       }),
       invalidatesTags: ["ToolTransportion", "Tool"],
     }),
+    deleteToolTransportion: builder.mutation({
+      query: (id) => ({
+        url: `/tool-transport/delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ToolTransportion", "Tool"],
+    }),
   }),
 });
 
 export const {
   useGetToolTransportionQuery,
   useCreateToolTransportionMutation,
+  useDeleteToolTransportionMutation,
 } = toolTransportionApi;

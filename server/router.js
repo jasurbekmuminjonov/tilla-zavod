@@ -72,6 +72,7 @@ const {
 const {
   createToolTransportion,
   getToolTransportion,
+  deleteToolTransportion,
 } = require("./controllers/toolTransportion.controller");
 
 const {
@@ -176,6 +177,7 @@ rt.delete("/process-type/:id", deleteProcessTypeById);
 // Tool Transportion routes
 rt.post("/tool-transport/create", createToolTransportion);
 rt.get("/tool-transport", getToolTransportion);
+rt.delete("/tool-transport/delete/:id", deleteToolTransportion);
 
 // Product Transportion routes
 rt.post("/product-transport/create", createProductTransportion);

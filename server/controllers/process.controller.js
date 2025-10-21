@@ -39,7 +39,11 @@ exports.endProcess = async (req, res) => {
       "process_type_id"
     );
 
-    const { astatka_gramm = 0, end_gramm = process.start_gramm } = req.body;
+    const {
+      astatka_gramm = 0,
+      end_quantity = 0,
+      end_gramm = process.start_gramm,
+    } = req.body;
     const lostGramm = process.start_gramm - astatka_gramm - end_gramm;
     const lostPerGramm = lostGramm / end_gramm;
     const endPurity =
@@ -48,6 +52,8 @@ exports.endProcess = async (req, res) => {
 
     process.end_gramm = end_gramm;
     process.astatka_gramm = astatka_gramm;
+    req.body.quantity_difference = end_quantity - process.quantity;
+    process.end_quantity = end_quantity;
     if (req.body.quantity) {
       process.quantity = req.body.quantity;
     }

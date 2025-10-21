@@ -7,7 +7,7 @@ exports.createToolTransportion = async (req, res) => {
     const { tool_id, user_name, quantity, user_id } = req.body;
     req.body.factory_id = req.user.factory_id;
     const tool = await Tool.findById(tool_id);
-    if (tool.stock - quantity <= 0) {
+    if (tool.stock - quantity < 0) {
       return res
         .status(400)
         .json({ message: "Склад da yetarli запчасть mavjud emas" });
@@ -65,3 +65,17 @@ exports.getToolTransportion = async (req, res) => {
   }
 };
 
+exports.deleteToolTransportion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const toolTransportion = await ToolTransportion.findById(id);
+    const tool = await Tool.findById(toolTransportion.tool_id);
+    tool.stock += toolTransportion.quantity;
+    await tool.save();
+    await ToolTransportion.findByIdAndDelete(id);
+    res.status(200).json({ message: "Запчасть chiqim o'chirildi" });
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};

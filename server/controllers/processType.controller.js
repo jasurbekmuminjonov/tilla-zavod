@@ -13,7 +13,7 @@ exports.createProcessType = async (req, res) => {
     return res.status(201).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -25,20 +25,18 @@ exports.getProcessTypes = async (req, res) => {
     return res.status(200).json(processTypes);
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
 exports.getProcessTypesByUser = async (req, res) => {
   try {
     const { user_id } = req.user;
-    const user = await User.findById(user_id).populate(
-      "allowed_process_types"
-    );
+    const user = await User.findById(user_id).populate("allowed_process_types");
     return res.status(200).json(user.allowed_process_types);
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -51,6 +49,7 @@ exports.editProcessTypeById = async (req, res) => {
     const { id } = req.params;
     await ProcessType.findByIdAndUpdate(id, {
       process_name: req.body.process_name,
+      background_color: req.body.background_color,
       weight_loss: req.body.weight_loss,
       is_numeral: req.body.is_numeral,
       purity_change: req.body.purity_change,
@@ -60,7 +59,7 @@ exports.editProcessTypeById = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };
 
@@ -79,6 +78,6 @@ exports.deleteProcessTypeById = async (req, res) => {
     return res.status(200).end();
   } catch (err) {
     console.log(err.message);
-    return res.status(500).json({message:"Serverda xatolik", err})
+    return res.status(500).json({ message: "Serverda xatolik", err });
   }
 };

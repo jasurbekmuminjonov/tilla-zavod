@@ -40,7 +40,8 @@ const Core = () => {
   const { data: processTypes = [] } = useGetProcessTypesQuery();
   const { data: golds = [] } = useGetGoldQuery();
   const { data: products = [] } = useGetProductQuery();
-  const { data: astatka = [], isLoading: astatkaLoading } = useGetAstatkaQuery();
+  const { data: astatka = [], isLoading: astatkaLoading } =
+    useGetAstatkaQuery();
   const [createAstatka] = useCreateAstatkaMutation();
   const [editAstatka] = useEditAstatkaMutation();
   const [deleteAstatka] = useDeleteAstatkaMutation();
@@ -50,9 +51,12 @@ const Core = () => {
     localeUser.role === "admin" ? "" : localeUser._id
   );
   const [getReport, { data = {} }] = useLazyGetTransportionsReportQuery();
-  const [getSummaryLost, { data: summaryLost = [] }] = useLazyGetLossesSummaryQuery();
-  const [getSummaryGived, { data: summaryGived = [] }] = useLazyGetSummaryGivedQuery();
-  const [getSummaryGet, { data: summaryGet = [] }] = useLazyGetSummaryGetQuery();
+  const [getSummaryLost, { data: summaryLost = [] }] =
+    useLazyGetLossesSummaryQuery();
+  const [getSummaryGived, { data: summaryGived = [] }] =
+    useLazyGetSummaryGivedQuery();
+  const [getSummaryGet, { data: summaryGet = [] }] =
+    useLazyGetSummaryGetQuery();
 
   const [inputValue, setInputValue] = useState("");
   const [difference, setDifference] = useState(null);
@@ -153,13 +157,12 @@ const Core = () => {
       (acc, item) => acc + item.total_gramm,
       0
     );
+    console.log(kirgan);
+    console.log(data.gived - data.get);
+    console.log(totalLoss);
+    console.log(tovar);
 
-    const astatka =
-      kirgan +
-      (user?.create_gold ? 0 : data.get || 0) -
-      (data.gived || 0) -
-      totalLoss -
-      tovar;
+    const astatka = kirgan - (data.gived - data.get) - totalLoss - tovar;
 
     setRealAstatka(astatka);
   }, [filteredData, processTypes, data, selectedUser, user]);
@@ -242,7 +245,6 @@ const Core = () => {
     <div className="core">
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="Hisobot" key="1">
-          <br />
           <Space style={{ display: "flex", alignItems: "center" }}>
             <Select
               disabled={localeUser.role === "user"}
@@ -283,7 +285,6 @@ const Core = () => {
           </Space>
 
           <br />
-          <br />
           {selectedUser && (
             <div style={{ width: "90%" }}>
               <table
@@ -307,8 +308,7 @@ const Core = () => {
                 >
                   <tr>
                     {user?.create_gold && <th style={thStyle}>Kirim</th>}
-                    {!user?.create_gold && <th style={thStyle}>Olgan</th>}
-                    <th style={thStyle}>Bergan</th>
+                    <th style={thStyle}>Ayirma</th>
                     <th style={thStyle}>Потери</th>
                     <th style={thStyle}>Tovar</th>
                     <th style={thStyle}>Astatka</th>
@@ -324,7 +324,7 @@ const Core = () => {
                           .toFixed(4)}
                       </td>
                     )}
-                    {!user?.create_gold && (
+                    {/* {!user?.create_gold && (
                       <td>
                         <Popover
                           content={
@@ -346,8 +346,9 @@ const Core = () => {
                           <Button type="link">{data.get}</Button>
                         </Popover>
                       </td>
-                    )}
-                    <td>
+                    )} */}
+                    <td>{data.gived - data.get}</td>
+                    {/* <td>
                       <Popover
                         content={
                           <Table
@@ -363,7 +364,7 @@ const Core = () => {
                       >
                         <Button type="link">{data.gived}</Button>
                       </Popover>
-                    </td>
+                    </td> */}
                     <td>
                       <Popover
                         content={
@@ -392,10 +393,7 @@ const Core = () => {
                     </td>
                     <td>{realAstatka.toFixed(4)}</td>
                     <td>
-                      <Button
-                        type="primary"
-                        onClick={() => setIsModalOpen(true)}
-                      >
+                      <Button onClick={() => setIsModalOpen(true)} disabled>
                         Saqlash
                       </Button>
                     </td>
@@ -421,8 +419,7 @@ const Core = () => {
           </Modal>
         </Tabs.TabPane>
 
-        {/* Astatka tarixi */}
-        <Tabs.TabPane tab="Astatka tarixi" key="2">
+        <Tabs.TabPane disabled tab="Astatka tarixi" key="2">
           <br />
           <Table
             loading={astatkaLoading}

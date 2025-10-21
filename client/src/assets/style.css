@@ -41,3 +41,6 @@ input[type="date"] {
   background: #d6d6d6 !important;
   transition: background 0.2s ease;
 } */
+.ant-table-tbody > tr:hover > td {
+  background: inherit !important;
+}

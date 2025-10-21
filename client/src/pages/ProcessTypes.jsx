@@ -88,6 +88,20 @@ const ProcessTypes = () => {
       render: (val) => val?.toFixed(4),
     },
     {
+      title: "Fon rangi",
+      dataIndex: "background_color",
+      render: (val) => (
+        <div
+          style={{
+            width: "30px",
+            height: "20px",
+            backgroundColor: val,
+            border: "1px solid #f5f5f5",
+          }}
+        ></div>
+      ),
+    },
+    {
       title: "Amallar",
       render: (_, record) => (
         <Space>
@@ -206,14 +220,12 @@ const ProcessTypes = () => {
             >
               <InputNumber step={0.001} min={0} style={{ width: "100%" }} />
             </Form.Item>
+            <Form.Item name="background_color" label="Fon rangi">
+              <Input defaultValue={"#ffffff"} type="color" />
+            </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                // style={{ width: "100%" }}
-                icon={<FaSave />}
-              >
+              <Button type="primary" htmlType="submit" icon={<FaSave />}>
                 Saqlash
               </Button>
             </Form.Item>
