@@ -35,11 +35,14 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
 const Core = () => {
-  const { data: users = [] } = useGetUsersQuery();
-  const { data: processes = [] } = useGetProcessesQuery();
-  const { data: processTypes = [] } = useGetProcessTypesQuery();
-  const { data: golds = [] } = useGetGoldQuery();
-  const { data: products = [] } = useGetProductQuery();
+  const { data: users = [], isLoading: userLoading } = useGetUsersQuery();
+  const { data: processes = [], isLoading: processLoading } =
+    useGetProcessesQuery();
+  const { data: processTypes = [], isLoading: processTypeLoading } =
+    useGetProcessTypesQuery();
+  const { data: golds = [], isLoading: goldLoading } = useGetGoldQuery();
+  const { data: products = [], isLoading: productLoading } =
+    useGetProductQuery();
   const { data: astatka = [], isLoading: astatkaLoading } =
     useGetAstatkaQuery();
   const [createAstatka] = useCreateAstatkaMutation();
@@ -50,13 +53,20 @@ const Core = () => {
   const [selectedUser, setSelectedUser] = useState(
     localeUser.role === "admin" ? "" : localeUser._id
   );
-  const [getReport, { data = {} }] = useLazyGetTransportionsReportQuery();
-  const [getSummaryLost, { data: summaryLost = [] }] =
-    useLazyGetLossesSummaryQuery();
-  const [getSummaryGived, { data: summaryGived = [] }] =
-    useLazyGetSummaryGivedQuery();
-  const [getSummaryGet, { data: summaryGet = [] }] =
-    useLazyGetSummaryGetQuery();
+  const [getReport, { data = {}, isLoading: dataLoading }] =
+    useLazyGetTransportionsReportQuery();
+  const [
+    getSummaryLost,
+    { data: summaryLost = [], isLoading: summaryLostLoading },
+  ] = useLazyGetLossesSummaryQuery();
+  const [
+    getSummaryGived,
+    { data: summaryGived = [], isLoading: summaryGivedLoading },
+  ] = useLazyGetSummaryGivedQuery();
+  const [
+    getSummaryGet,
+    { data: summaryGet = [], isLoading: summaryGetLoading },
+  ] = useLazyGetSummaryGetQuery();
 
   const [inputValue, setInputValue] = useState("");
   const [difference, setDifference] = useState(null);
@@ -65,7 +75,6 @@ const Core = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalValue, setModalValue] = useState("");
 
-  // yangi: edit modal uchun
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editRecord, setEditRecord] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -79,6 +88,7 @@ const Core = () => {
     {
       title: "Gramm",
       dataIndex: "totalGramm",
+      render: (text) => text.toFixed(4),
     },
   ];
   const summaryLostColumns = [
@@ -148,7 +158,7 @@ const Core = () => {
       return (
         sum +
         filteredData.process
-          .filter((p) => p.process_type_id === type._id && p.lost_gramm > 0)
+          .filter((p) => p.process_type_id === type._id)
           .reduce((acc, item) => acc + item.lost_gramm, 0)
       );
     }, 0);
@@ -178,11 +188,11 @@ const Core = () => {
     try {
       await createAstatka({
         user_id: selectedUser,
-        total_import: user?.create_gold
-          ? filteredData.gold.reduce((a, i) => a + i.gramm, 0)
-          : data.get,
+        total_import: filteredData.gold.reduce((a, i) => a + i.gramm, 0),
+        total_get: data.get,
         total_export: data.gived,
         total_losses: summaryLost.reduce((a, i) => a + i.total_lost, 0),
+        calculated_astatka: realAstatka,
         total_product: filteredData.product.reduce(
           (a, i) => a + i.total_gramm,
           0
@@ -198,7 +208,6 @@ const Core = () => {
     }
   };
 
-  // yangi: editni saqlash
   const handleEditSave = async () => {
     if (!editRecord) return;
     const newReal = parseFloat(editValue);
@@ -240,6 +249,32 @@ const Core = () => {
     borderBottom: "1px solid #ddd",
     borderRight: "1px solid #eee",
   };
+
+  if (
+    userLoading ||
+    processLoading ||
+    processTypeLoading ||
+    goldLoading ||
+    productLoading ||
+    dataLoading ||
+    summaryLostLoading ||
+    summaryGivedLoading ||
+    summaryGetLoading
+  ) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <p>Yuklanmoqda...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="core">
@@ -307,7 +342,9 @@ const Core = () => {
                   }}
                 >
                   <tr>
-                    {user?.create_gold && <th style={thStyle}>Kirim</th>}
+                    {<th style={thStyle}>Kirim</th>}
+                    <th>Berdi</th>
+                    {<th style={thStyle}>Oldi</th>}
                     <th style={thStyle}>Ayirma</th>
                     <th style={thStyle}>Потери</th>
                     <th style={thStyle}>Tovar</th>
@@ -317,14 +354,31 @@ const Core = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    {user?.create_gold && (
+                    {
                       <td>
                         {filteredData.gold
                           .reduce((acc, item) => acc + item.gramm, 0)
                           .toFixed(4)}
                       </td>
-                    )}
-                    {/* {!user?.create_gold && (
+                    }
+                    <td>
+                      <Popover
+                        content={
+                          <Table
+                            dataSource={summaryGived}
+                            columns={summaryColumns}
+                            rowKey={(record) => record.to_id?._id}
+                            pagination={false}
+                            size="small"
+                          />
+                        }
+                        title="Berganlar"
+                        trigger="click"
+                      >
+                        <Button type="link">{data.gived}</Button>
+                      </Popover>
+                    </td>
+                    {
                       <td>
                         <Popover
                           content={
@@ -346,25 +400,9 @@ const Core = () => {
                           <Button type="link">{data.get}</Button>
                         </Popover>
                       </td>
-                    )} */}
-                    <td>{data.gived - data.get}</td>
-                    {/* <td>
-                      <Popover
-                        content={
-                          <Table
-                            dataSource={summaryGived}
-                            columns={summaryColumns}
-                            rowKey={(record) => record.to_id?._id}
-                            pagination={false}
-                            size="small"
-                          />
-                        }
-                        title="Berganlar"
-                        trigger="click"
-                      >
-                        <Button type="link">{data.gived}</Button>
-                      </Popover>
-                    </td> */}
+                    }
+
+                    <td>{(data.gived - data.get)?.toFixed(4)}</td>
                     <td>
                       <Popover
                         content={
@@ -393,7 +431,7 @@ const Core = () => {
                     </td>
                     <td>{realAstatka.toFixed(4)}</td>
                     <td>
-                      <Button onClick={() => setIsModalOpen(true)} disabled>
+                      <Button onClick={() => setIsModalOpen(true)}>
                         Saqlash
                       </Button>
                     </td>
@@ -419,7 +457,7 @@ const Core = () => {
           </Modal>
         </Tabs.TabPane>
 
-        <Tabs.TabPane disabled tab="Astatka tarixi" key="2">
+        <Tabs.TabPane tab="Astatka tarixi" key="2">
           <br />
           <Table
             loading={astatkaLoading}
@@ -443,6 +481,11 @@ const Core = () => {
                 title: "Bergan",
                 dataIndex: "total_export",
                 render: (text) => text.toFixed(4),
+              },
+              {
+                title: "Olgan",
+                dataIndex: "total_get",
+                render: (text) => text?.toFixed(4),
               },
               {
                 title: "Потери",

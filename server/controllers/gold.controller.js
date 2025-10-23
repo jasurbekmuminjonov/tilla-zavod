@@ -229,15 +229,13 @@ exports.getAllLosses = async (req, res) => {
       .lean();
 
     processes.forEach((p) => {
-      if (p.lost_gramm > 0) {
-        allLosses.push({
-          loss_type: "process",
-          lost_gramm: p.lost_gramm,
-          owner: p.user_id?.name || "Noma'lum user",
-          date: p.end_time,
-          data: p,
-        });
-      }
+      allLosses.push({
+        loss_type: "process",
+        lost_gramm: p.lost_gramm,
+        owner: p.user_id?.name || "Noma'lum user",
+        date: p.end_time,
+        data: p,
+      });
     });
 
     // === 3. Product losses with owner name ===

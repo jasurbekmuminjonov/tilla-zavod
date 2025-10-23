@@ -126,7 +126,6 @@ exports.getLossesSummary = async (req, res) => {
       {
         $match: {
           user_id: new mongoose.Types.ObjectId(user_id),
-          lost_gramm: { $gt: 0 },
         },
       },
       {

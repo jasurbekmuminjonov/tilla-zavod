@@ -9,14 +9,12 @@ exports.createAstatka = async (req, res) => {
       total_losses,
       total_product,
       real_astatka,
+      calculated_astatka,
     } = req.body;
     const { factory_id } = req.user;
 
-    const calculated_astatka =
-      total_import - total_export - total_losses - total_product;
     const difference = calculated_astatka - real_astatka;
     req.body.factory_id = factory_id;
-    req.body.calculated_astatka = calculated_astatka;
     req.body.difference = difference;
     await Astatka.create(req.body);
     res.json({ message: "Astatka saqlandi" });

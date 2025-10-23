@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Divider, Row, Col, Statistic, DatePicker, Card } from "antd";
+import { Row, Col, Statistic, Card } from "antd";
 import moment from "moment";
 import {
   useGetGoldQuery,
@@ -20,12 +20,12 @@ const Home = () => {
   const [from, setFrom] = useState(moment().subtract(30, "days"));
   const [to, setTo] = useState(moment());
 
-  const isInRange = (dateStr) => {
-    const d = moment(dateStr);
-    return d.isSameOrAfter(from, "day") && d.isSameOrBefore(to, "day");
-  };
-
   const stats = useMemo(() => {
+    const isInRange = (dateStr) => {
+      const d = moment(dateStr);
+      return d.isSameOrAfter(from, "day") && d.isSameOrBefore(to, "day");
+    };
+
     const goldTotal = gold
       .filter((g) => isInRange(g.date))
       .reduce((sum, g) => sum + g.gramm, 0);
@@ -52,9 +52,9 @@ const Home = () => {
     const lossTotal = losses
       .filter((l) => isInRange(l.date))
       .reduce((sum, l) => sum + (l.lost_gramm || 0), 0);
+    console.log(lossTotal);
 
-    const totalAstatka =
-      goldTotal - startGrammTotal - productGrammTotal - lossTotal;
+    const totalAstatka = goldTotal - productGrammTotal - lossTotal;
 
     return {
       goldTotal,
@@ -127,22 +127,11 @@ const Home = () => {
             />
           </Card>
         </Col>
-        {/* <Col span={6}>
-          <Card>
-            <Statistic
-              title="Jarayondan chiqqan"
-              value={stats.startGrammTotal}
-              precision={2}
-              suffix="gr"
-            />
-          </Card>
-        </Col> */}
         <Col span={6}>
           <Card>
             <Statistic
               title="Umumiy потери"
-              value={stats.lossTotal}
-              precision={2}
+              value={stats.lossTotal?.toFixed(2)}
               suffix="gr"
             />
           </Card>

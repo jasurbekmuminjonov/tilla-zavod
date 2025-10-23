@@ -16,6 +16,11 @@ const AstaktaSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    total_get: {
+      type: Number,
+      required: true,
+      default: null,
+    },
     total_export: {
       type: Number,
       required: true,
