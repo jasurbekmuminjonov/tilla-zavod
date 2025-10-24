@@ -13,6 +13,7 @@ import {
   Tabs,
   Tag,
   Modal,
+  AutoComplete,
 } from "antd";
 import {
   useGetProcessTypesByUserQuery,
@@ -44,18 +45,10 @@ const Process = () => {
   const [completeProcess] = useEndProcessMutation();
   const [cancelProcess] = useCancelProcessMutation();
   const [selectedProcessType, setSelectedProcessType] = useState("");
+  const [selectedDescription, setSelectedDescription] = useState("");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [endModal, setEndModal] = useState({ open: false, record: null });
-
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth <= 1440);
-  //   };
-  //   handleResize();
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
 
   useEffect(() => {
     const savedType = localStorage.getItem("selectedProcessType");
@@ -97,6 +90,41 @@ const Process = () => {
     }
   }
 
+  const uniqueDescriptionsByType = useMemo(() => {
+    // map: { [processTypeId]: Map(normalizedDesc -> originalDesc) }
+    const map = {};
+
+    processes?.forEach((p) => {
+      // 1) process_type_id dan id olish (string yoki object bo'lishi mumkin)
+      const typeId =
+        typeof p.process_type_id === "string"
+          ? p.process_type_id
+          : p.process_type_id?._id || String(p.process_type_id);
+
+      if (!typeId) return;
+
+      if (!map[typeId]) map[typeId] = new Map();
+
+      if (p.description) {
+        // 2) normalizatsiya - trim va kichik harf
+        const normalized = p.description.trim().toLowerCase();
+        // Agar shu normalizatsiya avval bo'lmagan bo'lsa - originalni saqlaymiz
+        if (!map[typeId].has(normalized)) {
+          // saqlab qo'yamiz original ko'rinishini (ilk uchragan variant)
+          map[typeId].set(normalized, p.description.trim());
+        }
+      }
+    });
+
+    // Convert Map -> Array of original descriptions
+    const result = {};
+    Object.entries(map).forEach(([k, v]) => {
+      result[k] = Array.from(v.values());
+    });
+
+    return result;
+  }, [processes]);
+
   const columns = [
     {
       title: "Soat",
@@ -111,25 +139,6 @@ const Process = () => {
       title: "Tavsif",
       dataIndex: "description",
     },
-    // {
-    //   title: "Jarayon ID",
-    //   dataIndex: "_id",
-    //   render: (text, record) => (
-    //     <Space direction="vertical">
-    //       <Tag
-    //         color="green"
-    //         style={{ cursor: "pointer" }}
-    //         onClick={() => handleCopy(text)}
-    //       >
-    //         {text?.slice(-6)?.toUpperCase()}
-    //       </Tag>
-    //       <Tag color={statusOptions[record.status].color}>
-    //         {statusOptions[record.status].text}
-    //       </Tag>
-    //       <Tag>{record.user_id.name}</Tag>
-    //     </Space>
-    //   ),
-    // },
     {
       title: "Kirgan soni",
       dataIndex: "quantity",
@@ -166,10 +175,6 @@ const Process = () => {
       dataIndex: "end_purity",
       render: (text) => text?.toFixed(3),
     },
-    // {
-    //   title: "Astatka",
-    //   dataIndex: "astatka_gramm",
-    // },
     {
       title: "gr ga bo'lganda",
       dataIndex: "lost_per_gramm",
@@ -230,7 +235,8 @@ const Process = () => {
 
     return processes.filter((p) => {
       const matchesProcess =
-        !selectedProcess || p.process_type_id._id === selectedProcess;
+        (!selectedProcess || p.process_type_id._id === selectedProcess) &&
+        (!selectedDescription || p.description === selectedDescription);
       const matchesStatus = p.status === "active";
       const matchesDate = hasDateRange
         ? p.start_time &&
@@ -239,7 +245,9 @@ const Process = () => {
         : true;
       return matchesProcess && matchesStatus && matchesDate;
     });
-  }, [processes, startDate, endDate, selectedProcess]);
+  }, [processes, startDate, endDate, selectedProcess, selectedDescription]);
+  console.log(uniqueDescriptionsByType);
+  console.log(selectedProcess);
 
   return (
     <div className="process">
@@ -254,7 +262,10 @@ const Process = () => {
           >
             <div style={{ display: "flex", gap: 10 }}>
               <Select
-                onChange={setSelectedProcess}
+                onChange={(value) => {
+                  setSelectedProcess(value);
+                  setSelectedDescription("");
+                }}
                 value={selectedProcess}
                 style={{ width: 200 }}
               >
@@ -265,6 +276,21 @@ const Process = () => {
                   </Select.Option>
                 ))}
               </Select>
+              {selectedProcess && (
+                <Select
+                  style={{ width: 200 }}
+                  placeholder="Saralash"
+                  allowClear
+                  onChange={(val) => setSelectedDescription(val)}
+                >
+                  {uniqueDescriptionsByType[selectedProcess]?.map((desc) => (
+                    <Select.Option key={desc} value={desc}>
+                      {desc}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+
               <label>
                 <input
                   type="date"
@@ -481,9 +507,27 @@ const Process = () => {
           layout="vertical"
           autoComplete="off"
         >
-          <Form.Item name="description" label="Tavsif">
-            <Input />
-          </Form.Item>
+          {selectedProcessType && (
+            <Form.Item
+              label="Tavsif"
+              name="description"
+              rules={[{ required: true, message: "Tavsif kiriting" }]}
+            >
+              <AutoComplete
+                options={uniqueDescriptionsByType[selectedProcessType]?.map(
+                  (desc) => ({
+                    value: desc,
+                  })
+                )}
+                placeholder="Tavsif tanlang yoki kiriting"
+                allowClear
+                filterOption={(input, option) =>
+                  option.value.toLowerCase().includes(input.toLowerCase())
+                }
+              />
+            </Form.Item>
+          )}
+
           <Form.Item
             rules={[{ required: true, message: "Jarayon turini tanlang" }]}
             name="process_type_id"

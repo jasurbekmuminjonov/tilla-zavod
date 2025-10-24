@@ -112,8 +112,7 @@ const Home = () => {
           <Card>
             <Statistic
               title="Umumiy kirim"
-              value={stats.goldTotal}
-              precision={2}
+              value={stats.goldTotal?.toFixed(4)}
               suffix="gr"
             />
           </Card>
@@ -121,9 +120,9 @@ const Home = () => {
         <Col span={6}>
           <Card>
             <Statistic
-              suffix={"gr"}
+              suffix="gr"
               title="Umumiy tovar"
-              value={stats.productGrammTotal}
+              value={stats.productGrammTotal?.toFixed(4)}
             />
           </Card>
         </Col>
@@ -131,7 +130,7 @@ const Home = () => {
           <Card>
             <Statistic
               title="Umumiy потери"
-              value={stats.lossTotal?.toFixed(2)}
+              value={stats.lossTotal?.toFixed(4)}
               suffix="gr"
             />
           </Card>
@@ -140,7 +139,8 @@ const Home = () => {
           <Card>
             <Statistic
               title="Umumiy astatka"
-              value={`${stats.totalAstatka?.toFixed(4)} gr`}
+              value={stats.totalAstatka?.toFixed(4)}
+              suffix="gr"
             />
           </Card>
         </Col>
