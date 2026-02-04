@@ -127,8 +127,10 @@ const Process = () => {
 
   const columns = [
     {
-      title: "Soat",
-      render: (_, record) => moment(record?.start_time).format("HH:mm"),
+      title: "Sana",
+      // render: (_, record) => moment(record?.start_time).format("HH:mm"),
+      render: (_, record) =>
+        moment(record?.start_time).format(" DD.MM.YYYY HH:mm"),
     },
     {
       title: "Jarayon turi",
@@ -155,7 +157,9 @@ const Process = () => {
     {
       title: "Chiqqan soat",
       render: (_, record) =>
-        record.end_time ? moment(record.end_time).format("HH:mm") : "",
+        record.end_time
+          ? moment(record.end_time).format(" DD.MM.YYYY HH:mm")
+          : "",
     },
     {
       title: "Chiqqan soni",
@@ -319,7 +323,7 @@ const Process = () => {
               columns={columns}
               bordered
               dataSource={[...filteredProcesses].sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
               )}
               loading={processLoading}
               rowKey="_id"
@@ -481,11 +485,11 @@ const Process = () => {
                   {(
                     filteredProcesses.reduce(
                       (acc, item) => acc + item.lost_gramm,
-                      0
+                      0,
                     ) /
                     filteredProcesses.reduce(
                       (acc, item) => acc + item.start_gramm,
-                      0
+                      0,
                     )
                   )?.toFixed(4)}
                 </td>
@@ -517,7 +521,7 @@ const Process = () => {
                 options={uniqueDescriptionsByType[selectedProcessType]?.map(
                   (desc) => ({
                     value: desc,
-                  })
+                  }),
                 )}
                 placeholder="Tavsif tanlang yoki kiriting"
                 allowClear

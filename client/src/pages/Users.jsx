@@ -13,6 +13,7 @@ import {
   notification,
   Popconfirm,
   Popover,
+  Row,
   Select,
   Space,
   Switch,
@@ -26,6 +27,11 @@ import { GrUserAdmin } from "react-icons/gr";
 import { Form } from "antd";
 import { useGetWarehousesQuery } from "../context/services/warehouse.service";
 import { useGetProcessTypesQuery } from "../context/services/processType.service";
+import {
+  CheckCircleOutlined,
+  CheckOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -107,142 +113,6 @@ const Users = () => {
       dataIndex: "role",
       render: (text) => (text === "admin" ? "Admin" : "Ishchi"),
     },
-    // {
-    //   title: "Umumiy oltin gr",
-    //   dataIndex: "gold",
-    //   render: (text) => text.reduce((acc, g) => acc + g.gramm, 0).toFixed(3),
-    // },
-    // {
-    //   title: "",
-    //   dataIndex: "gold",
-    //   render: (gold) => (
-    //     <Popover
-    //       trigger="click"
-    //       title="Oltin"
-    //       placement="bottom"
-    //       content={
-    //         <Table
-    //           columns={[
-    //             {
-    //               title: "Yetkazuvchi",
-    //               dataIndex: "provider_id",
-    //               render: (p) => p?.provider_name || "-",
-    //             },
-    //             {
-    //               title: "Jarayon",
-    //               dataIndex: "process_id",
-    //               render: (p) => (
-    //                 <Tag color="green">
-    //                   {processTypes.find((pt) => pt._id === p?.process_type_id)
-    //                     ?.process_name || "-"}
-    //                 </Tag>
-    //               ),
-    //             },
-    //             {
-    //               title: "Gramm",
-    //               dataIndex: "gramm",
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //             {
-    //               title: "Oltin probasi",
-    //               dataIndex: "gold_purity",
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //             {
-    //               title: "Tovar probasi",
-    //               dataIndex: "product_purity",
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //             {
-    //               title: "Tayyorlash",
-    //               dataIndex: "ratio",
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //             { title: "Izoh", dataIndex: "description" },
-    //           ]}
-    //           dataSource={gold}
-    //           rowKey={(r, i) => i}
-    //           pagination={false}
-    //           size="small"
-    //         />
-    //       }
-    //     >
-    //       <Button icon={<FaList />} />
-    //     </Popover>
-    //   ),
-    // },
-    // {
-    //   title: "",
-    //   dataIndex: "products",
-    //   render: (text, record) => (
-    //     <Popover
-    //       trigger="click"
-    //       title="Tayyor mahsulotlar"
-    //       placement="bottom"
-    //       content={
-    //         <Table
-    //           style={{ minWidth: "300px" }}
-    //           columns={[
-    //             {
-    //               title: "Tovar",
-    //               dataIndex: "product_type_id",
-    //               render: (text) => text.product_name,
-    //             },
-    //             { title: "Miqdor", dataIndex: "quantity" },
-    //             { title: "Umumiy gramm", dataIndex: "total_gramm" },
-    //             {
-    //               title: "1 dona da gramm",
-    //               dataIndex: "gramm_per_quantity",
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //             {
-    //               title: "Umumiy yo'qotilgan gramm",
-    //               dataIndex: "total_lost_gramm",
-
-    //               render: (text) => text.toFixed(3),
-    //             },
-    //           ]}
-    //           dataSource={text.products?.map((item, index) => ({
-    //             key: index,
-    //             ...item,
-    //           }))}
-    //           rowKey="_id"
-    //         />
-    //       }
-    //     >
-    //       <Button icon={<FaList />} />
-    //     </Popover>
-    //   ),
-    // },
-    // {
-    //   title: "",
-    //   dataIndex: "tools",
-    //   render: (text) => (
-    //     <Popover
-    //       trigger="click"
-    //       title="Ehtiyot qismlar"
-    //       placement="bottom"
-    //       content={
-    //         <Table
-    //           style={{ minWidth: "300px" }}
-    //           columns={[
-    //             { title: "Eht. qism", dataIndex: "tool_name" },
-    //             {
-    //               title: "O'lch. birlik",
-    //               dataIndex: "unit",
-    //               render: (text) => unitOptions[text],
-    //             },
-    //             { title: "Miqdor", dataIndex: "quantity" },
-    //           ]}
-    //           dataSource={text}
-    //           rowKey="_id"
-    //         />
-    //       }
-    //     >
-    //       <Button icon={<FaList />} />
-    //     </Popover>
-    //   ),
-    // },
     {
       title: "Jarayonlar",
       dataIndex: "allowed_process_types",
@@ -260,7 +130,16 @@ const Users = () => {
                 {
                   title: "Gramm ozayishi",
                   dataIndex: "weight_loss",
-                  render: (text) => (text ? "✅" : "❌"),
+                  render: (text) =>
+                    text ? (
+                      <CheckCircleOutlined
+                        style={{ color: "green", fontSize: "18px" }}
+                      />
+                    ) : (
+                      <CloseCircleOutlined
+                        style={{ color: "red", fontSize: "18px" }}
+                      />
+                    ),
                 },
                 {
                   title: "Kamayish limiti 1gr",
@@ -269,7 +148,16 @@ const Users = () => {
                 {
                   title: "Proba o'zgarishi",
                   dataIndex: "purity_change",
-                  render: (text) => (text ? "✅" : "❌"),
+                  render: (text) =>
+                    text ? (
+                      <CheckCircleOutlined
+                        style={{ color: "green", fontSize: "18px" }}
+                      />
+                    ) : (
+                      <CloseCircleOutlined
+                        style={{ color: "red", fontSize: "18px" }}
+                      />
+                    ),
                 },
               ]}
               dataSource={text}
@@ -284,39 +172,35 @@ const Users = () => {
     {
       title: "Oltin kirim",
       dataIndex: "create_gold",
-      render: (text) => (text ? "✅" : "❌"),
+      // render: (text) => (text ? "✅" : "❌"),
+      render: (text) =>
+        text ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
     {
       title: "запчасть kirim",
       dataIndex: "create_tool",
-      render: (text) => (text ? "✅" : "❌"),
+      render: (text) =>
+        text ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
     {
       title: "Tovar chiqarish",
       dataIndex: "allow_production",
-      render: (text) => (text ? "✅" : "❌"),
+      render: (text) =>
+        text ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
-    // {
-    //   title: "",
-    //   dataIndex: "attached_warehouses",
-    //   render: (text) => (
-    //     <Popover
-    //       placement="bottom"
-    //       title="Bog'langan omborlar"
-    //       trigger="click"
-    //       content={
-    //         <Table
-    //           style={{ minWidth: "300px" }}
-    //           columns={[{ title: "Ombor", dataIndex: "warehouse_name" }]}
-    //           dataSource={text}
-    //           rowKey="_id"
-    //         />
-    //       }
-    //     >
-    //       <Button icon={<FaList />} />
-    //     </Popover>
-    //   ),
-    // },
+
     {
       title: "Operatsiyalar",
       render: (_, record) => (
@@ -329,10 +213,10 @@ const Users = () => {
                 phone: record.phone,
                 role: record.role,
                 allowed_process_types: record.allowed_process_types.map(
-                  (p) => p._id
+                  (p) => p._id,
                 ),
                 attached_warehouses: record.attached_warehouses.map(
-                  (w) => w._id
+                  (w) => w._id,
                 ),
                 allow_production: record.allow_production,
                 create_gold: record.create_gold,
@@ -341,8 +225,8 @@ const Users = () => {
               setActiveTab("2");
             }}
             title="Tahrirlash"
-            type="dashed"
-            icon={<MdEdit />}
+            type="primary"
+            icon={<MdEdit size={18} />}
           />
           <Button
             title="Parolni tahrirlash"
@@ -377,7 +261,7 @@ const Users = () => {
               }
             }}
           >
-            <Button type="dashed" danger icon={<MdDelete />} />
+            <Button danger icon={<MdDelete size="18px" />} />
           </Popconfirm>
         </Space>
       ),
@@ -449,6 +333,10 @@ const Users = () => {
             dataSource={users}
             size="small"
             rowKey="_id"
+            // per page 15
+            pagination={{
+              defaultPageSize: 20,
+            }}
           />
         </TabPane>
         <TabPane tab="Yangi foydalanuvchi" key="2">
@@ -538,15 +426,17 @@ const Users = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="allow_production" label="Tayyor tovar">
-              <Switch />
-            </Form.Item>
-            <Form.Item name="create_gold" label="Oltin kirim">
-              <Switch />
-            </Form.Item>
-            <Form.Item name="create_tool" label="запчасть kirim">
-              <Switch />
-            </Form.Item>
+            <Row gutter={16}>
+              <Form.Item name="allow_production" label="Tayyor tovar">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="create_gold" label="Oltin kirim">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="create_tool" label="запчасть kirim">
+                <Switch />
+              </Form.Item>
+            </Row>
             <Form.Item>
               <Button
                 // style={{ width: "100%" }}

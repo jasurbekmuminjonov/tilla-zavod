@@ -51,7 +51,7 @@ const Core = () => {
   const [user, setUser] = useState({});
   const localeUser = JSON.parse(localStorage.getItem("user"));
   const [selectedUser, setSelectedUser] = useState(
-    localeUser.role === "admin" ? "" : localeUser._id
+    localeUser.role === "admin" ? "" : localeUser._id,
   );
   const [getReport, { data = {}, isLoading: dataLoading }] =
     useLazyGetTransportionsReportQuery();
@@ -165,7 +165,7 @@ const Core = () => {
 
     const tovar = filteredData.product.reduce(
       (acc, item) => acc + item.total_gramm,
-      0
+      0,
     );
     console.log(kirgan);
     console.log(data.gived - data.get);
@@ -195,7 +195,7 @@ const Core = () => {
         calculated_astatka: realAstatka,
         total_product: filteredData.product.reduce(
           (a, i) => a + i.total_gramm,
-          0
+          0,
         ),
         real_astatka: parseFloat(modalValue),
       }).unwrap();
@@ -387,7 +387,7 @@ const Core = () => {
                               columns={summaryColumns.map((col) =>
                                 col.dataIndex === "to_id"
                                   ? { ...col, dataIndex: "from_id" }
-                                  : col
+                                  : col,
                               )}
                               rowKey={(record) => record.from_id?._id}
                               pagination={false}
@@ -528,6 +528,7 @@ const Core = () => {
                 render: (record) => (
                   <Space>
                     <Button
+                      type="primary"
                       size="small"
                       onClick={() => {
                         setEditRecord(record);

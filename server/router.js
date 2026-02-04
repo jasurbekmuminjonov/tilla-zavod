@@ -13,6 +13,14 @@ const {
 } = require("./controllers/user.controller");
 
 const {
+  createDistribution,
+  getDistributions,
+  getDistributionById,
+  updateDistribution,
+  deleteDistribution,
+} = require("./controllers/toolDistribution.controller");
+
+const {
   createWarehouse,
   getWarehouses,
   editWarehouse,
@@ -26,6 +34,7 @@ const {
 const {
   createGold,
   getGold,
+  getGoldForDashboard,
   getAllLosses,
   deleteGold,
 } = require("./controllers/gold.controller");
@@ -112,6 +121,7 @@ const {
   getAstatka,
   editAstatka,
   deleteAstatka,
+  getAstatkaLatestSummary,
 } = require("./controllers/astatka.controller");
 
 // User routes
@@ -137,6 +147,7 @@ rt.get("/factory", getFactory);
 // Gold routes
 rt.post("/gold/create", createGold);
 rt.get("/gold", getGold);
+rt.get("/gold/dashboard", getGoldForDashboard);
 rt.delete("/gold/delete/:id", deleteGold);
 rt.get("/losses", getAllLosses);
 
@@ -212,8 +223,28 @@ rt.delete("/external-transport/delete/:id", deleteExtTransportion);
 
 //Astatka routes
 rt.post("/astatka/create", createAstatka);
+rt.get("/astatka/summary/latest", getAstatkaLatestSummary);
 rt.get("/astatka/get", getAstatka);
 rt.put("/astatka/edit/:id", editAstatka);
 rt.delete("/astatka/delete/:id", deleteAstatka);
+
+// tool 2 new version
+const tool2 = require("./controllers/tool2Controller");
+rt.get("/tool2/all", tool2.getAll);
+rt.get("/tool2/froms", tool2.getFroms);
+rt.post("/tool2/create", tool2.create);
+rt.put("/tool2/update/:id", tool2.update);
+rt.delete("/tool2/delete/:id", tool2.delete);
+
+// Tool Distribution routes
+rt.post("/tool-distribution/create", createDistribution);
+rt.get("/tool-distribution/all", getDistributions);
+rt.get(
+  "/tool-distribution/meta",
+  require("./controllers/toolDistribution.controller").getDistributionMeta,
+);
+rt.get("/tool-distribution/:id", getDistributionById);
+rt.put("/tool-distribution/edit/:id", updateDistribution);
+rt.delete("/tool-distribution/delete/:id", deleteDistribution);
 
 module.exports = rt;

@@ -85,6 +85,13 @@ export const inventoryApi = api.injectEndpoints({
       }),
       providesTags: ["Gold"],
     }),
+    getGoldForDashboard: builder.query({
+      query: () => ({
+        url: "/gold/dashboard",
+        method: "GET",
+      }),
+      providesTags: ["Gold"],
+    }),
     getProduct: builder.query({
       query: () => ({
         url: "/product",
@@ -116,6 +123,7 @@ export const {
   useGetToolsQuery,
   useCreateProductMutation,
   useGetGoldQuery,
+  useGetGoldForDashboardQuery,
   useGetProductQuery,
   useLazySearchGoldQuery,
   useGetLossesQuery,

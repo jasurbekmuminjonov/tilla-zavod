@@ -25,7 +25,7 @@ select {
   height: 100vh;
 }
 .ant-btn-primary {
-  background-color: black !important;
+  background-color: #1890ff !important;
 }
 input[type="date"] {
   height: 30px;

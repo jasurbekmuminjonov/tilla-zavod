@@ -1,519 +1,450 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
+import {
+  useGetAllQuery,
+  useCreateMutation,
+  useUpdateMutation,
+  useDeleteMutation,
+  useGetFromsQuery,
+} from "../context/services/tool2Api";
+
 import {
   Button,
-  Form,
-  InputNumber,
-  AutoComplete,
   Modal,
-  notification,
-  Table,
-  Tabs,
-  Select,
-  Space,
+  Form,
   Input,
+  InputNumber,
+  Table,
+  Space,
+  Popconfirm,
+  Card,
+  Typography,
+  Tag,
+  Select,
+  DatePicker,
+  Tabs,
 } from "antd";
-import moment from "moment";
-import {
-  useCreateToolTransportionMutation,
-  useDeleteToolTransportionMutation,
-} from "../context/services/toolTransportion.service";
-import { GiHandTruck } from "react-icons/gi";
-import { MdEdit, MdSend } from "react-icons/md";
-import {
-  useCreateToolMutation,
-  useDeleteToolMutation,
-  useEditToolMutation,
-  useGetToolCreatingsQuery,
-  useGetToolsQuery,
-} from "../context/services/inventory.service";
-import { useGetToolTransportionQuery } from "../context/services/toolTransportion.service";
-import {
-  useGetUserByUserIdQuery,
-  useGetUsersQuery,
-} from "../context/services/user.service";
-import { FaLock, FaRegTrashAlt } from "react-icons/fa";
 
-const Tools = () => {
-  const [createToolTransportion, { isLoading: toolTransportionLoading }] =
-    useCreateToolTransportionMutation();
-  const { data: users = [] } = useGetUsersQuery();
-  const { data: self = {} } = useGetUserByUserIdQuery();
-  const { data: tools = [], isLoading } = useGetToolsQuery();
-  const { data: toolCreatings = [] } = useGetToolCreatingsQuery();
-  const { data: toolTransportions = [] } = useGetToolTransportionQuery();
-  const [createTool] = useCreateToolMutation();
-  const [deleteTool] = useDeleteToolMutation();
-  const [editTool] = useEditToolMutation();
-  const [editingTool, setEditingTool] = useState({});
-  const [deleteToolTransportion] = useDeleteToolTransportionMutation();
+import { MdEdit, MdAdd } from "react-icons/md";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { SearchOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import TabPane from "antd/es/tabs/TabPane";
+import ToolDistribution from "./ToolDistribution";
 
-  const [transportingTool, setTransportingTool] = useState({});
-  const [transportingModal, setTransportingModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("1");
-  const [transportingForm] = Form.useForm();
+const { Title } = Typography;
+const { RangePicker } = DatePicker;
+
+const getColumns = (onEdit, onDelete) => [
+  {
+    title: "Nomi",
+    dataIndex: "name",
+    key: "name",
+    render: (text) => <span style={{ fontWeight: 500 }}>{text}</span>,
+  },
+  {
+    title: "Kimdan",
+    dataIndex: "from",
+    key: "from",
+    render: (text) => <Tag color="blue">{text}</Tag>,
+  },
+  {
+    title: "Narxi",
+    dataIndex: "price",
+    key: "price",
+    render: (v) => (
+      <span style={{ color: "#52c41a", fontWeight: 500 }}>
+        {v || v === 0 ? `$${v.toLocaleString()}` : "-"}
+      </span>
+    ),
+  },
+  {
+    title: "Miqdori",
+    dataIndex: "quantity",
+    key: "quantity",
+    render: (v) => <Tag color="purple">{v || v === 0 ? v : "-"}</Tag>,
+  },
+  {
+    title: "Sana",
+    dataIndex: "createdAt",
+    key: "createdAt",
+    render: (t) => {
+      if (!t) return "-";
+      const date = new Date(t);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return (
+        <span style={{ color: "#666" }}>
+          {`${day}-${month}-${year} ${hours}:${minutes}`}
+        </span>
+      );
+    },
+  },
+  {
+    title: "Operatsiyalar",
+    key: "actions",
+    width: 120,
+    align: "center",
+    render: (_, record) => (
+      <Space>
+        <Button
+          type="primary"
+          size="small"
+          icon={<MdEdit />}
+          onClick={() => onEdit(record)}
+        />
+        <Popconfirm
+          title="O'chirish"
+          description="Chindan ham o'chirmoqchimisiz?"
+          okText="Ha"
+          cancelText="Yo'q"
+          onConfirm={() => onDelete(record._id)}
+        >
+          <Button danger ghost size="small" icon={<FaRegTrashAlt />} />
+        </Popconfirm>
+      </Space>
+    ),
+  },
+];
+
+function Tools() {
   const [form] = Form.useForm();
-  const [searchToolName, setSearchToolName] = useState("");
-  const [searchDescription, setSearchDescription] = useState("");
+  const [searchForm] = Form.useForm();
 
-  const filteredTools = useMemo(() => {
-    return tools.filter((item) => {
-      const matchName = searchToolName
-        ? item.tool_name?.toLowerCase().includes(searchToolName.toLowerCase())
-        : true;
+  const [pageNum, setPageNum] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [filters, setFilters] = React.useState({});
 
-      const matchDesc = searchDescription
-        ? item.description
-            ?.toLowerCase()
-            .includes(searchDescription.toLowerCase())
-        : true;
+  const { data, isLoading, refetch } = useGetAllQuery({
+    page: pageNum,
+    limit: pageSize,
+    ...filters,
+  });
 
-      return matchName && matchDesc;
-    });
-  }, [tools, searchToolName, searchDescription]);
+  const [createTool] = useCreateMutation();
+  const [updateTool] = useUpdateMutation();
+  const [deleteTool] = useDeleteMutation();
 
-  const totalUsd = useMemo(
-    () => filteredTools.reduce((sum, t) => sum + Number(t.total_usd || 0), 0),
-    [filteredTools]
-  );
-  const totalUzs = useMemo(
-    () => filteredTools.reduce((sum, t) => sum + Number(t.total_uzs || 0), 0),
-    [filteredTools]
-  );
+  const { data: froms = [] } = useGetFromsQuery();
 
-  const userNameOptions = useMemo(() => {
-    const names = new Set(toolTransportions.map((t) => t.user_name));
-    return [...names].map((name) => ({ label: name, value: name }));
-  }, [toolTransportions]);
+  const [open, setOpen] = React.useState(false);
+  const [editingId, setEditingId] = React.useState(null);
 
-  const toolNameOptions = tools.map((item) => ({
-    label: item.tool_name,
-    value: item.tool_name,
-    description: item.description,
-  }));
-
-  const handleSelectTool = (value) => {
-    const selectedTool = toolNameOptions.find((item) => item.value === value);
-
-    if (selectedTool) {
-      form.setFieldsValue({ description: selectedTool.description });
-    }
-  };
-
-  const handleChangeTool = (value) => {
-    const selectedTool = toolNameOptions.find((item) => item.value === value);
-    if (!selectedTool && !editingTool._id) {
-      form.setFieldsValue({ description: "" });
-    }
-  };
-
-  async function handleTransportion(values) {
-    try {
-      const payload = {
-        tool_id: transportingTool._id,
-        user_name: values.user_name,
-        user_id: values.user_id,
-        quantity: values.quantity,
-      };
-      const res = await createToolTransportion(payload).unwrap();
-      notification.success({
-        message: res.message,
-        description: "",
-      });
-      transportingForm.resetFields();
-      setTransportingModal(false);
-      setTransportingTool({});
-    } catch (err) {
-      console.log(err);
-      notification.error({
-        message: "Xatolik",
-        description: err.data.message,
-      });
-    }
-  }
-
-  async function handleCreateTool(values) {
+  async function handleCreate(values) {
     try {
       let res;
-      if (editingTool._id) {
-        res = await editTool({ id: editingTool._id, body: values }).unwrap();
+      if (editingId) {
+        res = updateTool({ id: editingId, body: values });
       } else {
-        res = await createTool(values).unwrap();
+        res = createTool(values);
       }
+      if (res.unwrap) await res.unwrap();
+      else await res;
 
-      notification.success({
-        message: res.message,
-        description: "",
-      });
       form.resetFields();
-      setActiveTab("1");
+      setOpen(false);
+      setEditingId(null);
+      refetch?.();
     } catch (err) {
-      console.log(err);
-      notification.error({
-        message: err.data.message,
-        description: "",
-      });
+      console.error(err);
     }
   }
 
-  async function handleDeleteToolTransportion(id) {
+  async function handleDelete(id) {
     try {
-      await deleteToolTransportion(id).unwrap();
+      const res = deleteTool(id);
+      if (res.unwrap) await res.unwrap();
+      else await res;
+      refetch?.();
     } catch (err) {
-      console.log(err);
-      notification.error({
-        message: "Xatolik",
-        description: err.data.message,
-      });
+      console.error(err);
     }
   }
 
-  const columns = [
-    {
-      title: (
-        <div>
-          <div>Запчасть</div>
-          <AutoComplete
-            size="small"
-            style={{ width: "100%" }}
-            placeholder="Qidirish..."
-            value={searchToolName}
-            options={toolNameOptions}
-            onChange={setSearchToolName}
-            filterOption={(inputValue, option) =>
-              option?.label?.toLowerCase().includes(inputValue.toLowerCase())
-            }
-          />
-        </div>
-      ),
-      dataIndex: "tool_name",
-      width: 300,
-    },
-    {
-      title: (
-        <div>
-          <div>Tavsif</div>
-          <AutoComplete
-            size="small"
-            style={{ width: "100%" }}
-            placeholder="Qidirish..."
-            value={searchDescription}
-            onChange={setSearchDescription}
-            options={[...new Set(tools.map((t) => t.description || ""))]
-              .filter((v) => v)
-              .map((d) => ({ label: d, value: d }))}
-            filterOption={(inputValue, option) =>
-              option?.label?.toLowerCase().includes(inputValue.toLowerCase())
-            }
-          />
-        </div>
-      ),
-      dataIndex: "description",
-      width: 300,
-    },
-    {
-      title: "Narx, so'm",
-      dataIndex: "uzs_price",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    { title: "Hozirgi miqdor", dataIndex: "stock" },
-    {
-      title: "Narx, dollar",
-      dataIndex: "usd_price",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Jami dollar",
-      dataIndex: "total_usd",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Jami so'm",
-      dataIndex: "total_uzs",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Operatsiyalar",
-      render: (_, record) => (
-        <Space>
-          <Button
-            onClick={() => {
-              setTransportingTool(record);
-              setTransportingModal(true);
-              transportingForm.resetFields();
-            }}
-            icon={<GiHandTruck size={20} />}
-          />
-          <Button
-            onClick={() => {
-              setEditingTool(record);
-              form.setFieldsValue({
-                tool_name: record.tool_name,
-                usd_price: record.usd_price,
-                uzs_price: record.uzs_price,
-                description: record.description,
-                stock: record.stock,
-              });
-              setActiveTab("2");
-            }}
-            icon={<MdEdit />}
-          />
-          <Button
-            onClick={() => {
-              if (window.confirm("Chindan ham o‘chirmoqchimisiz?")) {
-                handleDeleteTool(record._id);
-              }
-            }}
-            icon={<FaRegTrashAlt />}
-          />
-        </Space>
-      ),
-    },
-  ];
-  const creatingColumns = [
-    {
-      title: "Запчасть",
-      dataIndex: "tool_id",
-      render: (text) => text.tool_name,
-    },
-    {
-      title: "Tavsif",
-      dataIndex: "tool_id",
-      render: (text) => text.description,
-    },
-    {
-      title: "Narx, so'm",
-      dataIndex: "uzs_price",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    { title: "Miqdor", dataIndex: "quantity" },
-    {
-      title: "Narx, dollar",
-      dataIndex: "usd_price",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Jami dollar",
-      dataIndex: "total_usd",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Jami so'm",
-      dataIndex: "total_uzs",
-      render: (text) => text?.toLocaleString("us-US"),
-    },
-    {
-      title: "Sana",
-      dataIndex: "createdAt",
-      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
-    },
-  ];
-
-  const transportionColumns = [
-    {
-      title: "Запчасть",
-      dataIndex: "tool_id",
-      render: (text) => text?.tool_name,
-    },
-    { title: "Miqdor", dataIndex: "quantity" },
-    { title: "Kimga", dataIndex: "user_name" },
-    { title: "Xodim", dataIndex: "user_id", render: (text) => text?.name },
-    {
-      title: "Sana",
-      dataIndex: "createdAt",
-      render: (text) => moment(text).format("DD.MM.YYYY HH:mm"),
-    },
-    {
-      title: "Operatsiyalar",
-      render: (_, record) => (
-        <Space>
-          <Button
-            onClick={() => {
-              if (window.confirm("Chindan ham o‘chirmoqchimisiz?")) {
-                handleDeleteToolTransportion(record._id);
-              }
-            }}
-            icon={<FaRegTrashAlt />}
-          />
-        </Space>
-      ),
-    },
-  ];
-
-  async function handleDeleteTool(id) {
-    try {
-      await deleteTool(id).unwrap();
-    } catch (err) {
-      console.log(err);
-      notification.error({
-        message: "Xatolik",
-        description: err.data.message,
-      });
-    }
+  function handleEdit(record) {
+    setEditingId(record._id);
+    form.setFieldsValue(record);
+    setOpen(true);
   }
 
-  if (self?.role !== "admin" && !self?.create_tool) {
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "15px",
-        }}
-      >
-        <FaLock size="20px" /> <h2>Sizda kirish uchun ruxsat yo'q</h2>
-      </div>
-    );
+  function handleCloseModal() {
+    setOpen(false);
+    setEditingId(null);
+    form.resetFields();
+  }
+
+  // ✅ FILTER: bo‘sh qiymat yubormaydi + RangePicker => startDate/endDate
+  function handleFilter(values) {
+    const next = {};
+
+    // name
+    if (values?.name && String(values.name).trim()) {
+      next.name = String(values.name).trim();
+    }
+
+    // from
+    if (values?.from && String(values.from).trim()) {
+      next.from = String(values.from).trim();
+    }
+
+    // dateRange => startDate/endDate (YYYY-MM-DD)
+    if (Array.isArray(values?.dateRange) && values.dateRange.length === 2) {
+      const [start, end] = values.dateRange;
+      if (start && end) {
+        next.startDate = dayjs(start).format("YYYY-MM-DD");
+        next.endDate = dayjs(end).format("YYYY-MM-DD");
+      }
+    }
+
+    setFilters(next);
+    setPageNum(1);
+  }
+
+  // ✅ Clear bo‘lganda (Input/Select/Date) avtomatik filter yangilansin
+  function onSearchValuesChange(_, allValues) {
+    const hasAny =
+      (allValues?.name && String(allValues.name).trim()) ||
+      (allValues?.from && String(allValues.from).trim()) ||
+      (Array.isArray(allValues?.dateRange) && allValues.dateRange.length);
+
+    if (!hasAny) {
+      setFilters({});
+      setPageNum(1);
+    }
   }
 
   return (
-    <div className="tools">
-      <Tabs onChange={setActiveTab} activeKey={activeTab}>
-        <Tabs.TabPane key="1" tab="Запчасть">
-          <Modal
-            open={transportingModal}
-            title="Запчасть ni chiqim qilish"
-            onCancel={() => setTransportingModal(false)}
-            footer={null}
+    <Tabs>
+      <TabPane tab="Ombor" key="all">
+        <div
+          style={{
+            padding: "15px 0",
+            minHeight: "100vh",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+              backgroundColor: "#fff",
+              padding: "15px",
+            }}
           >
+            <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
+              🛠️ Ombor boshqaruvi
+            </Title>
+
+            {/* ✅ Search Form */}
             <Form
-              onFinish={handleTransportion}
-              form={transportingForm}
-              layout="vertical"
+              form={searchForm}
+              layout="inline"
+              onFinish={handleFilter}
+              onValuesChange={onSearchValuesChange}
+              style={{
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
             >
-              <Form.Item name="user_name" label="Kimga yuborish">
-                <AutoComplete
-                  options={userNameOptions}
-                  placeholder="Yangi ism yozish yoki tanlash"
-                  filterOption={(inputValue, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(inputValue.toLowerCase())
-                  }
+              <Form.Item name="name" style={{ marginBottom: 0 }}>
+                <Input
+                  allowClear
+                  placeholder="Nom bo'yicha qidirish..."
+                  prefix={<SearchOutlined />}
+                  style={{ width: "200px", borderRadius: "6px" }}
                 />
               </Form.Item>
-              <Form.Item name="user_id" label="Xodim">
-                <Select allowClear>
-                  {users.map((u) => (
-                    <Select.Option key={u._id} value={u._id}>
-                      {u.name}
-                    </Select.Option>
-                  ))}
-                </Select>
+
+              <Form.Item name="from" style={{ marginBottom: 0 }}>
+                <Select
+                  allowClear
+                  showSearch
+                  placeholder="Kimdan filter"
+                  style={{ width: 200 }}
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={froms.map((from) => ({
+                    label: from,
+                    value: from,
+                  }))}
+                />
               </Form.Item>
-              <Form.Item
-                name="quantity"
-                label="Запчасть miqdori"
-                rules={[{ required: true, message: "Miqdor kiriting" }]}
-              >
-                <InputNumber style={{ width: "100%" }} />
+
+              {/* ✅ Sana oralig'i */}
+              <Form.Item name="dateRange" style={{ marginBottom: 0 }}>
+                <RangePicker
+                  allowClear
+                  format="DD-MM-YYYY"
+                  style={{ width: 260, borderRadius: "6px" }}
+                  placeholder={["Boshlanish sana", "Tugash sana"]}
+                />
               </Form.Item>
-              <Form.Item>
+
+              <Form.Item style={{ marginBottom: 0 }}>
                 <Button
                   type="primary"
                   htmlType="submit"
-                  icon={<MdSend />}
-                  loading={toolTransportionLoading}
+                  icon={<SearchOutlined />}
+                  style={{ borderRadius: "6px" }}
                 >
-                  Yuborish
+                  Qidirish
                 </Button>
+              </Form.Item>
+
+              {/* ❌ Tozalash button olib tashlandi */}
+
+              <Form.Item style={{ marginBottom: 0, marginLeft: "auto" }}>
+                <Button
+                  onClick={() => setOpen(true)}
+                  type="primary"
+                  icon={<MdAdd />}
+                >
+                  Yangi Kirim
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
+
+          {/* ✅ Modal */}
+          <Modal
+            title={
+              <span style={{ fontSize: "18px", fontWeight: 600 }}>
+                {editingId ? "📝 O'zgartirish" : "➕ Yangi Tool"}
+              </span>
+            }
+            open={open}
+            onCancel={handleCloseModal}
+            footer={null}
+            width={500}
+            style={{ top: 20 }}
+          >
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleCreate}
+              style={{ marginTop: "24px" }}
+            >
+              <Form.Item
+                name="name"
+                label={<span style={{ fontWeight: 500 }}>Nomi</span>}
+                rules={[{ required: true, message: "Nomi kiriting" }]}
+              >
+                <Input
+                  placeholder="Tool nomini kiriting"
+                  style={{ borderRadius: "6px" }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="from"
+                label={<span style={{ fontWeight: 500 }}>Kimdan</span>}
+                rules={[{ required: true, message: "Kimdan kiriting" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Tanlang yoki yangi kiriting"
+                  style={{ borderRadius: "6px" }}
+                  mode="tags"
+                  maxCount={1}
+                  allowClear
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={froms.map((from) => ({
+                    label: from,
+                    value: from,
+                  }))}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="price"
+                label={<span style={{ fontWeight: 500 }}>Narxi ($)</span>}
+              >
+                <InputNumber
+                  style={{ width: "100%", borderRadius: "6px" }}
+                  placeholder="0.00"
+                  min={0}
+                  precision={2}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="quantity"
+                label={<span style={{ fontWeight: 500 }}>Miqdori</span>}
+              >
+                <InputNumber
+                  style={{ width: "100%", borderRadius: "6px" }}
+                  placeholder="0"
+                  min={0}
+                />
+              </Form.Item>
+
+              <Form.Item style={{ marginBottom: 0, marginTop: "24px" }}>
+                <Space style={{ width: "100%", justifyContent: "flex-end" }}>
+                  <Button
+                    onClick={handleCloseModal}
+                    style={{ borderRadius: "6px" }}
+                  >
+                    Bekor qilish
+                  </Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{ borderRadius: "6px" }}
+                  >
+                    Saqlash
+                  </Button>
+                </Space>
               </Form.Item>
             </Form>
           </Modal>
 
+          {/* ✅ Table Card */}
+
           <Table
             loading={isLoading}
-            columns={columns}
-            dataSource={filteredTools}
-            size="small"
+            columns={getColumns(handleEdit, handleDelete)}
+            dataSource={data?.data || []}
+            size="middle"
             rowKey="_id"
             bordered
-            pagination={{ pageSize: 10 }}
-            summary={() => (
-              <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={5}>
-                  <b>Jami:</b>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={5}>
-                  <b>{totalUsd.toLocaleString("uz-UZ")}</b>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={6}>
-                  <b>{totalUzs.toLocaleString("uz-UZ")}</b>
-                </Table.Summary.Cell>
-                <Table.Summary.Cell index={7} />
-              </Table.Summary.Row>
-            )}
+            style={{ borderRadius: "8px", overflow: "hidden" }}
+            pagination={{
+              current: pageNum,
+              pageSize: pageSize,
+              total: data?.total || 0,
+              onChange: (page) => setPageNum(page),
+              onShowSizeChange: (_, size) => {
+                setPageSize(size);
+                setPageNum(1);
+              },
+              showSizeChanger: true,
+              pageSizeOptions: ["10", "20", "50", "100"],
+              showTotal: (total) => `Jami: ${total} ta`,
+              style: { marginTop: "16px", marginBottom: "8px" },
+            }}
           />
-        </Tabs.TabPane>
-        <Tabs.TabPane key="2" tab="Запчасть kirim qilish">
-          <Form layout="vertical" form={form} onFinish={handleCreateTool}>
-            <Form.Item
-              name="tool_name"
-              label="Запчасть nomi"
-              rules={[{ required: true, message: "Запчасть nomini kiriting" }]}
-            >
-              <AutoComplete
-                options={toolNameOptions}
-                placeholder="Nomi yozish yoki tanlash"
-                onSelect={handleSelectTool}
-                onChange={handleChangeTool}
-                filterOption={(inputValue, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(inputValue.toLowerCase())
-                }
-              />
-            </Form.Item>
-            <Form.Item
-              name="description"
-              label="Tavsif (kategoriya, o'lcham, qo'shimcha ma'lumot va h.k)"
-            >
-              <Input placeholder="Tavsif" />
-            </Form.Item>
-            <Form.Item
-              name="stock"
-              label="Запчасть miqdori"
-              rules={[{ required: true, message: "Miqdor kiriting" }]}
-            >
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-            <Form.Item name="usd_price" label="Dollar narxi">
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-            <Form.Item name="uzs_price" label="So'm narxi">
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+        </div>
+      </TabPane>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Saqlash
-              </Button>
-            </Form.Item>
-          </Form>
-        </Tabs.TabPane>
-        <Tabs.TabPane key="3" tab="Kirim">
-          <Table
-            columns={creatingColumns}
-            dataSource={toolCreatings}
-            size="small"
-            bordered
-            rowKey="_id"
-          />
-        </Tabs.TabPane>
-        <Tabs.TabPane key="4" tab="Chiqim">
-          <Table
-            columns={transportionColumns}
-            dataSource={toolTransportions}
-            size="small"
-            rowKey="_id"
-            bordered
-          />
-        </Tabs.TabPane>
-      </Tabs>
-    </div>
+      <TabPane tab="Berilgan ehtiyot qismlar" key="2">
+        <ToolDistribution />
+      </TabPane>
+    </Tabs>
   );
-};
+}
 
 export default Tools;

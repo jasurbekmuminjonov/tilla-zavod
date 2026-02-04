@@ -5,13 +5,12 @@ import {
   FaHome,
   FaUser,
   FaUserTie,
-  FaWarehouse,
   FaCalculator,
 } from "react-icons/fa";
 import { GiBigDiamondRing } from "react-icons/gi";
 import { IoIosWarning, IoMdSettings } from "react-icons/io";
 import { IoCutSharp } from "react-icons/io5";
-import { TbCubeSend, TbTransfer } from "react-icons/tb";
+import { TbTransfer } from "react-icons/tb";
 
 export const sidebarLinks = [
   {
@@ -65,6 +64,11 @@ export const sidebarLinks = [
     icon: <BsTools size={20} />,
   },
   {
+    path: "/my-distributions",
+    label: "Mening Taqsimlanishlarim",
+    icon: <BsTools size={20} />,
+  },
+  {
     path: "/transfer-gold",
     label: "Oltin o'tkazmalari",
     icon: <AiFillGold size={20} />,
@@ -72,7 +76,7 @@ export const sidebarLinks = [
   {
     path: "/external-transportion",
     label: "Tashqi o'tkazmalar",
-    icon: <TbTransfer  size={20} />,
+    icon: <TbTransfer size={20} />,
   },
   // {
   //   path: "/transfer-product",

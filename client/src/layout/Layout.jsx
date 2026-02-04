@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { Layout as AntLayout, Modal, Space } from "antd";
-import { FaRegBell } from "react-icons/fa";
+import { Layout as AntLayout, Modal } from "antd";
 import { useState } from "react";
 // import { useGetNotificationQuery } from "../context/services/notification.service";
 import { ImExit } from "react-icons/im";
@@ -25,7 +24,7 @@ const Layout = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "#f5f5f5",
+            background: "#fff",
             borderBottom: "1px solid #ccc",
             gap: "15px",
             paddingInline: "10px",
@@ -39,7 +38,7 @@ const Layout = () => {
               size={20}
             /> */}
             <ImExit
-              color="red"
+              color="crimson"
               onClick={() => {
                 localStorage.removeItem("token");
                 window.location.href = "/";
@@ -49,7 +48,7 @@ const Layout = () => {
             />
           </div>
         </Header>
-        <Content style={{ paddingInline: "15px" }}>
+        <Content style={{ paddingInline: "15px", background: "#fff" }}>
           <Outlet />
         </Content>
       </AntLayout>

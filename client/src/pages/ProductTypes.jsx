@@ -75,7 +75,8 @@ const ProductTypes = () => {
       render: (_, record) => (
         <Space>
           <Button
-            icon={<MdEdit />}
+            type="primary"
+            icon={<MdEdit size={18} />}
             onClick={() => {
               setEditingItem(record);
               form.setFieldsValue(record);
@@ -99,7 +100,7 @@ const ProductTypes = () => {
               }
             }}
           >
-            <Button danger icon={<MdDelete />} />
+            <Button danger icon={<MdDelete size={18} />} />
           </Popconfirm>
         </Space>
       ),

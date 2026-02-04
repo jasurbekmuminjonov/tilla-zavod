@@ -19,6 +19,7 @@ import {
 } from "antd";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { FaLock, FaSave } from "react-icons/fa";
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
 
@@ -70,17 +71,32 @@ const ProcessTypes = () => {
     {
       title: "Gramm yo'qolishi",
       dataIndex: "weight_loss",
-      render: (val) => (val ? "✅" : "❌"),
+      render: (val) =>
+        val ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
     {
       title: "Proba o'zgaradi",
       dataIndex: "purity_change",
-      render: (val) => (val ? "✅" : "❌"),
+      render: (val) =>
+        val ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
     {
       title: "Sanaladigan ish",
       dataIndex: "is_numeral",
-      render: (val) => (val ? "✅" : "❌"),
+      render: (val) =>
+        val ? (
+          <CheckCircleOutlined style={{ color: "green", fontSize: "18px" }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: "red", fontSize: "18px" }} />
+        ),
     },
     {
       title: "Limit (1gr)",
@@ -96,7 +112,7 @@ const ProcessTypes = () => {
             width: "30px",
             height: "20px",
             backgroundColor: val,
-            border: "1px solid #f5f5f5",
+            border: "1px solid #fff",
           }}
         ></div>
       ),
@@ -106,7 +122,7 @@ const ProcessTypes = () => {
       render: (_, record) => (
         <Space>
           <Button
-            icon={<MdEdit />}
+            icon={<MdEdit size={18} />}
             onClick={() => {
               setEditingItem(record);
               form.setFieldsValue(record);
@@ -130,7 +146,7 @@ const ProcessTypes = () => {
               }
             }}
           >
-            <Button danger icon={<MdDelete />} />
+            <Button danger icon={<MdDelete size={18} />} />
           </Popconfirm>
         </Space>
       ),

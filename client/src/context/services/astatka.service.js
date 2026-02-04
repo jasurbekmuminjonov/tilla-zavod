@@ -33,6 +33,13 @@ export const astatkaApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Astatka"],
     }),
+    getAstatkaLatestSummary: builder.query({
+      query: () => ({
+        url: "/astatka/summary/latest",
+        method: "GET",
+      }),
+      providesTags: ["Astatka"],
+    }),
   }),
 });
 
@@ -41,4 +48,5 @@ export const {
   useGetAstatkaQuery,
   useDeleteAstatkaMutation,
   useEditAstatkaMutation,
+  useGetAstatkaLatestSummaryQuery,
 } = astatkaApi;

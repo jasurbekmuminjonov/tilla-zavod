@@ -193,6 +193,46 @@ exports.getGold = async (req, res) => {
   }
 };
 
+exports.getGoldForDashboard = async (req, res) => {
+  try {
+    const factory_id = req.user.factory_id;
+
+    // Aggregate gold entries by provider_id, summing gramm for dashboard
+    const aggregated = await Gold.aggregate([
+      // { $match: { factory_id: factory_id } },
+      {
+        $group: {
+          _id: "$provider_id",
+          totalGramm: { $sum: "$gramm" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "providers",
+          localField: "_id",
+          foreignField: "_id",
+          as: "provider",
+        },
+      },
+      { $unwind: { path: "$provider", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          provider: { _id: "$_id", provider_name: "$provider.provider_name" },
+          totalGramm: 1,
+          count: 1,
+        },
+      },
+      { $sort: { totalGramm: -1 } },
+    ]);
+
+    return res.status(200).json(aggregated);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(500).json({ message: "Serverda xatolik", err });
+  }
+};
+
 exports.getAllLosses = async (req, res) => {
   try {
     const { factory_id } = req.user;

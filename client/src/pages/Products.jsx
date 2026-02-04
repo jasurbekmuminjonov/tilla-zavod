@@ -113,17 +113,18 @@ const Products = () => {
       title: "O'chirish",
       render: (_, record) => (
         <Button
+          danger
           icon={<FaRegTrashAlt />}
           onClick={async () => {
             if (
               !window.confirm(
                 `${
                   productTypes.find(
-                    (item) => item._id === record.product_type_id
+                    (item) => item._id === record.product_type_id,
                   )?.product_name
                 } - ${record.description}, ${
                   record.quantity
-                } ta, ni o'chirib tashlamoqchimisiz?`
+                } ta, ni o'chirib tashlamoqchimisiz?`,
               )
             )
               return;
@@ -141,81 +142,80 @@ const Products = () => {
     },
   ];
 
-const groupedData = useMemo(() => {
-  let filtered = [...products];
+  const groupedData = useMemo(() => {
+    let filtered = [...products];
 
-  if (filterUser) {
-    filtered = filtered.filter((p) => p.user_id?._id === filterUser);
-  }
+    if (filterUser) {
+      filtered = filtered.filter((p) => p.user_id?._id === filterUser);
+    }
 
-  if (fromDate || toDate) {
-    filtered = filtered.filter((p) => {
-      const created = moment(p.createdAt).startOf("day");
-      if (fromDate && toDate) {
-        return (
-          created.isSameOrAfter(moment(fromDate).startOf("day")) &&
-          created.isSameOrBefore(moment(toDate).endOf("day"))
-        );
-      } else if (fromDate && !toDate) {
-        return created.isSameOrAfter(moment(fromDate).startOf("day"));
-      } else if (!fromDate && toDate) {
-        return created.isSameOrBefore(moment(toDate).endOf("day"));
-      }
-      return true;
-    });
-  }
+    if (fromDate || toDate) {
+      filtered = filtered.filter((p) => {
+        const created = moment(p.createdAt).startOf("day");
+        if (fromDate && toDate) {
+          return (
+            created.isSameOrAfter(moment(fromDate).startOf("day")) &&
+            created.isSameOrBefore(moment(toDate).endOf("day"))
+          );
+        } else if (fromDate && !toDate) {
+          return created.isSameOrAfter(moment(fromDate).startOf("day"));
+        } else if (!fromDate && toDate) {
+          return created.isSameOrBefore(moment(toDate).endOf("day"));
+        }
+        return true;
+      });
+    }
 
-  // 🔽 Faqat bitta productType tanlansa, shuni olamiz
-  const visibleProductTypes = filterProductType
-    ? productTypes.filter((t) => t._id === filterProductType)
-    : productTypes;
+    // 🔽 Faqat bitta productType tanlansa, shuni olamiz
+    const visibleProductTypes = filterProductType
+      ? productTypes.filter((t) => t._id === filterProductType)
+      : productTypes;
 
-  const result = visibleProductTypes.map((type) => {
-    const typeProducts = filtered.filter(
-      (p) => p.product_type_id === type._id
-    );
+    const result = visibleProductTypes.map((type) => {
+      const typeProducts = filtered.filter(
+        (p) => p.product_type_id === type._id,
+      );
 
-    // 🔽 faqat shu turdagi description tanlangan bo‘lsa, bitta o‘zi chiqsin
-    const allDescriptions = filterDescription
-      ? [filterDescription]
-      : [
-          ...new Set(
-            products
-              .filter((p) => p.product_type_id === type._id)
-              .map((p) => p.description || "—")
-          ),
-        ];
+      // 🔽 faqat shu turdagi description tanlangan bo‘lsa, bitta o‘zi chiqsin
+      const allDescriptions = filterDescription
+        ? [filterDescription]
+        : [
+            ...new Set(
+              products
+                .filter((p) => p.product_type_id === type._id)
+                .map((p) => p.description || "—"),
+            ),
+          ];
 
-    const childGroups = allDescriptions.map((desc) => {
-      const sameDesc = typeProducts.filter((p) => p.description === desc);
+      const childGroups = allDescriptions.map((desc) => {
+        const sameDesc = typeProducts.filter((p) => p.description === desc);
+        return {
+          key: `${type._id}_${desc}`,
+          product_name: desc,
+          quantity: sameDesc.reduce((sum, p) => sum + p.quantity, 0),
+          total_gramm: sameDesc.reduce((sum, p) => sum + p.total_gramm, 0),
+        };
+      });
+
       return {
-        key: `${type._id}_${desc}`,
-        product_name: desc,
-        quantity: sameDesc.reduce((sum, p) => sum + p.quantity, 0),
-        total_gramm: sameDesc.reduce((sum, p) => sum + p.total_gramm, 0),
+        key: type._id,
+        product_name: type.product_name,
+        quantity: childGroups.reduce((sum, c) => sum + c.quantity, 0),
+        total_gramm: childGroups.reduce((sum, c) => sum + c.total_gramm, 0),
+        children: childGroups,
       };
     });
 
-    return {
-      key: type._id,
-      product_name: type.product_name,
-      quantity: childGroups.reduce((sum, c) => sum + c.quantity, 0),
-      total_gramm: childGroups.reduce((sum, c) => sum + c.total_gramm, 0),
-      children: childGroups,
-    };
-  });
-
-  return result;
-}, [
-  products,
-  productTypes,
-  filterUser,
-  fromDate,
-  toDate,
-  filterProductType,
-  filterDescription,
-]);
-
+    return result;
+  }, [
+    products,
+    productTypes,
+    filterUser,
+    fromDate,
+    toDate,
+    filterProductType,
+    filterDescription,
+  ]);
 
   const groupedColumns = [
     {
@@ -259,11 +259,13 @@ const groupedData = useMemo(() => {
           <Table
             loading={productLoading}
             dataSource={products.filter((p) =>
-              self.role === "user" ? p.user_id._id === self._id : true
+              self.role === "user" ? p.user_id._id === self._id : true,
             )}
+            rowKey={(d, index) => index}
             columns={columns}
             size="small"
             bordered
+            pagination={{ defaultPageSize: 20 }}
           />
         </TabPane>
 
@@ -380,7 +382,7 @@ const groupedData = useMemo(() => {
                   ...new Set(
                     products
                       .filter((p) => p.product_type_id === filterProductType)
-                      .map((p) => p.description)
+                      .map((p) => p.description),
                   ),
                 ].map((desc) => (
                   <Select.Option key={desc} value={desc}>
@@ -404,6 +406,7 @@ const groupedData = useMemo(() => {
             columns={groupedColumns}
             dataSource={groupedData}
             bordered
+            size="small"
             pagination={false}
             expandable={{ defaultExpandAllRows: true }}
           />
