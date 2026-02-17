@@ -6,6 +6,7 @@ const schema = new Schema(
     from: { type: String },
     price: { type: Number, default: 0 },
     quantity: { type: Number, default: 0 },
+    deleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,

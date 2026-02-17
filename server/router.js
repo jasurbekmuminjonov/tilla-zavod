@@ -13,11 +13,15 @@ const {
 } = require("./controllers/user.controller");
 
 const {
-  createDistribution,
-  getDistributions,
   getDistributionById,
+  updateDistributionItem,
+  deleteDistributionItem,
+  closeDistribution,
+  getDistributions,
+  getDistributionMeta,
+  createDistribution,
+  createDistributionItem,
   updateDistribution,
-  deleteDistribution,
 } = require("./controllers/toolDistribution.controller");
 
 const {
@@ -124,6 +128,8 @@ const {
   getAstatkaLatestSummary,
 } = require("./controllers/astatka.controller");
 
+rt.use("/inventory", require("./inventory/inventory.routes"));
+
 // User routes
 rt.post("/user/create", createUser);
 rt.post("/user/login", loginUser);
@@ -228,23 +234,33 @@ rt.get("/astatka/get", getAstatka);
 rt.put("/astatka/edit/:id", editAstatka);
 rt.delete("/astatka/delete/:id", deleteAstatka);
 
-// tool 2 new version
-const tool2 = require("./controllers/tool2Controller");
-rt.get("/tool2/all", tool2.getAll);
-rt.get("/tool2/froms", tool2.getFroms);
-rt.post("/tool2/create", tool2.create);
-rt.put("/tool2/update/:id", tool2.update);
-rt.delete("/tool2/delete/:id", tool2.delete);
-
 // Tool Distribution routes
-rt.post("/tool-distribution/create", createDistribution);
-rt.get("/tool-distribution/all", getDistributions);
-rt.get(
-  "/tool-distribution/meta",
-  require("./controllers/toolDistribution.controller").getDistributionMeta,
-);
+
 rt.get("/tool-distribution/:id", getDistributionById);
-rt.put("/tool-distribution/edit/:id", updateDistribution);
-rt.delete("/tool-distribution/delete/:id", deleteDistribution);
+rt.put("/tool-distribution/close/:id", closeDistribution);
+rt.put("/tool-distribution/edit/:id", updateDistributionItem);
+rt.delete(
+  "/tool-distribution/item/:distributionId/:itemId",
+  deleteDistributionItem,
+);
+
+rt.post("/tool-distribution/:entity/create", createDistribution);
+rt.get("/tool-distribution/:entity/all", getDistributions);
+rt.get("/tool-distribution/:entity/meta", getDistributionMeta);
+
+// item delete
+rt.delete(
+  "/tool-distribution/:entity/item/:distributionId/:itemId",
+  deleteDistributionItem,
+);
+
+const ctrl = require("./controllers/toolReturn.controller");
+
+rt.post("/tool-return/create", ctrl.createReturnRequest);
+
+// admin
+rt.get("/tool-return/all", ctrl.getReturnRequests);
+rt.put("/tool-return/accept/:id", ctrl.acceptReturnRequest);
+rt.delete("/tool-return/cancel/:id", ctrl.cancelReturnRequest);
 
 module.exports = rt;
