@@ -171,9 +171,53 @@ exports.getDistributions = async (req, res) => {
 
     const total = await ToolDistribution.countDocuments(filter);
 
-    return res
-      .status(200)
-      .json({ data, total, page: pageNum, limit: pageSize });
+    const invCollection = inv.model.collection.name; // ✅ Tool2 yoki Tool3 collection nomi
+
+    const totalPriceAgg = await ToolDistribution.aggregate([
+      { $match: filter }, // ✅ aynan shu filter bilan hisobla
+      { $unwind: "$products" },
+
+      // xavfsizlik (agar aralash bo'lib ketgan bo'lsa)
+      { $match: { "products.productRef": inv.ref } },
+
+      {
+        $lookup: {
+          from: invCollection,
+          localField: "products.productId",
+          foreignField: "_id",
+          as: "p",
+        },
+      },
+      { $unwind: { path: "$p", preserveNullAndEmptyArrays: true } },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $multiply: [
+                "$products.quantity",
+                {
+                  // narx fieldingiz qaysi bo'lsa shuni qoldiring:
+                  // price bo'lsa "$p.price", sellPrice bo'lsa "$p.sellPrice"
+                  $ifNull: ["$p.price", { $ifNull: ["$p.sellPrice", 0] }],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    const totalPrice = totalPriceAgg?.[0]?.total || 0;
+
+    return res.status(200).json({
+      data,
+      total,
+      page: pageNum,
+      limit: pageSize,
+      totalPrice,
+    });
   } catch (err) {
     console.log(err);
     return res

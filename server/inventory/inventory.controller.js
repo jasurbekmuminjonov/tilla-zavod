@@ -51,9 +51,18 @@ exports.getAll = async (req, res) => {
 
     const query = conds.length > 1 ? { $and: conds } : conds[0];
 
-    const [total, data] = await Promise.all([
+    const [total, data, totalPrice] = await Promise.all([
       Model.countDocuments(query),
       Model.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+      Model.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: { $multiply: ["$price", "$quantity"] } },
+          },
+        },
+      ]),
     ]);
 
     return res.status(200).json({
@@ -62,6 +71,7 @@ exports.getAll = async (req, res) => {
       page: pageNum,
       limit: limitNum,
       pages: Math.ceil(total / limitNum),
+      totalPrice: totalPrice[0]?.total || 0,
     });
   } catch (err) {
     return res.status(err.statusCode || 500).json({ message: err.message });
@@ -204,13 +214,22 @@ exports.getReturns = async (req, res) => {
       filter.createdAt = d;
     }
 
-    const [total, data] = await Promise.all([
+    const [total, data, totalPrice] = await Promise.all([
       InventoryReturn.countDocuments(filter),
       InventoryReturn.find(filter)
         .populate("createdBy", "name")
         .sort({ createdAt: -1 })
         .skip((pageNum - 1) * pageSize)
         .limit(pageSize),
+      InventoryReturn.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: { $multiply: ["$quantity", "$price"] } },
+          },
+        },
+      ]),
     ]);
 
     // item info’ni join qilib yuboramiz (frontendga qulay)
@@ -225,9 +244,13 @@ exports.getReturns = async (req, res) => {
       item: map.get(String(r.itemId)) || null,
     }));
 
-    return res
-      .status(200)
-      .json({ data: enriched, total, page: pageNum, limit: pageSize });
+    return res.status(200).json({
+      data: enriched,
+      total,
+      page: pageNum,
+      limit: pageSize,
+      totalPrice: totalPrice[0]?.total || 0,
+    });
   } catch (err) {
     return res
       .status(500)
