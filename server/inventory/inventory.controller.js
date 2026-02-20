@@ -223,10 +223,28 @@ exports.getReturns = async (req, res) => {
         .limit(pageSize),
       InventoryReturn.aggregate([
         { $match: filter },
+
+        {
+          $lookup: {
+            from: getInventoryModel(entity).collection.name, // masalan: "tool2inventories"
+            localField: "itemId",
+            foreignField: "_id",
+            as: "item",
+          },
+        },
+        { $unwind: { path: "$item", preserveNullAndEmptyArrays: true } },
+
         {
           $group: {
             _id: null,
-            total: { $sum: { $multiply: ["$quantity", "$price"] } },
+            total: {
+              $sum: {
+                $multiply: [
+                  "$quantity",
+                  { $ifNull: ["$item.price", 0] }, // yoki "$item.sellPrice"
+                ],
+              },
+            },
           },
         },
       ]),
