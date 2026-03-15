@@ -10,5 +10,6 @@ router.delete("/:entity/delete/:id", ctrl.delete);
 
 router.post("/:entity/return-out", ctrl.returnOut);
 router.get("/:entity/returns", ctrl.getReturns);
+router.delete("/:entity/returns/:id", ctrl.deleteReturn);
 
 module.exports = router;

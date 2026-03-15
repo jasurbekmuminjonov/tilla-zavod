@@ -275,3 +275,27 @@ exports.getReturns = async (req, res) => {
       .json({ message: "Serverda xatolik", err: err?.message });
   }
 };
+
+// ✅ DELETE /inventory/:entity/returns/:id
+exports.deleteReturn = async (req, res) => {
+  try {
+    const { entity, id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Id noto'g'ri" });
+    }
+
+    const doc = await InventoryReturn.findOneAndDelete({
+      _id: id,
+      entity: String(entity).toLowerCase(),
+    });
+
+    if (!doc) return res.status(404).json({ message: "Topilmadi" });
+
+    return res.status(200).json({ message: "Vazvrat ma'lumotlari o'chirildi" });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Serverda xatolik", err: err?.message });
+  }
+};
