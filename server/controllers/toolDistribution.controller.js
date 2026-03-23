@@ -113,6 +113,7 @@ exports.getDistributions = async (req, res) => {
       employeeId,
       page = 1,
       limit = 10,
+      productId,
       productName,
       startDate,
       endDate,
@@ -127,6 +128,13 @@ exports.getDistributions = async (req, res) => {
       if (!mongoose.Types.ObjectId.isValid(employeeId))
         return res.status(400).json({ message: "employeeId noto'g'ri" });
       filter.employeeId = new mongoose.Types.ObjectId(employeeId);
+    }
+
+    if (productId) {
+      if (!mongoose.Types.ObjectId.isValid(productId))
+        return res.status(400).json({ message: "productId noto'g'ri" });
+      filter["products.productId"] = new mongoose.Types.ObjectId(productId);
+      filter["products.productRef"] = inv.ref;
     }
 
     // date filter: products.createdAt
@@ -146,7 +154,7 @@ exports.getDistributions = async (req, res) => {
     }
 
     // productName -> inventory model’dan topamiz (Tool2 yoki Tool3)
-    if (productName && String(productName).trim()) {
+    if (!productId && productName && String(productName).trim()) {
       const q = String(productName).trim().replace(/["']/g, "");
       const matched = await inv.model
         .find({ name: { $regex: q, $options: "i" } })
@@ -381,23 +389,72 @@ exports.deleteDistributionItem = async (req, res) => {
 // Return meta info: distinct products and employees present in distributions
 exports.getDistributionMeta = async (req, res) => {
   try {
-    const productIds = await ToolDistribution.distinct("products.productId");
-    const employeeIds = await ToolDistribution.distinct("employeeId");
+    const { entity } = req.params;
+    const inv = getInv(entity);
+    if (!inv)
+      return res
+        .status(400)
+        .json({ message: "entity noto'g'ri (tool2/tool3)" });
 
-    const products = await Tool2.find({ _id: { $in: productIds } }).select(
-      "name",
+    const [metaAgg] = await ToolDistribution.aggregate([
+      { $match: { entity: String(entity) } },
+      {
+        $facet: {
+          employees: [
+            { $group: { _id: null, ids: { $addToSet: "$employeeId" } } },
+          ],
+          products: [
+            { $unwind: "$products" },
+            {
+              $group: {
+                _id: "$products.productId",
+                employeeIds: { $addToSet: "$employeeId" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          employeeIds: {
+            $ifNull: [{ $arrayElemAt: ["$employees.ids", 0] }, []],
+          },
+          products: 1,
+        },
+      },
+    ]);
+
+    const productMeta = metaAgg?.products || [];
+    const productIds = productMeta.map((item) => item._id).filter(Boolean);
+    const employeeIds = metaAgg?.employeeIds || [];
+
+    const [products, employeeDocs] = await Promise.all([
+      productIds.length
+        ? inv.model
+            .find({ _id: { $in: productIds } })
+            .select("name")
+            .lean()
+        : [],
+      employeeIds.length
+        ? User.find({ _id: { $in: employeeIds } })
+            .select("name")
+            .lean()
+        : [],
+    ]);
+
+    const employeeMap = new Map(
+      employeeDocs.map((doc) => [String(doc._id), doc]),
     );
-    const employees = await User.find({ _id: { $in: employeeIds } }).select(
-      "name",
-    );
+
+    const employees = employeeIds
+      .map((id) => employeeMap.get(String(id)))
+      .filter(Boolean);
 
     const employeesByProduct = {};
-    for (const pid of productIds) {
-      const eIds = await ToolDistribution.distinct("employeeId", {
-        "products.productId": pid,
-      });
-      const docs = await User.find({ _id: { $in: eIds } }).select("name");
-      employeesByProduct[String(pid)] = docs;
+    for (const item of productMeta) {
+      employeesByProduct[String(item._id)] = (item.employeeIds || [])
+        .map((id) => employeeMap.get(String(id)))
+        .filter(Boolean);
     }
 
     return res.status(200).json({ products, employees, employeesByProduct });
