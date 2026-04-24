@@ -1,12 +1,90 @@
 const mongoose = require("mongoose");
 const InventoryReturn = require("../models/inventoryReturn.model");
+const InventoryEntry = require("../models/inventoryEntry.model");
 const { getInventoryModel } = require("./inventory.registry");
+
+function normalizeName(v) {
+  return String(v || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+function escapeRegex(v) {
+  return String(v).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getReadableError(err) {
+  if (err?.name === "ValidationError" && err?.errors) {
+    const first = Object.values(err.errors)[0];
+    if (first?.message) return first.message;
+  }
+  return err?.message || "Serverda xatolik";
+}
+
+async function compactInventoryByName(Model, entity) {
+  const docs = await Model.find({ deleted: false }).sort({ createdAt: -1 });
+  if (!docs.length) return;
+
+  const groups = new Map();
+
+  for (const doc of docs) {
+    const key = normalizeName(doc?.name);
+    if (!key) continue;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(doc);
+  }
+
+  for (const [nameNormalized, list] of groups.entries()) {
+    if (!Array.isArray(list) || list.length <= 1) continue;
+
+    const target = list[0];
+    const totalQty = list.reduce((acc, d) => acc + Number(d.quantity || 0), 0);
+
+    const hasHistory = await InventoryEntry.exists({
+      entity: String(entity).toLowerCase(),
+      nameNormalized,
+    });
+
+    if (!hasHistory) {
+      const legacyRows = list.map((d) => ({
+        entity: String(entity).toLowerCase(),
+        itemId: target._id,
+        name: String(d.name || target.name || "").trim(),
+        nameNormalized,
+        from: String(d.from || ""),
+        price: Number(d.price || 0),
+        quantity: Number(d.quantity || 0),
+        createdBy: null,
+        source: "legacy",
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
+      }));
+      if (legacyRows.length) await InventoryEntry.insertMany(legacyRows);
+    }
+
+    await Model.updateOne(
+      { _id: target._id },
+      { $set: { quantity: totalQty, deleted: false } },
+    );
+
+    const duplicateIds = list
+      .slice(1)
+      .map((d) => d._id)
+      .filter(Boolean);
+
+    if (duplicateIds.length) {
+      await Model.updateMany({ _id: { $in: duplicateIds } }, { $set: { deleted: true } });
+    }
+  }
+}
 
 // ✅ GET /inventory/:entity/all
 exports.getAll = async (req, res) => {
   try {
     const { entity } = req.params;
     const Model = getInventoryModel(entity);
+    await compactInventoryByName(Model, entity);
 
     let { startDate, endDate, from, name, page = 1, limit = 10 } = req.query;
 
@@ -81,13 +159,115 @@ exports.getAll = async (req, res) => {
 // ✅ POST /inventory/:entity/create
 exports.create = async (req, res) => {
   try {
-    const Model = getInventoryModel(req.params.entity);
-    const doc = await Model.create(req.body);
-    return res.status(201).json(doc);
+    const { user_id } = req.user || {};
+    const { entity } = req.params;
+    const Model = getInventoryModel(entity);
+
+    const rawName = String(req.body?.name || "").trim();
+    if (!rawName) {
+      return res.status(400).json({ message: "Nomi majburiy" });
+    }
+
+    const normalized = normalizeName(rawName);
+    const qty = Number(req.body?.quantity ?? 0);
+    if (!Number.isFinite(qty) || qty < 0) {
+      return res.status(400).json({ message: "Miqdor noto'g'ri" });
+    }
+
+    const price = Number(req.body?.price ?? 0);
+    const from = String(req.body?.from || "").trim();
+    const nameRegex = new RegExp(`^${escapeRegex(rawName)}$`, "i");
+
+    // Bir xil nomdagi eski yozuvlar bo'lsa bitta yozuvga jamlaymiz.
+    const sameNameDocs = await Model.find({ deleted: false, name: nameRegex }).sort({
+      createdAt: -1,
+    });
+
+    let targetDoc = null;
+
+    if (sameNameDocs.length > 0) {
+      targetDoc = sameNameDocs[0];
+
+      // Legacy ma'lumotlar hali tarixga tushmagan bo'lsa seed qilamiz.
+      const hasHistory = await InventoryEntry.exists({
+        entity: String(entity).toLowerCase(),
+        nameNormalized: normalized,
+      });
+
+      if (!hasHistory) {
+        const legacyRows = sameNameDocs.map((d) => ({
+          entity: String(entity).toLowerCase(),
+          itemId: targetDoc._id,
+          name: rawName,
+          nameNormalized: normalized,
+          from: String(d.from || ""),
+          price: Number(d.price || 0),
+          quantity: Number(d.quantity || 0),
+          createdBy: null,
+          source: "legacy",
+          createdAt: d.createdAt,
+          updatedAt: d.updatedAt,
+        }));
+        if (legacyRows.length) await InventoryEntry.insertMany(legacyRows);
+      }
+
+      const totalQty = sameNameDocs.reduce(
+        (acc, d) => acc + Number(d.quantity || 0),
+        0,
+      );
+
+      targetDoc.name = rawName;
+      targetDoc.from = from || targetDoc.from || "";
+      targetDoc.price = Number.isFinite(price) ? price : Number(targetDoc.price || 0);
+      targetDoc.quantity = totalQty + qty;
+      targetDoc.deleted = false;
+      await targetDoc.save();
+
+      const duplicateIds = sameNameDocs
+        .slice(1)
+        .map((d) => d._id)
+        .filter(Boolean);
+
+      if (duplicateIds.length) {
+        await Model.updateMany({ _id: { $in: duplicateIds } }, { $set: { deleted: true } });
+      }
+    } else {
+      targetDoc = await Model.create({
+        ...req.body,
+        name: rawName,
+        from,
+        price: Number.isFinite(price) ? price : 0,
+        quantity: qty,
+      });
+    }
+
+    await InventoryEntry.create({
+      entity: String(entity).toLowerCase(),
+      itemId: targetDoc._id,
+      name: rawName,
+      nameNormalized: normalized,
+      from,
+      price: Number.isFinite(price) ? price : 0,
+      quantity: qty,
+      createdBy: user_id || null,
+      source: "create",
+    });
+
+    return res.status(201).json(targetDoc);
   } catch (err) {
-    return res
-      .status(500)
-      .json({ message: "Serverda xatolik", err: err?.message });
+    return res.status(500).json({ message: getReadableError(err) });
+  }
+};
+
+// ✅ GET /inventory/:entity/names
+exports.getNames = async (req, res) => {
+  try {
+    const Model = getInventoryModel(req.params.entity);
+    const names = await Model.distinct("name", { deleted: false });
+    const sorted = (names || []).filter(Boolean).sort((a, b) => String(a).localeCompare(String(b)));
+    return res.status(200).json(sorted);
+  } catch (err) {
+    return res.status(500).json({ message: getReadableError(err) });
   }
 };
 
@@ -269,6 +449,54 @@ exports.getReturns = async (req, res) => {
       limit: pageSize,
       totalPrice: totalPrice[0]?.total || 0,
     });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Serverda xatolik", err: err?.message });
+  }
+};
+
+// ✅ GET /inventory/:entity/entry-history?name=...
+exports.getEntryHistory = async (req, res) => {
+  try {
+    const { entity } = req.params;
+    const Model = getInventoryModel(entity);
+    const name = String(req.query?.name || "").trim();
+
+    if (!name) return res.status(400).json({ message: "name majburiy" });
+
+    const normalized = normalizeName(name);
+
+    const history = await InventoryEntry.find({
+      entity: String(entity).toLowerCase(),
+      nameNormalized: normalized,
+    })
+      .populate("createdBy", "name")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Eski ma'lumotlar uchun fallback: avvalgi alohida kirim hujjatlari.
+    if (!history.length) {
+      const nameRegex = new RegExp(`^${escapeRegex(name)}$`, "i");
+      const legacyDocs = await Model.find({ deleted: false, name: nameRegex })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      const legacy = legacyDocs.map((d) => ({
+        _id: `legacy-${d._id}`,
+        name: d.name,
+        from: d.from,
+        price: d.price,
+        quantity: d.quantity,
+        createdBy: null,
+        source: "legacy",
+        createdAt: d.createdAt,
+      }));
+
+      return res.status(200).json({ data: legacy });
+    }
+
+    return res.status(200).json({ data: history });
   } catch (err) {
     return res
       .status(500)

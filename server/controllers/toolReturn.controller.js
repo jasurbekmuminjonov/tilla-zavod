@@ -75,11 +75,12 @@ exports.getReturnRequests = async (req, res) => {
     const pageSize = Math.max(parseInt(limit, 10) || 20, 1);
 
     const filter = {};
-    if (status) filter.status = status;
+    if (status && status !== "all") filter.status = status;
 
     const data = await ToolReturn.find(filter)
       .populate("employeeId", "name")
       .populate("productId", "name price")
+      .populate("acceptedBy", "name")
       .sort({ createdAt: -1 })
       .skip((pageNum - 1) * pageSize)
       .limit(pageSize);

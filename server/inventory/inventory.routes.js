@@ -4,6 +4,8 @@ const ctrl = require("./inventory.controller");
 
 router.get("/:entity/all", ctrl.getAll);
 router.get("/:entity/froms", ctrl.getFroms);
+router.get("/:entity/names", ctrl.getNames);
+router.get("/:entity/entry-history", ctrl.getEntryHistory);
 router.post("/:entity/create", ctrl.create);
 router.put("/:entity/update/:id", ctrl.update);
 router.delete("/:entity/delete/:id", ctrl.delete);

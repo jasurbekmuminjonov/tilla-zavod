@@ -400,9 +400,7 @@ exports.getDistributionMeta = async (req, res) => {
       { $match: { entity: String(entity) } },
       {
         $facet: {
-          employees: [
-            { $group: { _id: null, ids: { $addToSet: "$employeeId" } } },
-          ],
+          employees: [{ $group: { _id: null, ids: { $addToSet: "$employeeId" } } }],
           products: [
             { $unwind: "$products" },
             {
@@ -416,9 +414,7 @@ exports.getDistributionMeta = async (req, res) => {
       },
       {
         $project: {
-          employeeIds: {
-            $ifNull: [{ $arrayElemAt: ["$employees.ids", 0] }, []],
-          },
+          employeeIds: { $ifNull: [{ $arrayElemAt: ["$employees.ids", 0] }, []] },
           products: 1,
         },
       },
@@ -430,15 +426,10 @@ exports.getDistributionMeta = async (req, res) => {
 
     const [products, employeeDocs] = await Promise.all([
       productIds.length
-        ? inv.model
-            .find({ _id: { $in: productIds } })
-            .select("name")
-            .lean()
+        ? inv.model.find({ _id: { $in: productIds } }).select("name").lean()
         : [],
       employeeIds.length
-        ? User.find({ _id: { $in: employeeIds } })
-            .select("name")
-            .lean()
+        ? User.find({ _id: { $in: employeeIds } }).select("name").lean()
         : [],
     ]);
 
